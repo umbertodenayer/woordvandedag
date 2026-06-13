@@ -9,7 +9,7 @@ const cache = new Map();
 
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'; // Rachel — ElevenLabs premade, free tier
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 
 // Supabase client for persistent cache (survives container restarts/redeploys)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lanmsexkozkrttiydtsm.supabase.co';
