@@ -247,15 +247,16 @@
       const { data, error } = await supabase.auth.signUp({ email, password });
 
       if (error) {
-        const msg = error.message.toLowerCase().includes('already registered')
-          ? 'Er bestaat al een account met dit e-mailadres.'
-          : error.message;
-        showFormError(msg);
+        const lower = (error.message || '').toLowerCase();
+        const isDuplicate = lower.includes('already registered') || lower.includes('already in use') || lower.includes('email exists');
+        showFormError(isDuplicate ? 'Dit e-mailadres is al in gebruik.' : error.message);
         return;
       }
 
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        showFormError('Er bestaat al een account met dit e-mailadres.');
+      // Supabase with "Prevent email enumeration" ON returns a fake success
+      // for duplicate emails — detectable by an empty identities array.
+      if (data.user?.identities !== undefined && data.user.identities.length === 0) {
+        showFormError('Dit e-mailadres is al in gebruik.');
         return;
       }
 
