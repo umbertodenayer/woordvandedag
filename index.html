@@ -10,21 +10,25 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="card">
-    <div class="topbar">
-      <p class="label">Word of the Day</p>
+  <main class="layout">
+    <div class="col-image">
+      <img id="word-image" class="word-image" alt="" />
     </div>
-    <h1 id="word"></h1>
-    <img id="word-image" class="word-image" alt="" />
-    <p id="pos" class="pos"></p>
-    <p id="definition" class="definition"></p>
-    <div class="etymology">
-      <p class="etymology-label">Etymology</p>
-      <p id="etymology" class="etymology-text"></p>
+    <div class="col-text">
+      <div class="topbar">
+        <p class="label">Word of the Day</p>
+      </div>
+      <h1 id="word"></h1>
+      <p id="pos" class="pos"></p>
+      <p id="definition" class="definition"></p>
+      <div class="etymology">
+        <p class="etymology-label">Etymology</p>
+        <p id="etymology" class="etymology-text"></p>
+      </div>
+      <p id="example" class="example"></p>
+      <p id="source" class="source"></p>
+      <p id="date" class="date"></p>
     </div>
-    <p id="example" class="example"></p>
-    <p id="source" class="source"></p>
-    <p id="date" class="date"></p>
   </main>
   <script src="script.js"></script>
 </body>
