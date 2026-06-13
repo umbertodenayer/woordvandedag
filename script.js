@@ -48,6 +48,101 @@ let currentWord = null;
 let ygWidget = null;
 let hearItTriggered = false;
 
+const SUPABASE_URL = 'https://lanmsexkozkrttiydsm.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const userIconBtn = document.getElementById('user-icon-btn');
+const userDot = document.getElementById('user-dot');
+const userDropdown = document.getElementById('user-dropdown');
+const signOutBtn = document.getElementById('sign-out-btn');
+const authModal = document.getElementById('auth-modal');
+const authModalBackdrop = authModal.querySelector('.auth-modal-backdrop');
+const authModalClose = document.getElementById('auth-modal-close');
+const authTabs = document.querySelectorAll('.auth-tab');
+const authForm = document.getElementById('auth-form');
+const authEmail = document.getElementById('auth-email');
+const authPassword = document.getElementById('auth-password');
+const authError = document.getElementById('auth-error');
+const authSubmit = document.getElementById('auth-submit');
+
+let authMode = 'sign-in';
+
+function setAuthMode(mode) {
+  authMode = mode;
+  authTabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === mode));
+  authSubmit.textContent = mode === 'sign-in' ? 'Sign In' : 'Sign Up';
+  authError.classList.add('hidden');
+  authError.textContent = '';
+}
+
+function openAuthModal() {
+  setAuthMode('sign-in');
+  authForm.reset();
+  authModal.classList.remove('hidden');
+}
+
+function closeAuthModal() {
+  authModal.classList.add('hidden');
+}
+
+authTabs.forEach((tab) => {
+  tab.addEventListener('click', () => setAuthMode(tab.dataset.tab));
+});
+
+authModalBackdrop.addEventListener('click', closeAuthModal);
+authModalClose.addEventListener('click', closeAuthModal);
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  authError.classList.add('hidden');
+  const email = authEmail.value;
+  const password = authPassword.value;
+
+  const { error } = authMode === 'sign-in'
+    ? await supabase.auth.signInWithPassword({ email, password })
+    : await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    authError.textContent = error.message;
+    authError.classList.remove('hidden');
+    return;
+  }
+
+  closeAuthModal();
+});
+
+function updateUserUI(session) {
+  userDot.classList.toggle('hidden', !session);
+}
+
+userIconBtn.addEventListener('click', async () => {
+  const { data } = await supabase.auth.getSession();
+  if (data.session) {
+    userDropdown.classList.toggle('hidden');
+  } else {
+    userDropdown.classList.add('hidden');
+    openAuthModal();
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.user-menu')) {
+    userDropdown.classList.add('hidden');
+  }
+});
+
+signOutBtn.addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  userDropdown.classList.add('hidden');
+});
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  updateUserUI(session);
+});
+
+supabase.auth.getSession().then(({ data }) => updateUserUI(data.session));
+
 const CACHE_VERSION = 'v2';
 
 function todaySeed() {

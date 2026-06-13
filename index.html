@@ -27,6 +27,18 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
           </svg>
         </button>
+        <div class="user-menu">
+          <button id="user-icon-btn" class="theme-toggle" aria-label="Account">
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-3.5 3.5-6 8-6s8 2.5 8 6"/>
+            </svg>
+            <span id="user-dot" class="user-dot hidden"></span>
+          </button>
+          <div id="user-dropdown" class="user-dropdown hidden">
+            <button id="sign-out-btn" class="user-dropdown-item">Sign out</button>
+          </div>
+        </div>
       </div>
       <div class="content-middle">
         <div class="accent-bar"></div>
@@ -85,6 +97,24 @@
     <div id="youglish-widget"></div>
   </section>
 
+  <div id="auth-modal" class="auth-modal hidden">
+    <div class="auth-modal-backdrop"></div>
+    <div class="auth-modal-card">
+      <button id="auth-modal-close" class="auth-modal-close" aria-label="Close">&times;</button>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="sign-in">Sign In</button>
+        <button class="auth-tab" data-tab="sign-up">Sign Up</button>
+      </div>
+      <form id="auth-form" class="auth-form">
+        <input type="email" id="auth-email" class="auth-input" placeholder="Email" required autocomplete="email">
+        <input type="password" id="auth-password" class="auth-input" placeholder="Password" required autocomplete="current-password">
+        <p id="auth-error" class="auth-error hidden"></p>
+        <button type="submit" id="auth-submit" class="auth-submit">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://youglish.com/apiv2/youglish.js" async></script>
   <script src="script.js"></script>
 </body>
