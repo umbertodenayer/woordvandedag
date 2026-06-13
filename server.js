@@ -227,16 +227,6 @@ app.get('/api/pronunciation', async (req, res) => {
   res.json(audio);
 });
 
-app.get('/api/debug-regenerate', async (req, res) => {
-  const seed = todaySeed();
-  cache.delete(`${seed}`);
-  cache.delete(`image:${seed}`);
-  cache.delete(`audio:${seed}`);
-  saveCache();
-  await refreshWord();
-  res.json({ ok: true, word: cache.get(`${seed}`) });
-});
-
 app.get('/api/word', async (req, res) => {
   const seed = todaySeed();
   const cacheKey = `${seed}`;
