@@ -244,6 +244,22 @@
 
       setButtonLoading(btn);
 
+      // Server-side check: definitively detect duplicate emails before calling signUp.
+      try {
+        const checkRes = await fetch('/api/check-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        if (checkRes.ok) {
+          const checkData = await checkRes.json();
+          if (checkData.exists) {
+            showFormError('Dit e-mailadres is al in gebruik.');
+            return;
+          }
+        }
+      } catch (_) {}
+
       const { data, error } = await supabase.auth.signUp({ email, password });
 
       if (error) {
@@ -253,8 +269,6 @@
         return;
       }
 
-      // Supabase with "Prevent email enumeration" ON returns a fake success
-      // for duplicate emails — detectable by an empty identities array.
       if (data.user?.identities !== undefined && data.user.identities.length === 0) {
         showFormError('Dit e-mailadres is al in gebruik.');
         return;

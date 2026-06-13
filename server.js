@@ -313,6 +313,28 @@ app.post('/api/refresh', async (req, res) => {
   refreshWord();
 });
 
+app.post('/api/check-email', async (req, res) => {
+  const { email } = req.body || {};
+  if (!email || typeof email !== 'string') {
+    return res.status(400).json({ error: 'Missing email' });
+  }
+  if (!sb) {
+    return res.status(503).json({ error: 'Auth check unavailable' });
+  }
+  try {
+    const { data, error } = await sb.auth.admin.getUserByEmail(email.trim().toLowerCase());
+    if (error && error.message === 'User not found') {
+      return res.json({ exists: false });
+    }
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.json({ exists: !!data.user });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 app.use(express.static(path.join(__dirname), {
   setHeaders: (res) => res.set('Cache-Control', 'no-cache')
 }));
