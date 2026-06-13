@@ -11,7 +11,13 @@
 </head>
 <body>
   <main class="card">
-    <p class="label">Word of the Day</p>
+    <div class="topbar">
+      <p class="label">Word of the Day</p>
+      <div class="lang-toggle">
+        <button id="lang-en" class="lang-btn active" data-lang="en">EN</button>
+        <button id="lang-nl" class="lang-btn" data-lang="nl">NL</button>
+      </div>
+    </div>
     <h1 id="word"></h1>
     <p id="pos" class="pos"></p>
     <p id="definition" class="definition"></p>
