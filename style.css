@@ -385,6 +385,10 @@ html[data-theme="dark"] .word-image {
   overflow: hidden;
 }
 
+.hear-it.hidden > * {
+  display: none;
+}
+
 #youglish-widget {
   width: 100%;
   max-width: 800px;
