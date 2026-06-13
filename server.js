@@ -197,7 +197,7 @@ async function fetchAudio(word) {
     },
     body: JSON.stringify({
       text: word,
-      model_id: 'eleven_monolingual_v1'
+      model_id: 'eleven_turbo_v2_5'
     })
   });
 
