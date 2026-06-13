@@ -10,7 +10,7 @@ function todaySeed() {
 const app = express();
 const cache = new Map(); // key: `${seed}` or `image:${seed}` -> data
 
-const CACHE_FILE = path.join(__dirname, '.cache.json');
+const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
 
 function loadCache() {
   try {
