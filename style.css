@@ -136,42 +136,6 @@ body {
   color: #c4554d;
 }
 
-.settings {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.settings summary {
-  cursor: pointer;
-}
-
-.key-row {
-  margin-top: 10px;
-  display: flex;
-  gap: 6px;
-}
-
-.key-row input {
-  flex: 1;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  padding: 6px 8px;
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 13px;
-}
-
-.key-row button {
-  background: var(--accent);
-  border: none;
-  color: #fff;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 @media (max-width: 480px) {
   .card { padding: 36px 24px; }
   #word { font-size: 42px; }
