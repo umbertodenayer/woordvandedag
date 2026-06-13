@@ -38,13 +38,26 @@ body {
   min-width: 0;
   text-align: left;
   padding: 64px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.content-middle {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.content-middle > * {
+  margin: 0;
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
 }
 
 .label {
@@ -60,7 +73,6 @@ body {
   width: 40px;
   height: 3px;
   background: #c4714a;
-  margin: 0 0 16px;
 }
 
 .word-image {
@@ -78,14 +90,12 @@ body {
   font-family: 'Fraunces', serif;
   font-size: clamp(4.5rem, 9vw, 5rem);
   font-weight: 600;
-  margin: 0 0 16px;
   text-transform: lowercase;
   line-height: 1.05;
   color: #1a1a1a;
 }
 
 .pos {
-  margin: 0 0 16px;
   color: var(--muted);
   font-style: italic;
   font-size: 12px;
@@ -95,19 +105,16 @@ body {
   font-size: 1.3rem;
   font-weight: 400;
   line-height: 1.7;
-  margin: 0 0 24px;
 }
 
 .divider {
   border: none;
   border-top: 1px solid #eee;
-  margin: 0 0 24px;
 }
 
 .etymology {
   border-left: 2px solid #C4714A;
   padding: 0 0 0 16px;
-  margin: 0 0 24px;
   text-align: left;
 }
 
@@ -131,7 +138,6 @@ body {
   font-size: 16px;
   line-height: 1.6;
   color: var(--muted);
-  margin: 0 0 8px;
   font-style: italic;
 }
 
@@ -142,14 +148,13 @@ body {
 .source {
   font-size: 13px;
   color: var(--muted);
-  margin: 0 0 24px;
   text-align: right;
 }
 
 .date {
   font-size: 11px;
   color: var(--muted);
-  margin: 16px 0 0;
+  margin: 0;
   padding-top: 16px;
   border-top: 1px solid var(--border);
   letter-spacing: 0.18em;
