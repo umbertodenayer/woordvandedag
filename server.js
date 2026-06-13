@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 const cache = new Map();
 
-const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'AyQGttFzg1EY7EIKkpHs';
+const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'; // Rachel — ElevenLabs premade, free tier
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
 const CACHE_VERSION = 'v4';
 
