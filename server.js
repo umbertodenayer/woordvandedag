@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 const LANG_NAMES = {
   en: 'English',
@@ -15,7 +16,32 @@ function todaySeed() {
 }
 
 const app = express();
-const cache = new Map(); // key: `${seed}:${lang}` -> word data
+const cache = new Map(); // key: `${seed}:${lang}` or `image:${seed}:${lang}` -> data
+
+const CACHE_FILE = path.join(__dirname, '.cache.json');
+
+function loadCache() {
+  try {
+    const raw = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
+    const seed = todaySeed();
+    for (const [key, value] of Object.entries(raw)) {
+      if (key.startsWith(`${seed}:`) || key.startsWith(`image:${seed}:`)) {
+        cache.set(key, value);
+      }
+    }
+    console.log(`Loaded ${cache.size} cached entries for seed ${seed}`);
+  } catch (e) {
+    console.log('No usable cache file found, starting fresh.');
+  }
+}
+
+function saveCache() {
+  try {
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(Object.fromEntries(cache)));
+  } catch (e) {
+    console.error('Failed to persist cache:', e.message);
+  }
+}
 
 async function fetchWord(lang) {
   const languageName = LANG_NAMES[lang] || LANG_NAMES.en;
@@ -59,10 +85,26 @@ async function fetchWord(lang) {
 async function refreshWord(lang) {
   const seed = todaySeed();
   const cacheKey = `${seed}:${lang}`;
-  let data;
+  if (cache.has(cacheKey) && cache.has(`image:${seed}:${lang}`)) {
+    console.log(`Already cached for ${lang} (seed ${seed}), skipping regeneration`);
+    return;
+  }
+  let data = cache.get(cacheKey);
+  if (data) {
+    try {
+      const image = await fetchImage(data.word, data.definition);
+      cache.set(`image:${seed}:${lang}`, image);
+      saveCache();
+      console.log(`Cached image for ${lang} (seed ${seed}): ${data.word}`);
+    } catch (e) {
+      console.error(`Failed to fetch image for ${lang}:`, e.message);
+    }
+    return;
+  }
   try {
     data = await fetchWord(lang);
     cache.set(cacheKey, data);
+    saveCache();
     console.log(`Cached word of the day for ${lang} (seed ${seed}): ${data.word}`);
   } catch (e) {
     console.error(`Failed to fetch word of the day for ${lang}:`, e.message);
@@ -72,6 +114,7 @@ async function refreshWord(lang) {
   try {
     const image = await fetchImage(data.word, data.definition);
     cache.set(`image:${seed}:${lang}`, image);
+    saveCache();
     console.log(`Cached image for ${lang} (seed ${seed}): ${data.word}`);
   } catch (e) {
     console.error(`Failed to fetch image for ${lang}:`, e.message);
@@ -135,6 +178,7 @@ app.get('/api/image', async (req, res) => {
       try {
         wordData = await fetchWord(lang);
         cache.set(cacheKey, wordData);
+        saveCache();
       } catch (e) {
         res.status(500).json({ error: e.message });
         return;
@@ -143,6 +187,7 @@ app.get('/api/image', async (req, res) => {
     try {
       image = await fetchImage(wordData.word, wordData.definition);
       cache.set(imageCacheKey, image);
+      saveCache();
     } catch (e) {
       res.status(500).json({ error: e.message });
       return;
@@ -178,6 +223,7 @@ app.use(express.static(path.join(__dirname)));
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
+  loadCache();
   refreshAllLanguages();
   scheduleMidnightRefresh();
 });
