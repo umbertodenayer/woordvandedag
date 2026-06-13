@@ -245,7 +245,37 @@ const pronunciationSection = document.getElementById('pronunciation-section');
 const pronunciationBtn = document.getElementById('pronunciation-btn');
 const playIcon = document.getElementById('play-icon');
 const pauseIcon = document.getElementById('pause-icon');
+const waveformEl = document.getElementById('waveform');
 let pronunciationAudio = null;
+let waveformBars = [];
+
+const WAVEFORM_BAR_COUNT = 40;
+
+function buildWaveform() {
+  waveformEl.innerHTML = '';
+  waveformBars = [];
+  for (let i = 0; i < WAVEFORM_BAR_COUNT; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const height = 8 + Math.random() * 24;
+    bar.style.height = `${height}px`;
+    waveformEl.appendChild(bar);
+    waveformBars.push(bar);
+  }
+}
+
+function updateWaveformProgress() {
+  if (!pronunciationAudio || !pronunciationAudio.duration) return;
+  const progress = pronunciationAudio.currentTime / pronunciationAudio.duration;
+  const activeCount = Math.round(progress * waveformBars.length);
+  waveformBars.forEach((bar, i) => {
+    bar.classList.toggle('played', i < activeCount);
+  });
+}
+
+function resetWaveform() {
+  waveformBars.forEach((bar) => bar.classList.remove('played'));
+}
 
 function audioCacheKey() {
   return `wordOfTheDay:${CACHE_VERSION}:audio:${todaySeed()}`;
@@ -277,10 +307,14 @@ async function loadPronunciation() {
 function setupAudio(src) {
   pronunciationAudio = new Audio(src);
   pronunciationSection.classList.remove('hidden');
+  buildWaveform();
+
+  pronunciationAudio.addEventListener('timeupdate', updateWaveformProgress);
 
   pronunciationAudio.addEventListener('ended', () => {
     playIcon.classList.remove('hidden');
     pauseIcon.classList.add('hidden');
+    resetWaveform();
   });
 }
 
