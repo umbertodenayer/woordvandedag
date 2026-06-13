@@ -413,12 +413,8 @@ html[data-theme="dark"] #word {
 .waveform .bar {
   width: 3px;
   border-radius: 2px;
-  background: var(--border);
-  transition: background 0.1s linear;
-}
-
-.waveform .bar.played {
-  background: var(--terracotta);
+  --fill: 0;
+  background: linear-gradient(to top, var(--terracotta) calc(var(--fill) * 100%), var(--border) calc(var(--fill) * 100%));
 }
 
 .hear-it {

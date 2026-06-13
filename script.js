@@ -264,17 +264,30 @@ function buildWaveform() {
   }
 }
 
+let waveformRAF = null;
+
 function updateWaveformProgress() {
   if (!pronunciationAudio || !pronunciationAudio.duration) return;
   const progress = pronunciationAudio.currentTime / pronunciationAudio.duration;
-  const activeCount = Math.round(progress * waveformBars.length);
+  const exact = progress * waveformBars.length;
   waveformBars.forEach((bar, i) => {
-    bar.classList.toggle('played', i < activeCount);
+    let fill;
+    if (i < Math.floor(exact)) fill = 1;
+    else if (i === Math.floor(exact)) fill = exact - i;
+    else fill = 0;
+    bar.style.setProperty('--fill', fill);
   });
 }
 
+function animateWaveform() {
+  updateWaveformProgress();
+  if (pronunciationAudio && !pronunciationAudio.paused && !pronunciationAudio.ended) {
+    waveformRAF = requestAnimationFrame(animateWaveform);
+  }
+}
+
 function resetWaveform() {
-  waveformBars.forEach((bar) => bar.classList.remove('played'));
+  waveformBars.forEach((bar) => bar.style.setProperty('--fill', 0));
 }
 
 function audioCacheKey() {
@@ -309,11 +322,10 @@ function setupAudio(src) {
   pronunciationSection.classList.remove('hidden');
   buildWaveform();
 
-  pronunciationAudio.addEventListener('timeupdate', updateWaveformProgress);
-
   pronunciationAudio.addEventListener('ended', () => {
     playIcon.classList.remove('hidden');
     pauseIcon.classList.add('hidden');
+    cancelAnimationFrame(waveformRAF);
     resetWaveform();
   });
 }
@@ -324,9 +336,12 @@ pronunciationBtn.addEventListener('click', () => {
     pronunciationAudio.play();
     playIcon.classList.add('hidden');
     pauseIcon.classList.remove('hidden');
+    cancelAnimationFrame(waveformRAF);
+    waveformRAF = requestAnimationFrame(animateWaveform);
   } else {
     pronunciationAudio.pause();
     playIcon.classList.remove('hidden');
     pauseIcon.classList.add('hidden');
+    cancelAnimationFrame(waveformRAF);
   }
 });
