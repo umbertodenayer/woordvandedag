@@ -445,13 +445,18 @@ body.compact-view .hear-it {
   background: var(--terracotta);
   color: #fff;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
 }
 
-.auth-submit:hover {
+.auth-submit:hover:not(:disabled) {
   opacity: 0.9;
 }
 
+.auth-submit:disabled {
+  cursor: default;
+}
+
+/* Loading */
 .auth-submit.loading {
   pointer-events: none;
 }
@@ -464,8 +469,28 @@ body.compact-view .hear-it {
   opacity: 1;
 }
 
+/* Success */
+.auth-submit.success {
+  background: #9e5428;
+  pointer-events: none;
+}
+
+.auth-submit.success .btn-text,
+.auth-submit.success .btn-spinner {
+  opacity: 0;
+}
+
+.auth-submit.success .btn-checkmark {
+  opacity: 1;
+}
+
+/* Shake */
+.auth-submit.shake {
+  animation: authShake 0.4s ease;
+}
+
 .btn-text {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 
 .btn-spinner {
@@ -475,7 +500,7 @@ body.compact-view .hear-it {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 
 .btn-spinner::after {
@@ -486,6 +511,50 @@ body.compact-view .hear-it {
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+}
+
+.btn-checkmark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-checkmark svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Field states */
+.auth-input {
+  transition: border-color 0.3s ease, opacity 0.3s ease;
+}
+
+.auth-input.field-muted {
+  opacity: 0.45;
+}
+
+.auth-input.field-error {
+  border-color: #c4554d;
+}
+
+/* Inline form error */
+.login-form-error {
+  font-size: 13px;
+  color: var(--terracotta);
+  margin: 6px 0 0;
+  min-height: 1.3em;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.login-form-error.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .auth-toast {

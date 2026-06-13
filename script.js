@@ -54,6 +54,14 @@ let hearItTriggered = false;
 let sbClient = null;
 let sbSession = null;
 
+// Welcome toast after login redirect
+if (new URLSearchParams(window.location.search).get('welcome') === '1') {
+  history.replaceState({}, '', window.location.pathname + window.location.hash);
+  window.addEventListener('load', () => {
+    setTimeout(() => showPremiumToast('Welkom terug 👋', 3000), 400);
+  });
+}
+
 // === Premium auth helpers ===
 
 let premiumToastTimer = null;

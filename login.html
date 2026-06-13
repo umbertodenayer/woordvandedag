@@ -51,11 +51,16 @@
               </svg>
             </button>
           </div>
-          <p class="auth-error hidden" id="login-error"></p>
-          <button type="submit" class="auth-submit">
+          <button type="submit" class="auth-submit" id="login-btn">
             <span class="btn-text">Inloggen</span>
             <span class="btn-spinner"></span>
+            <span class="btn-checkmark">
+              <svg viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2.5,9 7,13.5 15.5,4.5"/>
+              </svg>
+            </span>
           </button>
+          <p class="login-form-error" id="login-error"></p>
         </form>
 
         <p class="auth-switch-link">Nog geen account? <a href="signup.html">Maak er een aan →</a></p>
@@ -94,18 +99,15 @@
     // Theme
     const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-
     const themeToggle = document.getElementById('auth-theme-toggle');
-    const sunIcon = document.getElementById('auth-sun-icon');
-    const moonIcon = document.getElementById('auth-moon-icon');
-
+    const sunIcon    = document.getElementById('auth-sun-icon');
+    const moonIcon   = document.getElementById('auth-moon-icon');
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       sunIcon.classList.toggle('hidden', theme === 'dark');
       moonIcon.classList.toggle('hidden', theme !== 'dark');
     }
     applyTheme(savedTheme);
-
     themeToggle.addEventListener('click', () => {
       const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       localStorage.setItem('wordOfTheDay:theme', next);
@@ -113,70 +115,124 @@
     });
 
     // Supabase
-    const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
+    const SUPABASE_URL      = 'https://lanmsexkozkrttiydtsm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) window.location.replace('index.html');
     });
 
-    // Toast
-    let toastTimer = null;
-    function showPremiumToast(message, duration) {
-      const toast = document.getElementById('premium-toast');
-      clearTimeout(toastTimer);
-      toast.textContent = message;
-      toast.classList.remove('visible');
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        toast.classList.add('visible');
-        toastTimer = setTimeout(() => toast.classList.remove('visible'), duration);
-      }));
+    // Eye toggle
+    document.querySelector('.auth-eye-toggle').addEventListener('click', function () {
+      const input     = document.getElementById('password-input');
+      const eyeOpen   = this.querySelector('.eye-open');
+      const eyeClosed = this.querySelector('.eye-closed');
+      const reveal    = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      eyeOpen.classList.toggle('hidden', reveal);
+      eyeClosed.classList.toggle('hidden', !reveal);
+    });
+
+    // Elements
+    const form        = document.getElementById('login-form');
+    const emailInput  = document.getElementById('email-input');
+    const passInput   = document.getElementById('password-input');
+    const btn         = document.getElementById('login-btn');
+    const errorEl     = document.getElementById('login-error');
+    let submitting    = false;
+
+    function setLoading() {
+      submitting = true;
+      btn.classList.add('loading');
+      btn.classList.remove('success', 'shake');
+      emailInput.classList.add('field-muted');
+      passInput.classList.add('field-muted');
+      passInput.classList.remove('field-error');
+      hideError();
     }
 
-    function setButtonLoading(btn) { btn.classList.add('loading'); }
-    function setButtonNormal(btn) { btn.classList.remove('loading'); }
+    function setSuccess() {
+      btn.classList.remove('loading');
+      btn.classList.add('success');
+      emailInput.classList.remove('field-muted');
+      passInput.classList.remove('field-muted');
+    }
 
-    function showFormError(message) {
-      const btn = document.querySelector('.auth-submit');
-      const errorEl = document.getElementById('login-error');
-      const inner = document.getElementById('auth-inner');
-      setButtonNormal(btn);
-      errorEl.classList.remove('fade-in');
+    function setError(message, highlightPass = true) {
+      submitting = false;
+      btn.classList.remove('loading', 'success');
+      emailInput.classList.remove('field-muted');
+      passInput.classList.remove('field-muted');
+      if (highlightPass) passInput.classList.add('field-error');
+
+      // Shake button
+      btn.classList.remove('shake');
+      void btn.offsetWidth; // force reflow to restart animation
+      btn.classList.add('shake');
+      btn.addEventListener('animationend', () => btn.classList.remove('shake'), { once: true });
+
+      // Show error
       errorEl.textContent = message;
-      errorEl.classList.remove('hidden');
-      requestAnimationFrame(() => errorEl.classList.add('fade-in'));
-      inner.classList.remove('shake');
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        inner.classList.add('shake');
-        inner.addEventListener('animationend', () => inner.classList.remove('shake'), { once: true });
-      }));
+      errorEl.classList.add('visible');
     }
 
-    function showSuccess() {
-      window.location.href = 'index.html';
+    function hideError() {
+      errorEl.classList.remove('visible');
+      passInput.classList.remove('field-error');
     }
 
-    // Submit
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    // Clear error on input
+    emailInput.addEventListener('input', hideError);
+    passInput.addEventListener('input', hideError);
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email-input').value;
-      const password = document.getElementById('password-input').value;
-      const btn = document.querySelector('.auth-submit');
-      const errorEl = document.getElementById('login-error');
+      if (submitting) return;
 
-      errorEl.classList.add('hidden');
-      errorEl.classList.remove('fade-in');
-      setButtonLoading(btn);
+      const email    = emailInput.value.trim();
+      const password = passInput.value;
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        showFormError(error.message);
+      if (!email || !password) {
+        setError('Vul alle velden in', false);
         return;
       }
 
-      showSuccess();
+      setLoading();
+
+      try {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) {
+          const msg = (error.message || '').toLowerCase();
+
+          if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+            // Distinguish wrong password vs unknown email
+            try {
+              const res  = await fetch('/api/check-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+              });
+              const data = await res.json();
+              setError(data.exists ? 'Ongeldig wachtwoord' : 'E-mailadres niet gevonden', data.exists);
+            } catch {
+              setError('Ongeldig wachtwoord');
+            }
+          } else if (msg.includes('email not confirmed')) {
+            setError('Bevestig eerst je e-mailadres', false);
+          } else {
+            setError('Er is iets misgegaan. Probeer het opnieuw.', false);
+          }
+          return;
+        }
+
+        // Success: show checkmark 0.8 s then redirect with welcome flag
+        setSuccess();
+        setTimeout(() => { window.location.href = 'index.html?welcome=1'; }, 800);
+
+      } catch {
+        setError('Er is iets misgegaan. Probeer het opnieuw.', false);
+      }
     });
   </script>
 </body>
