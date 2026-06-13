@@ -19,7 +19,7 @@ function loadCache() {
     const raw = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
     const seed = todaySeed();
     for (const [key, value] of Object.entries(raw)) {
-      if (key === `v2:${seed}` || key === `v2:image:${seed}` || key === `v2:audio:${seed}`) {
+      if (key === `v3:${seed}` || key === `v3:image:${seed}` || key === `v3:audio:${seed}`) {
         cache.set(key, value);
       }
     }
@@ -77,7 +77,7 @@ async function fetchWord() {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1024,
+      max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }]
     })
   });
@@ -146,9 +146,9 @@ async function fetchAudio(word) {
 // Called once at midnight UTC. Never called on startup or by user requests.
 async function refreshWord() {
   const seed = todaySeed();
-  const cacheKey = `v2:${seed}`;
-  const imageCacheKey = `v2:image:${seed}`;
-  const audioCacheKey = `v2:audio:${seed}`;
+  const cacheKey = `v3:${seed}`;
+  const imageCacheKey = `v3:image:${seed}`;
+  const audioCacheKey = `v3:audio:${seed}`;
 
   if (cache.has(cacheKey) && cache.has(imageCacheKey) && cache.has(audioCacheKey)) {
     console.log(`Already cached for seed ${seed}, skipping`);
@@ -274,9 +274,9 @@ app.post('/api/refresh', async (req, res) => {
   }
   // Clear today's cache so refreshWord() regenerates everything
   const seed = todaySeed();
-  cache.delete(`v2:${seed}`);
-  cache.delete(`v2:image:${seed}`);
-  cache.delete(`v2:audio:${seed}`);
+  cache.delete(`v3:${seed}`);
+  cache.delete(`v3:image:${seed}`);
+  cache.delete(`v3:audio:${seed}`);
   res.json({ ok: true, message: 'Cache cleared, regenerating...' });
   refreshWord();
 });
@@ -291,7 +291,7 @@ app.listen(port, () => {
   loadCache();
   // Generate today's word if not already cached (cold start / first deploy of the day)
   const seed = todaySeed();
-  if (!cache.has(`v2:${seed}`) || !cache.has(`v2:image:${seed}`) || !cache.has(`v2:audio:${seed}`)) {
+  if (!cache.has(`v3:${seed}`) || !cache.has(`v3:image:${seed}`) || !cache.has(`v3:audio:${seed}`)) {
     console.log('Cold start: no cached data for today, generating now...');
     refreshWord();
   }
