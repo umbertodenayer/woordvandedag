@@ -154,32 +154,7 @@
     }
 
     function showSuccess() {
-      const leftPanel = document.getElementById('auth-left');
-      const inner = document.getElementById('auth-inner');
-      inner.style.opacity = '0';
-
-      setTimeout(() => {
-        const icon = document.createElement('div');
-        icon.className = 'auth-success-icon';
-        icon.innerHTML = `<svg class="checkmark-svg" viewBox="0 0 52 52">
-          <circle class="checkmark-fill" cx="26" cy="26" r="25" fill="var(--terracotta)"/>
-          <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="var(--terracotta)" stroke-width="2"/>
-          <polyline class="checkmark-tick" points="13,27 22,35 39,17" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>`;
-        leftPanel.appendChild(icon);
-
-        requestAnimationFrame(() => {
-          icon.classList.add('visible');
-          requestAnimationFrame(() => {
-            icon.querySelector('.checkmark-fill').classList.add('animate');
-            icon.querySelector('.checkmark-circle').classList.add('animate');
-            icon.querySelector('.checkmark-tick').classList.add('animate');
-          });
-        });
-
-        showPremiumToast('Welkom terug.', 3000);
-        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
-      }, 300);
+      window.location.href = 'index.html';
     }
 
     // Eye toggle
