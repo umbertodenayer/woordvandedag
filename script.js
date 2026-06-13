@@ -47,11 +47,14 @@ themeToggle.addEventListener('click', () => {
 let currentWord = null;
 let ygWidget = null;
 let hearItTriggered = false;
+let sbClient = null;
+let sbSession = null;
 
 if (window.supabase) {
   const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  sbClient = supabase;
 
   const userIconBtn = document.getElementById('user-icon-btn');
   const userDot = document.getElementById('user-dot');
@@ -62,6 +65,9 @@ if (window.supabase) {
   const openSigninBtn = document.getElementById('open-signin-btn');
   const openSignupBtn = document.getElementById('open-signup-btn');
   const signOutBtn = document.getElementById('sign-out-btn');
+  const myWordsBtn = document.getElementById('my-words-btn');
+  const myWordsModal = document.getElementById('my-words-modal');
+  const myWordsList = document.getElementById('my-words-list');
   const authToast = document.getElementById('auth-toast');
 
   const signinModal = document.getElementById('signin-modal');
@@ -173,6 +179,7 @@ if (window.supabase) {
   });
 
   const updateUserUI = (session) => {
+    sbSession = session;
     const signedIn = !!session;
     userDot.classList.toggle('hidden', !signedIn);
     dropdownSignedOut.classList.toggle('hidden', signedIn);
@@ -202,6 +209,30 @@ if (window.supabase) {
     closeDropdown();
   });
 
+  myWordsBtn.addEventListener('click', async () => {
+    closeDropdown();
+    myWordsList.innerHTML = '';
+    myWordsModal.classList.remove('hidden');
+
+    const { data, error } = await supabase
+      .from('user_liked_words')
+      .select('word, date')
+      .eq('user_id', sbSession.user.id)
+      .order('date', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      myWordsList.innerHTML = '<p class="my-words-empty">Words you like will appear here.</p>';
+      return;
+    }
+
+    myWordsList.innerHTML = data.map((row) => `
+      <div class="my-words-item">
+        <span class="my-words-word">${row.word}</span>
+        <span class="my-words-date">${row.date}</span>
+      </div>
+    `).join('');
+  });
+
   supabase.auth.onAuthStateChange((_event, session) => {
     updateUserUI(session);
   });
@@ -226,6 +257,7 @@ function render(data) {
   definitionEl.className = 'definition';
   currentWord = data.word;
   loadPronunciation();
+  loadRatings();
   if (ygWidget && hearItTriggered) {
     ygWidget.fetch(currentWord, 'english');
   }
@@ -505,6 +537,76 @@ pronunciationBtn.addEventListener('click', () => {
     cancelAnimationFrame(waveformRAF);
   }
 });
+
+const thumbUpBtn = document.getElementById('thumb-up-btn');
+const thumbDownBtn = document.getElementById('thumb-down-btn');
+const likeCountEl = document.getElementById('like-count');
+const dislikeCountEl = document.getElementById('dislike-count');
+
+function todayDateStr() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())).toISOString().slice(0, 10);
+}
+
+function voteKey() {
+  return `wordOfTheDay:${CACHE_VERSION}:vote:${todaySeed()}`;
+}
+
+async function loadRatings() {
+  if (!sbClient || !currentWord) return;
+  const today = todayDateStr();
+  const { data } = await sbClient
+    .from('word_ratings')
+    .select('likes, dislikes')
+    .eq('word', currentWord)
+    .eq('date', today)
+    .maybeSingle();
+
+  likeCountEl.textContent = data?.likes ?? 0;
+  dislikeCountEl.textContent = data?.dislikes ?? 0;
+
+  const savedVote = localStorage.getItem(voteKey());
+  thumbUpBtn.classList.toggle('active', savedVote === 'like');
+  thumbDownBtn.classList.toggle('active', savedVote === 'dislike');
+}
+
+async function castVote(type) {
+  if (!sbClient || !currentWord || localStorage.getItem(voteKey())) return;
+
+  const today = todayDateStr();
+  const { data: existing } = await sbClient
+    .from('word_ratings')
+    .select('likes, dislikes')
+    .eq('word', currentWord)
+    .eq('date', today)
+    .maybeSingle();
+
+  const likes = (existing?.likes ?? 0) + (type === 'like' ? 1 : 0);
+  const dislikes = (existing?.dislikes ?? 0) + (type === 'dislike' ? 1 : 0);
+
+  if (existing) {
+    await sbClient.from('word_ratings').update({ likes, dislikes }).eq('word', currentWord).eq('date', today);
+  } else {
+    await sbClient.from('word_ratings').insert({ word: currentWord, date: today, likes, dislikes });
+  }
+
+  likeCountEl.textContent = likes;
+  dislikeCountEl.textContent = dislikes;
+  localStorage.setItem(voteKey(), type);
+  thumbUpBtn.classList.toggle('active', type === 'like');
+  thumbDownBtn.classList.toggle('active', type === 'dislike');
+
+  if (type === 'like' && sbSession) {
+    await sbClient.from('user_liked_words').insert({
+      user_id: sbSession.user.id,
+      word: currentWord,
+      date: today
+    });
+  }
+}
+
+thumbUpBtn.addEventListener('click', () => castVote('like'));
+thumbDownBtn.addEventListener('click', () => castVote('dislike'));
 
 load();
 loadImage();
