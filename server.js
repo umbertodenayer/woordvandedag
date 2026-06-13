@@ -101,12 +101,35 @@ async function fetchImage(word, definition) {
   return { mimeType: 'image/png', data: b64 };
 }
 
+async function fetchAudio(word) {
+  const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/JBFqnCBsd6RMkjVDRZzb', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'xi-api-key': process.env.ELEVENLABS_API_KEY
+    },
+    body: JSON.stringify({
+      text: word,
+      model_id: 'eleven_flash_v2_5'
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`ElevenLabs API error ${response.status}: ${errText}`);
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return { mimeType: 'audio/mpeg', data: buffer.toString('base64') };
+}
+
 async function refreshWord() {
   const seed = todaySeed();
   const cacheKey = `${seed}`;
   const imageCacheKey = `image:${seed}`;
+  const audioCacheKey = `audio:${seed}`;
 
-  if (cache.has(cacheKey) && cache.has(imageCacheKey) && cache.get(cacheKey).ipa) {
+  if (cache.has(cacheKey) && cache.has(imageCacheKey) && cache.has(audioCacheKey) && cache.get(cacheKey).ipa) {
     console.log(`Already cached for seed ${seed}, skipping regeneration`);
     return;
   }
@@ -124,13 +147,26 @@ async function refreshWord() {
     }
   }
 
-  try {
-    const image = await fetchImage(data.word, data.definition);
-    cache.set(imageCacheKey, image);
-    saveCache();
-    console.log(`Cached image (seed ${seed}): ${data.word}`);
-  } catch (e) {
-    console.error('Failed to fetch image:', e.message);
+  if (!cache.has(imageCacheKey)) {
+    try {
+      const image = await fetchImage(data.word, data.definition);
+      cache.set(imageCacheKey, image);
+      saveCache();
+      console.log(`Cached image (seed ${seed}): ${data.word}`);
+    } catch (e) {
+      console.error('Failed to fetch image:', e.message);
+    }
+  }
+
+  if (!cache.has(audioCacheKey)) {
+    try {
+      const audio = await fetchAudio(data.word);
+      cache.set(audioCacheKey, audio);
+      saveCache();
+      console.log(`Cached audio (seed ${seed}): ${data.word}`);
+    } catch (e) {
+      console.error('Failed to fetch audio:', e.message);
+    }
   }
 }
 
@@ -196,25 +232,7 @@ app.get('/api/pronunciation', async (req, res) => {
       }
     }
     try {
-      const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/JBFqnCBsd6RMkjVDRZzb', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': process.env.ELEVENLABS_API_KEY
-        },
-        body: JSON.stringify({
-          text: wordData.word,
-          model_id: 'eleven_flash_v2_5'
-        })
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`ElevenLabs API error ${response.status}: ${errText}`);
-      }
-
-      const buffer = Buffer.from(await response.arrayBuffer());
-      audio = { mimeType: 'audio/mpeg', data: buffer.toString('base64') };
+      audio = await fetchAudio(wordData.word);
       cache.set(audioCacheKey, audio);
       saveCache();
     } catch (e) {
