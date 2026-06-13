@@ -882,6 +882,10 @@ html[data-theme="dark"] #word {
   max-width: 800px;
 }
 
+#main-content.hidden {
+  display: none;
+}
+
 .subpage {
   min-height: 100vh;
   background: var(--bg);

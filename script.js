@@ -368,88 +368,6 @@ if (window.supabase) {
     closeDropdown();
   });
 
-  const mainContent = document.getElementById('main-content');
-  const pageSettings = document.getElementById('page-settings');
-  const pageMyWords = document.getElementById('page-my-words');
-
-  const showPage = (page) => {
-    mainContent.classList.toggle('hidden', !!page);
-    pageSettings.classList.toggle('hidden', page !== 'settings');
-    pageMyWords.classList.toggle('hidden', page !== 'my-words');
-  };
-
-  const loadMyWords = async () => {
-    myWordsList.innerHTML = '<p class="my-words-empty">Laden…</p>';
-    const { data, error } = await supabase
-      .from('user_liked_words')
-      .select('word, date')
-      .eq('user_id', sbSession.user.id)
-      .order('date', { ascending: false });
-
-    if (error || !data || data.length === 0) {
-      myWordsList.innerHTML = '<p class="my-words-empty">Woorden die je leuk vindt verschijnen hier.</p>';
-      return;
-    }
-
-    myWordsList.innerHTML = data.map((row) => `
-      <div class="my-words-item">
-        <span class="my-words-word">${row.word}</span>
-        <span class="my-words-date">${row.date}</span>
-      </div>
-    `).join('');
-  };
-
-  const loadSettings = async () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    darkModeToggle.setAttribute('aria-checked', currentTheme === 'dark');
-    compactViewToggle.setAttribute('aria-checked', document.body.classList.contains('compact-view'));
-
-    let weeklyEmail = false;
-    if (sbSession) {
-      const { data } = await supabase
-        .from('user_preferences')
-        .select('weekly_email')
-        .eq('user_id', sbSession.user.id)
-        .maybeSingle();
-      weeklyEmail = !!data?.weekly_email;
-    }
-    weeklyEmailToggle.setAttribute('aria-checked', weeklyEmail);
-  };
-
-  const handleRoute = async () => {
-    const hash = window.location.hash;
-    if (hash === '#settings') {
-      showPage('settings');
-      await loadSettings();
-    } else if (hash === '#my-words') {
-      showPage('my-words');
-      await loadMyWords();
-    } else {
-      showPage(null);
-    }
-  };
-
-  window.addEventListener('hashchange', handleRoute);
-  handleRoute();
-
-  myWordsBtn.addEventListener('click', () => {
-    closeDropdown();
-    window.location.hash = '#my-words';
-  });
-
-  settingsBtn.addEventListener('click', () => {
-    closeDropdown();
-    window.location.hash = '#settings';
-  });
-
-  document.getElementById('settings-back-btn').addEventListener('click', () => {
-    window.location.hash = '';
-  });
-
-  document.getElementById('my-words-back-btn').addEventListener('click', () => {
-    window.location.hash = '';
-  });
-
   darkModeToggle.addEventListener('click', () => {
     const isDark = darkModeToggle.getAttribute('aria-checked') === 'true';
     const next = isDark ? 'light' : 'dark';
@@ -484,6 +402,97 @@ if (window.supabase) {
 } else {
   console.warn('Supabase failed to load; auth disabled.');
 }
+
+// === Subpage routing ===
+
+const mainContent = document.getElementById('main-content');
+const pageSettings = document.getElementById('page-settings');
+const pageMyWords = document.getElementById('page-my-words');
+
+const showPage = (page) => {
+  mainContent.classList.toggle('hidden', !!page);
+  pageSettings.classList.toggle('hidden', page !== 'settings');
+  pageMyWords.classList.toggle('hidden', page !== 'my-words');
+};
+
+const loadMyWords = async () => {
+  const myWordsList = document.getElementById('my-words-list');
+  if (!sbClient || !sbSession) {
+    myWordsList.innerHTML = '<p class="my-words-empty">Log in om je woorden te zien.</p>';
+    return;
+  }
+  myWordsList.innerHTML = '<p class="my-words-empty">Laden…</p>';
+  const { data, error } = await sbClient
+    .from('user_liked_words')
+    .select('word, date')
+    .eq('user_id', sbSession.user.id)
+    .order('date', { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    myWordsList.innerHTML = '<p class="my-words-empty">Woorden die je leuk vindt verschijnen hier.</p>';
+    return;
+  }
+
+  myWordsList.innerHTML = data.map((row) => `
+    <div class="my-words-item">
+      <span class="my-words-word">${row.word}</span>
+      <span class="my-words-date">${row.date}</span>
+    </div>
+  `).join('');
+};
+
+const loadSettingsPage = async () => {
+  const darkModeToggle = document.getElementById('setting-dark-mode');
+  const weeklyEmailToggle = document.getElementById('setting-weekly-email');
+  const compactViewToggle = document.getElementById('setting-compact-view');
+
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+  darkModeToggle.setAttribute('aria-checked', currentTheme === 'dark');
+  compactViewToggle.setAttribute('aria-checked', document.body.classList.contains('compact-view'));
+
+  let weeklyEmail = false;
+  if (sbClient && sbSession) {
+    const { data } = await sbClient
+      .from('user_preferences')
+      .select('weekly_email')
+      .eq('user_id', sbSession.user.id)
+      .maybeSingle();
+    weeklyEmail = !!data?.weekly_email;
+  }
+  weeklyEmailToggle.setAttribute('aria-checked', weeklyEmail);
+};
+
+const handleRoute = async () => {
+  const hash = window.location.hash;
+  if (hash === '#settings') {
+    showPage('settings');
+    await loadSettingsPage();
+  } else if (hash === '#my-words') {
+    showPage('my-words');
+    await loadMyWords();
+  } else {
+    showPage(null);
+  }
+};
+
+window.addEventListener('hashchange', handleRoute);
+handleRoute();
+
+document.getElementById('my-words-btn').addEventListener('click', () => {
+  window.location.hash = '#my-words';
+});
+
+document.getElementById('settings-btn').addEventListener('click', () => {
+  window.location.hash = '#settings';
+});
+
+document.getElementById('settings-back-btn').addEventListener('click', () => {
+  window.location.hash = '';
+});
+
+document.getElementById('my-words-back-btn').addEventListener('click', () => {
+  window.location.hash = '';
+});
 
 const CACHE_VERSION = 'v3';
 
