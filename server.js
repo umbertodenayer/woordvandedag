@@ -265,15 +265,6 @@ app.get('/api/word', async (req, res) => {
   res.json(data);
 });
 
-app.get('/api/debug-regenerate', async (req, res) => {
-  const seed = todaySeed();
-  cache.delete(`${seed}`);
-  cache.delete(`image:${seed}`);
-  cache.delete(`audio:${seed}`);
-  await refreshWord();
-  res.json({ done: true, word: cache.get(`${seed}`)?.word });
-});
-
 app.use(express.static(path.join(__dirname), {
   setHeaders: (res) => res.set('Cache-Control', 'no-cache')
 }));
