@@ -715,6 +715,12 @@ html[data-theme="dark"] #word {
   box-sizing: border-box;
 }
 
+.pronunciation .section-label {
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+}
+
 .pronunciation.hidden {
   display: none;
 }
