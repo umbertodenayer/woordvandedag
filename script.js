@@ -298,13 +298,22 @@ if (window.supabase) {
     errorEl.classList.remove('fade-in');
     setButtonLoading(btn);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: emailInput.value,
       password: passwordInput.value
     });
 
     if (error) {
-      showModalError(card, errorEl, btn, error.message);
+      const msg = error.message.toLowerCase().includes('already registered')
+        ? 'Er bestaat al een account met dit e-mailadres.'
+        : error.message;
+      showModalError(card, errorEl, btn, msg);
+      return;
+    }
+
+    // Supabase silently returns success with empty identities when email enumeration protection is on
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      showModalError(card, errorEl, btn, 'Er bestaat al een account met dit e-mailadres.');
       return;
     }
 
