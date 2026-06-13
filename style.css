@@ -80,7 +80,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .theme-toggle {
@@ -1089,18 +1089,16 @@ html[data-theme="dark"] #word {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  /* break out of col-text padding to span full column width */
+  gap: 16px;
   margin-left: -112px;
   margin-right: -64px;
   padding: 0 64px 0 112px;
-  height: 52px;
-  background: linear-gradient(to right, rgba(196, 113, 74, 0.05), rgba(181, 121, 59, 0.10));
-  border-radius: 0;
-  border-bottom: 1px solid rgba(196, 113, 74, 0.28);
-  margin-bottom: 32px;
+  height: 44px;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
   opacity: 0;
-  transition: opacity 0.5s ease, background-color 1.4s ease;
+  transition: opacity 0.5s ease;
 }
 
 .cta-banner.hidden {
@@ -1111,25 +1109,11 @@ html[data-theme="dark"] #word {
   opacity: 1;
 }
 
-.cta-left {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-}
-
-.cta-icon {
-  width: 13px;
-  height: 13px;
-  color: var(--terracotta);
-  flex-shrink: 0;
-}
-
 .cta-text {
-  font-size: 12px;
+  font-size: 0.78rem;
   color: var(--muted);
   font-family: 'Inter', system-ui, sans-serif;
-  font-style: italic;
+  font-style: normal;
   letter-spacing: 0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -1139,9 +1123,9 @@ html[data-theme="dark"] #word {
 .cta-btn {
   flex-shrink: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 7px 18px;
+  padding: 5px 14px;
   background: var(--terracotta);
   color: #fff;
   border: none;
@@ -1149,11 +1133,12 @@ html[data-theme="dark"] #word {
   cursor: pointer;
   text-decoration: none;
   letter-spacing: 0.02em;
-  transition: background-color 0.2s ease;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
 }
 
 .cta-btn:hover {
-  background-color: #b05e38;
+  opacity: 1;
 }
 
 /* Signup standalone page */
