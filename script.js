@@ -192,7 +192,7 @@ if (window.supabase) {
     }
 
     closeModal(signupModal);
-    showToast('Check your email to confirm your account before signing in.');
+    showToast('Controleer je e-mail om je account te bevestigen voor je inlogt.');
   });
 
   changePasswordForm.addEventListener('submit', async (e) => {

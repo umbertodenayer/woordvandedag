@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word of the Day</title>
+<title>Woord van de Dag</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,9 +16,9 @@
     </div>
     <div class="col-text">
       <div class="topbar">
-        <p class="masthead"><span class="masthead-word">Word</span><span class="masthead-rest">of the day</span></p>
+        <p class="masthead"><span class="masthead-word">Woord</span><span class="masthead-rest">van de dag</span></p>
         <div class="masthead-line"></div>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <button id="theme-toggle" class="theme-toggle" aria-label="Donkere modus wisselen">
           <svg id="sun-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="4"/>
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -37,17 +37,17 @@
           </button>
           <div id="user-dropdown" class="user-dropdown hidden">
             <div id="dropdown-signed-out">
-              <button id="open-signin-btn" class="user-dropdown-item">Sign In</button>
-              <button id="open-signup-btn" class="user-dropdown-item">Sign Up</button>
+              <button id="open-signin-btn" class="user-dropdown-item">Inloggen</button>
+              <button id="open-signup-btn" class="user-dropdown-item">Aanmelden</button>
             </div>
             <div id="dropdown-signed-in" class="hidden">
               <p id="user-email" class="user-dropdown-email"></p>
-              <button id="my-words-btn" class="user-dropdown-item">My Words</button>
-              <button id="settings-btn" class="user-dropdown-item">Settings</button>
+              <button id="my-words-btn" class="user-dropdown-item">Mijn Woorden</button>
+              <button id="settings-btn" class="user-dropdown-item">Instellingen</button>
               <div class="user-dropdown-divider"></div>
-              <button id="open-change-password-btn" class="user-dropdown-item">Change Password</button>
+              <button id="open-change-password-btn" class="user-dropdown-item">Wachtwoord Wijzigen</button>
               <div class="user-dropdown-divider"></div>
-              <button id="sign-out-btn" class="user-dropdown-item">Sign Out</button>
+              <button id="sign-out-btn" class="user-dropdown-item">Uitloggen</button>
             </div>
           </div>
         </div>
@@ -60,7 +60,7 @@
         <p id="definition" class="definition"></p>
         <hr class="divider">
         <div class="etymology">
-          <p class="etymology-label">Etymology</p>
+          <p class="etymology-label">Etymologie</p>
           <p id="etymology" class="etymology-text"></p>
         </div>
         <p id="example" class="example"></p>
@@ -72,32 +72,32 @@
 
   <section class="in-the-wild">
     <hr class="section-rule">
-    <p class="label section-label">In The Wild</p>
+    <p class="label section-label">In de Praktijk</p>
     <div class="wild-cards">
       <article class="wild-card">
-        <p class="wild-pub">The Paris Review</p>
-        <p class="wild-excerpt">"There was something almost <em>susurrous</em> about the way the pages turned, a whisper passed from hand to hand across the quiet room."</p>
-        <p class="wild-source">— Fiction, Issue 214</p>
+        <p class="wild-pub">de Volkskrant</p>
+        <p class="wild-excerpt">"Ze pakte de <em>bezem</em> en veegde de gevallen bladeren van het terras, terwijl de herfstwind door de tuin joeg."</p>
+        <p class="wild-source">— Weekendbijlage</p>
       </article>
       <article class="wild-card">
-        <p class="wild-pub">The Atlantic</p>
-        <p class="wild-excerpt">"A <em>susurrous</em> wind moved through the orchard, carrying with it the faint, dry rattle of late autumn leaves."</p>
-        <p class="wild-source">— Culture, October Issue</p>
+        <p class="wild-pub">NRC Handelsblad</p>
+        <p class="wild-excerpt">"De jonge atleet besloot te <em>sprinten</em> in de laatste honderd meter en pakte zo alsnog de overwinning."</p>
+        <p class="wild-source">— Sport, zaterdageditie</p>
       </article>
       <article class="wild-card">
-        <p class="wild-pub">London Review of Books</p>
-        <p class="wild-excerpt">"Beneath the city's roar lies a <em>susurrous</em> undercurrent — pipes, wires, and the breath of a million quiet rooms."</p>
-        <p class="wild-source">— Essays, Spring Edition</p>
+        <p class="wild-pub">Trouw</p>
+        <p class="wild-excerpt">"Het kleine meisje droomde ervan een <em>prinses</em> te zijn, met een kasteel vol boeken en een tuin vol bloemen."</p>
+        <p class="wild-source">— Verhalen, zomereditie</p>
       </article>
     </div>
     <hr class="section-rule">
   </section>
 
   <section class="pronunciation hidden" id="pronunciation-section">
-    <p class="label section-label">Pronunciation</p>
+    <p class="label section-label">Uitspraak</p>
     <div class="pronunciation-row">
       <div class="audio-player">
-        <button id="pronunciation-btn" class="pronunciation-btn" aria-label="Play pronunciation">
+        <button id="pronunciation-btn" class="pronunciation-btn" aria-label="Uitspraak afspelen">
           <svg id="play-icon" class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           <svg id="pause-icon" class="icon hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
         </button>
@@ -106,13 +106,13 @@
       <div class="rating-spacer"></div>
       <div class="rating">
         <div class="rating-item">
-          <button id="thumb-up-btn" class="thumb-btn" aria-label="Like">
+          <button id="thumb-up-btn" class="thumb-btn" aria-label="Leuk">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
           </button>
           <span id="like-count" class="rating-count">0</span>
         </div>
         <div class="rating-item">
-          <button id="thumb-down-btn" class="thumb-btn" aria-label="Dislike">
+          <button id="thumb-down-btn" class="thumb-btn" aria-label="Niet leuk">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
           </button>
           <span id="dislike-count" class="rating-count">0</span>
@@ -122,7 +122,7 @@
   </section>
 
   <section class="hear-it hidden" id="hear-it-section">
-    <p class="label section-label">Hear It</p>
+    <p class="label section-label">Beluister het</p>
     <div id="youglish-widget"></div>
   </section>
 
@@ -130,11 +130,11 @@
     <div class="auth-modal-backdrop"></div>
     <div class="auth-modal-card">
       <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Sign In</h2>
+      <h2 class="auth-modal-title">Inloggen</h2>
       <form id="signin-form" class="auth-form">
-        <input type="email" class="auth-input" placeholder="Email" required autocomplete="email">
+        <input type="email" class="auth-input" placeholder="E-mailadres" required autocomplete="email">
         <div class="auth-password-wrap">
-          <input type="password" class="auth-input" placeholder="Password" required autocomplete="current-password">
+          <input type="password" class="auth-input" placeholder="Wachtwoord" required autocomplete="current-password">
           <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
             <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
@@ -147,7 +147,7 @@
           </button>
         </div>
         <p class="auth-error hidden"></p>
-        <button type="submit" class="auth-submit">Sign In</button>
+        <button type="submit" class="auth-submit">Inloggen</button>
       </form>
     </div>
   </div>
@@ -156,11 +156,11 @@
     <div class="auth-modal-backdrop"></div>
     <div class="auth-modal-card">
       <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Sign Up</h2>
+      <h2 class="auth-modal-title">Aanmelden</h2>
       <form id="signup-form" class="auth-form">
-        <input type="email" class="auth-input" placeholder="Email" required autocomplete="email">
+        <input type="email" class="auth-input" placeholder="E-mailadres" required autocomplete="email">
         <div class="auth-password-wrap">
-          <input type="password" class="auth-input" placeholder="Password" required autocomplete="new-password">
+          <input type="password" class="auth-input" placeholder="Wachtwoord" required autocomplete="new-password">
           <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
             <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
@@ -173,7 +173,7 @@
           </button>
         </div>
         <p class="auth-error hidden"></p>
-        <button type="submit" class="auth-submit">Sign Up</button>
+        <button type="submit" class="auth-submit">Aanmelden</button>
       </form>
     </div>
   </div>
@@ -182,10 +182,10 @@
     <div class="auth-modal-backdrop"></div>
     <div class="auth-modal-card">
       <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Change Password</h2>
+      <h2 class="auth-modal-title">Wachtwoord Wijzigen</h2>
       <form id="change-password-form" class="auth-form">
         <div class="auth-password-wrap">
-          <input type="password" class="auth-input" placeholder="New Password" required autocomplete="new-password">
+          <input type="password" class="auth-input" placeholder="Nieuw wachtwoord" required autocomplete="new-password">
           <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
             <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
@@ -198,7 +198,7 @@
           </button>
         </div>
         <div class="auth-password-wrap">
-          <input type="password" class="auth-input" placeholder="Confirm New Password" required autocomplete="new-password">
+          <input type="password" class="auth-input" placeholder="Bevestig nieuw wachtwoord" required autocomplete="new-password">
           <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
             <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
@@ -211,7 +211,7 @@
           </button>
         </div>
         <p class="auth-error hidden"></p>
-        <button type="submit" class="auth-submit">Update Password</button>
+        <button type="submit" class="auth-submit">Wachtwoord bijwerken</button>
       </form>
     </div>
   </div>
@@ -220,7 +220,7 @@
     <div class="auth-modal-backdrop"></div>
     <div class="auth-modal-card">
       <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">My Words</h2>
+      <h2 class="auth-modal-title">Mijn Woorden</h2>
       <div id="my-words-list" class="my-words-list"></div>
     </div>
   </div>
@@ -229,22 +229,22 @@
     <div class="auth-modal-backdrop"></div>
     <div class="auth-modal-card">
       <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Settings</h2>
+      <h2 class="auth-modal-title">Instellingen</h2>
       <div class="settings-list">
         <div class="settings-row">
-          <span class="settings-label">Dark mode by default</span>
+          <span class="settings-label">Donkere modus standaard</span>
           <button id="setting-dark-mode" class="toggle-switch" role="switch" aria-checked="false">
             <span class="toggle-knob"></span>
           </button>
         </div>
         <div class="settings-row">
-          <span class="settings-label">Weekly email digest</span>
+          <span class="settings-label">Wekelijkse e-maildigest</span>
           <button id="setting-weekly-email" class="toggle-switch" role="switch" aria-checked="false">
             <span class="toggle-knob"></span>
           </button>
         </div>
         <div class="settings-row">
-          <span class="settings-label">Compact view</span>
+          <span class="settings-label">Compacte weergave</span>
           <button id="setting-compact-view" class="toggle-switch" role="switch" aria-checked="false">
             <span class="toggle-knob"></span>
           </button>

@@ -38,15 +38,15 @@ function saveCache() {
 async function fetchWord() {
   const seed = todaySeed();
 
-  const prompt = `Today's date seed is ${seed} (days since epoch, UTC). Using this seed so the result is deterministic and identical for everyone asking on this date, pick one interesting, uncommon word in English. Respond with ONLY a JSON object (no markdown, no code fences) with these exact keys:
+  const prompt = `Today's date seed is ${seed} (days since epoch, UTC). Using this seed so the result is deterministic and identical for everyone asking on this date, pick one Dutch word suitable for A0–B2 learners — everyday, concrete words like common nouns, verbs, or adjectives (for example: bezem, sprinten, prinses, woordenboek, fiets, koken, vrolijk). Respond with ONLY a JSON object (no markdown, no code fences) with these exact keys:
 {
-  "word": "the word",
-  "ipa": "the IPA phonetic transcription of the word, e.g. /səˈsɜːrəs/",
-  "partOfSpeech": "its part of speech",
-  "definition": "a clear definition",
-  "etymology": "the word's etymology",
-  "exampleSentence": "a real example sentence using the word, quoted from literature or journalism",
-  "exampleSource": "the title/author or publication the example sentence is from"
+  "word": "het Nederlandse woord",
+  "ipa": "the IPA phonetic transcription of the Dutch word, e.g. /ˈbeː.zəm/",
+  "partOfSpeech": "het woordsoort in het Nederlands (bijv. zelfstandig naamwoord, werkwoord, bijvoeglijk naamwoord)",
+  "definition": "een duidelijke definitie in het Nederlands",
+  "etymology": "de etymologie van het woord in het Nederlands",
+  "exampleSentence": "een natuurlijke voorbeeldzin in het Nederlands met het woord",
+  "exampleSource": "de bron of auteur van de voorbeeldzin, of 'Eigen voorbeeld' als zelfgemaakt"
 }`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -110,7 +110,7 @@ async function fetchAudio(word) {
     },
     body: JSON.stringify({
       text: word,
-      model_id: 'eleven_flash_v2_5'
+      model_id: 'eleven_multilingual_v2'
     })
   });
 
