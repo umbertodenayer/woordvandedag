@@ -118,11 +118,22 @@ body {
   content: '"';
 }
 
+.source {
+  font-size: 13px;
+  color: var(--muted);
+  margin: -28px 0 28px;
+  text-align: right;
+}
+
 .date {
   font-size: 13px;
   color: var(--muted);
-  margin: 0;
+  margin: 0 0 16px;
   letter-spacing: 0.05em;
+}
+
+.error {
+  color: #c4554d;
 }
 
 @media (max-width: 480px) {

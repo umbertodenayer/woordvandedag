@@ -2,10 +2,13 @@
   "name": "word-of-the-day",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "start": "serve -s . -l $PORT"
+    "start": "node server.js"
   },
   "dependencies": {
-    "serve": "^14.2.1"
+    "express": "^4.19.2"
   }
 }
