@@ -162,10 +162,15 @@
       const input = document.getElementById('password-input');
       const eyeOpen = this.querySelector('.eye-open');
       const eyeClosed = this.querySelector('.eye-closed');
-      const reveal = input.type === 'password';
-      input.type = reveal ? 'text' : 'password';
-      eyeOpen.classList.toggle('hidden', reveal);
-      eyeClosed.classList.toggle('hidden', !reveal);
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeOpen.style.display = 'none';
+        eyeClosed.style.display = '';
+      } else {
+        input.type = 'password';
+        eyeOpen.style.display = '';
+        eyeClosed.style.display = 'none';
+      }
     });
 
     // Submit

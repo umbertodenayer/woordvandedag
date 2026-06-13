@@ -401,6 +401,7 @@ body.compact-view .hear-it {
 .eye-icon {
   width: 18px;
   height: 18px;
+  pointer-events: none;
 }
 
 .eye-icon.hidden {
