@@ -58,7 +58,7 @@ body {
   flex: 1;
   min-width: 0;
   text-align: left;
-  padding: 64px 64px 64px 112px;
+  padding: 0 64px 64px 112px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -78,9 +78,19 @@ body {
 
 .topbar {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 0;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  margin-left: -112px;
+  margin-right: -64px;
+  padding: 0 64px 0 112px;
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .theme-toggle {
@@ -563,6 +573,7 @@ html[data-theme="dark"] .masthead-line {
   width: 40px;
   height: 3px;
   background: var(--terracotta);
+  margin: 10px 0 8px 0;
 }
 
 .word-image {
@@ -1095,11 +1106,25 @@ html[data-theme="dark"] #word {
   margin-right: -64px;
   padding: 0 64px 0 112px;
   height: 44px;
-  background: transparent;
+  background: rgba(196, 113, 74, 0.12);
   border-bottom: 1px solid var(--border);
-  margin-bottom: 28px;
+  margin-bottom: 0;
   opacity: 0;
   transition: opacity 0.5s ease;
+}
+
+.cta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cta-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--terracotta);
+  flex-shrink: 0;
 }
 
 .cta-banner.hidden {
@@ -1111,7 +1136,7 @@ html[data-theme="dark"] #word {
 }
 
 .cta-text {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: var(--muted);
   font-family: 'Inter', system-ui, sans-serif;
   font-style: normal;
@@ -1124,22 +1149,21 @@ html[data-theme="dark"] #word {
 .cta-btn {
   flex-shrink: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 10.5px;
+  font-size: 0.8rem;
   font-weight: 600;
-  padding: 5px 14px;
+  padding: 7px 18px;
   background: var(--terracotta);
   color: #fff;
   border: none;
-  border-radius: 24px;
+  border-radius: 20px;
   cursor: pointer;
   text-decoration: none;
-  letter-spacing: 0.02em;
-  opacity: 0.85;
+  letter-spacing: 0.01em;
   transition: opacity 0.2s ease;
 }
 
 .cta-btn:hover {
-  opacity: 1;
+  opacity: 0.85;
 }
 
 /* Signup standalone page */
