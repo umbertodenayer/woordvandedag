@@ -357,9 +357,16 @@ html[data-theme="dark"] #word {
   display: none;
 }
 
+.audio-player {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .pronunciation-btn {
-  width: 72px;
-  height: 72px;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: var(--terracotta);
@@ -369,7 +376,7 @@ html[data-theme="dark"] #word {
   justify-content: center;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 24px rgba(196, 113, 74, 0.3);
+  box-shadow: 0 4px 14px rgba(196, 113, 74, 0.35);
 }
 
 .pronunciation-btn:hover {
@@ -377,12 +384,30 @@ html[data-theme="dark"] #word {
 }
 
 .pronunciation-btn .icon {
-  width: 28px;
-  height: 28px;
+  width: 18px;
+  height: 18px;
 }
 
 .pronunciation-btn .icon.hidden {
   display: none;
+}
+
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 40px;
+}
+
+.waveform .bar {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.1s linear;
+}
+
+.waveform .bar.played {
+  background: var(--terracotta);
 }
 
 .hear-it {
