@@ -660,7 +660,7 @@ async function loadImage() {
   }
 }
 
-dateEl.textContent = new Date().toLocaleDateString('en-US', {
+dateEl.textContent = new Date().toLocaleDateString('nl-NL', {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
 });
 
