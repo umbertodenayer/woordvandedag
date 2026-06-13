@@ -260,9 +260,6 @@ dateEl.textContent = new Date().toLocaleDateString('en-US', {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
 });
 
-load();
-loadImage();
-
 const hero = document.getElementById('hero');
 
 function updateHeroOnScroll() {
@@ -444,3 +441,6 @@ pronunciationBtn.addEventListener('click', () => {
     cancelAnimationFrame(waveformRAF);
   }
 });
+
+load();
+loadImage();
