@@ -85,6 +85,63 @@ function scheduleMidnightRefresh() {
   }, delay);
 }
 
+async function fetchImage(word, definition) {
+  const prompt = `A clean, minimal, modern editorial illustration representing the word "${word}" (${definition}). No text or letters in the image. Soft warm color palette, flat design, lots of negative space.`;
+
+  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': process.env.GEMINI_API_KEY
+    },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }]
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Gemini API error ${response.status}: ${errText}`);
+  }
+
+  const json = await response.json();
+  const parts = json.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find(p => p.inlineData);
+  if (!imagePart) throw new Error('No image returned from Gemini');
+  return { mimeType: imagePart.inlineData.mimeType, data: imagePart.inlineData.data };
+}
+
+app.get('/api/image', async (req, res) => {
+  const lang = String(req.query.lang || 'en');
+  const seed = todaySeed();
+  const cacheKey = `${seed}:${lang}`;
+  const imageCacheKey = `image:${seed}`;
+
+  let image = cache.get(imageCacheKey);
+  if (!image) {
+    let wordData = cache.get(cacheKey);
+    if (!wordData) {
+      try {
+        wordData = await fetchWord(lang);
+        cache.set(cacheKey, wordData);
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+        return;
+      }
+    }
+    try {
+      image = await fetchImage(wordData.word, wordData.definition);
+      cache.set(imageCacheKey, image);
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+      return;
+    }
+  }
+
+  res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+  res.json(image);
+});
+
 app.get('/api/word', async (req, res) => {
   const lang = String(req.query.lang || 'en');
   const seed = todaySeed();

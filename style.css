@@ -60,6 +60,18 @@ body {
   cursor: pointer;
 }
 
+.word-image {
+  display: none;
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: 12px;
+  margin: 0 0 24px;
+}
+
+.word-image.loaded {
+  display: inline-block;
+}
+
 #word {
   font-family: 'Fraunces', serif;
   font-size: 84px;

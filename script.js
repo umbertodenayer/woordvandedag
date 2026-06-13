@@ -6,6 +6,7 @@ const exampleEl = document.getElementById('example');
 const sourceEl = document.getElementById('source');
 const dateEl = document.getElementById('date');
 const langSelect = document.getElementById('lang-select');
+const imageEl = document.getElementById('word-image');
 
 function todaySeed() {
   const now = new Date();
@@ -80,6 +81,31 @@ async function load(lang, force = false) {
   }
 }
 
+function imageCacheKey() {
+  return `wordOfTheDay:image:${todaySeed()}`;
+}
+
+async function loadImage() {
+  const key = imageCacheKey();
+  const cached = localStorage.getItem(key);
+  if (cached) {
+    imageEl.src = cached;
+    imageEl.classList.add('loaded');
+    return;
+  }
+  try {
+    const response = await fetch(`/api/image?lang=${encodeURIComponent(langSelect.value)}`);
+    if (!response.ok) return;
+    const data = await response.json();
+    const src = `data:${data.mimeType};base64,${data.data}`;
+    localStorage.setItem(key, src);
+    imageEl.src = src;
+    imageEl.classList.add('loaded');
+  } catch (e) {
+    // image is optional, fail silently
+  }
+}
+
 langSelect.addEventListener('change', () => load(langSelect.value));
 
 dateEl.textContent = new Date().toLocaleDateString(undefined, {
@@ -87,3 +113,4 @@ dateEl.textContent = new Date().toLocaleDateString(undefined, {
 });
 
 load(langSelect.value);
+loadImage();
