@@ -17,7 +17,7 @@ function loadCache() {
     const raw = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
     const seed = todaySeed();
     for (const [key, value] of Object.entries(raw)) {
-      if (key === `${seed}` || key === `image:${seed}`) {
+      if (key === `v2:${seed}` || key === `v2:image:${seed}` || key === `v2:audio:${seed}`) {
         cache.set(key, value);
       }
     }
@@ -143,9 +143,9 @@ async function fetchAudio(word) {
 
 async function refreshWord() {
   const seed = todaySeed();
-  const cacheKey = `${seed}`;
-  const imageCacheKey = `image:${seed}`;
-  const audioCacheKey = `audio:${seed}`;
+  const cacheKey = `v2:${seed}`;
+  const imageCacheKey = `v2:image:${seed}`;
+  const audioCacheKey = `v2:audio:${seed}`;
 
   if (cache.has(cacheKey) && cache.has(imageCacheKey) && cache.has(audioCacheKey) && cache.get(cacheKey).ipa) {
     console.log(`Already cached for seed ${seed}, skipping regeneration`);
@@ -201,8 +201,8 @@ function scheduleMidnightRefresh() {
 
 app.get('/api/image', async (req, res) => {
   const seed = todaySeed();
-  const cacheKey = `${seed}`;
-  const imageCacheKey = `image:${seed}`;
+  const cacheKey = `v2:${seed}`;
+  const imageCacheKey = `v2:image:${seed}`;
 
   let image = cache.get(imageCacheKey);
   if (!image) {
@@ -233,8 +233,8 @@ app.get('/api/image', async (req, res) => {
 
 app.get('/api/pronunciation', async (req, res) => {
   const seed = todaySeed();
-  const cacheKey = `${seed}`;
-  const audioCacheKey = `audio:${seed}`;
+  const cacheKey = `v2:${seed}`;
+  const audioCacheKey = `v2:audio:${seed}`;
 
   let audio = cache.get(audioCacheKey);
   if (!audio) {
@@ -265,7 +265,7 @@ app.get('/api/pronunciation', async (req, res) => {
 
 app.get('/api/word', async (req, res) => {
   const seed = todaySeed();
-  const cacheKey = `${seed}`;
+  const cacheKey = `v2:${seed}`;
 
   let data = cache.get(cacheKey);
   if (!data) {
