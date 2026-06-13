@@ -45,6 +45,7 @@
                 <div id="dropdown-signed-in" class="hidden">
                   <p id="user-email" class="user-dropdown-email"></p>
                   <button id="my-words-btn" class="user-dropdown-item">Mijn Woorden</button>
+                  <button id="profile-btn" class="user-dropdown-item">Mijn Profiel</button>
                   <button id="settings-btn" class="user-dropdown-item">Instellingen</button>
                   <div class="user-dropdown-divider"></div>
                   <button id="open-change-password-btn" class="user-dropdown-item">Wachtwoord Wijzigen</button>
@@ -212,6 +213,87 @@
   </div>
 
   </div><!-- /#main-content -->
+
+  <!-- Profile subpage -->
+  <div id="page-profile" class="subpage hidden">
+    <div class="subpage-topbar">
+      <button class="subpage-back" id="profile-back-btn" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <img src="logo.png" alt="Woord van de Dag" class="subpage-logo">
+      <span class="subpage-title">Mijn Profiel</span>
+    </div>
+    <div class="subpage-body">
+
+      <div class="pref-section">
+        <p class="pref-section-label">Niveau</p>
+        <div class="pref-grid pref-grid-2" id="profile-level-grid">
+          <div class="pref-card" data-value="Beginner">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Beginner</p>
+            <p class="pref-card-sub">A0 / A1 — Ik ken nog weinig Nederlands</p>
+          </div>
+          <div class="pref-card" data-value="Basis">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Basis</p>
+            <p class="pref-card-sub">A2 / B1 — Ik begrijp eenvoudige zinnen</p>
+          </div>
+          <div class="pref-card" data-value="Gevorderd">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Gevorderd</p>
+            <p class="pref-card-sub">B2 / C1 — Ik spreek redelijk vloeiend</p>
+          </div>
+          <div class="pref-card" data-value="Moedertaal">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Moedertaal</p>
+            <p class="pref-card-sub">C2 — Nederlands is mijn moedertaal</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <p class="pref-section-label">Leerdoelen</p>
+        <div class="pref-grid pref-grid-3" id="profile-goal-grid">
+          <div class="pref-card" data-value="Alledaags">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Alledaags</p>
+            <p class="pref-card-sub">Dagelijkse gesprekken en situaties</p>
+          </div>
+          <div class="pref-card" data-value="Professioneel">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Professioneel</p>
+            <p class="pref-card-sub">Zakelijke communicatie en werk</p>
+          </div>
+          <div class="pref-card" data-value="Academisch">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Academisch</p>
+            <p class="pref-card-sub">Universitair en wetenschappelijk taalgebruik</p>
+          </div>
+          <div class="pref-card" data-value="Literair">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Literair</p>
+            <p class="pref-card-sub">Poëzie, literatuur en schrijfstijl</p>
+          </div>
+          <div class="pref-card" data-value="Spreektaal">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Spreektaal</p>
+            <p class="pref-card-sub">Informeel, dialect en straattaal</p>
+          </div>
+          <div class="pref-card" data-value="Reizen">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Reizen</p>
+            <p class="pref-card-sub">Praktisch Nederlands voor onderweg</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-footer">
+        <button class="pref-save-btn" id="profile-save-btn">Opslaan</button>
+        <p class="pref-save-status" id="profile-save-status"></p>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Settings subpage -->
   <div id="page-settings" class="subpage hidden">

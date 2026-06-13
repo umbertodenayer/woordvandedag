@@ -308,6 +308,125 @@ body {
   color: var(--muted);
 }
 
+/* ── Profile preference cards ──────────────────────────────────────────────── */
+
+.pref-section {
+  margin-bottom: 36px;
+}
+
+.pref-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+
+.pref-grid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.pref-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.pref-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+.pref-card {
+  position: relative;
+  padding: 14px 14px 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.18s, background 0.18s;
+  background: var(--bg);
+}
+
+.pref-card:hover {
+  border-color: rgba(196, 113, 74, 0.4);
+}
+
+.pref-card.selected {
+  border-color: #C4714A;
+  background: rgba(196, 113, 74, 0.06);
+}
+
+.pref-card-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s, border-color 0.18s;
+  flex-shrink: 0;
+}
+
+.pref-card.selected .pref-card-check {
+  background: #C4714A;
+  border-color: #C4714A;
+}
+
+.pref-card-check svg {
+  width: 9px;
+  height: 7px;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+
+.pref-card.selected .pref-card-check svg {
+  opacity: 1;
+}
+
+.pref-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0 22px 3px 0;
+  color: var(--text);
+}
+
+.pref-card-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.pref-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.pref-save-btn {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 10px 28px;
+  background: #C4714A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.pref-save-btn:hover { opacity: 0.85; }
+.pref-save-btn:disabled { opacity: 0.5; cursor: default; }
+
+.pref-save-status {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ── Settings list ──────────────────────────────────────────────────────────── */
+
 .settings-list {
   display: flex;
   flex-direction: column;

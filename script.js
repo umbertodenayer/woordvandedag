@@ -445,11 +445,13 @@ if (window.supabase) {
 const mainContent = document.getElementById('main-content');
 const pageSettings = document.getElementById('page-settings');
 const pageMyWords = document.getElementById('page-my-words');
+const pageProfile  = document.getElementById('page-profile');
 
 const showPage = (page) => {
   mainContent.classList.toggle('hidden', !!page);
   pageSettings.classList.toggle('hidden', page !== 'settings');
   pageMyWords.classList.toggle('hidden', page !== 'my-words');
+  pageProfile.classList.toggle('hidden',  page !== 'profile');
 };
 
 const loadMyWords = async () => {
@@ -507,6 +509,9 @@ const handleRoute = async () => {
   } else if (hash === '#my-words') {
     showPage('my-words');
     await loadMyWords();
+  } else if (hash === '#profile') {
+    showPage('profile');
+    await loadProfilePage();
   } else {
     showPage(null);
   }
@@ -523,12 +528,104 @@ document.getElementById('settings-btn').addEventListener('click', () => {
   window.location.hash = '#settings';
 });
 
+document.getElementById('profile-btn').addEventListener('click', () => {
+  window.location.hash = '#profile';
+});
+
 document.getElementById('settings-back-btn').addEventListener('click', () => {
   window.location.hash = '';
 });
 
 document.getElementById('my-words-back-btn').addEventListener('click', () => {
   window.location.hash = '';
+});
+
+document.getElementById('profile-back-btn').addEventListener('click', () => {
+  window.location.hash = '';
+});
+
+// === Profile page ===
+
+let profileNiveau = null;
+let profileGoals  = new Set();
+
+const loadProfilePage = async () => {
+  profileNiveau = null;
+  profileGoals  = new Set();
+
+  document.querySelectorAll('#profile-level-grid .pref-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#profile-goal-grid  .pref-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('profile-save-status').textContent = '';
+
+  if (!sbClient || !sbSession) return;
+
+  const { data } = await sbClient
+    .from('user_profiles')
+    .select('niveau, leerdoelen')
+    .eq('user_id', sbSession.user.id)
+    .maybeSingle();
+
+  if (data) {
+    profileNiveau = data.niveau || null;
+    profileGoals  = new Set(data.leerdoelen || []);
+
+    document.querySelectorAll('#profile-level-grid .pref-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.value === profileNiveau);
+    });
+    document.querySelectorAll('#profile-goal-grid .pref-card').forEach(card => {
+      card.classList.toggle('selected', profileGoals.has(card.dataset.value));
+    });
+  }
+};
+
+document.getElementById('profile-level-grid').addEventListener('click', e => {
+  const card = e.target.closest('.pref-card');
+  if (!card) return;
+  profileNiveau = card.dataset.value;
+  document.querySelectorAll('#profile-level-grid .pref-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+});
+
+document.getElementById('profile-goal-grid').addEventListener('click', e => {
+  const card = e.target.closest('.pref-card');
+  if (!card) return;
+  const val = card.dataset.value;
+  if (profileGoals.has(val)) {
+    profileGoals.delete(val);
+    card.classList.remove('selected');
+  } else {
+    profileGoals.add(val);
+    card.classList.add('selected');
+  }
+});
+
+document.getElementById('profile-save-btn').addEventListener('click', async () => {
+  if (!sbClient || !sbSession) return;
+  const btn    = document.getElementById('profile-save-btn');
+  const status = document.getElementById('profile-save-status');
+  btn.disabled    = true;
+  btn.textContent = 'Opslaan…';
+  status.textContent = '';
+
+  const { error } = await sbClient
+    .from('user_profiles')
+    .upsert({
+      user_id:    sbSession.user.id,
+      niveau:     profileNiveau,
+      leerdoelen: Array.from(profileGoals),
+    }, { onConflict: 'user_id' });
+
+  btn.disabled    = false;
+  btn.textContent = 'Opslaan';
+
+  if (error) {
+    status.textContent = 'Er is iets misgegaan. Probeer het opnieuw.';
+    status.style.color = '#c4554d';
+  } else {
+    status.textContent = 'Voorkeuren opgeslagen ✓';
+    status.style.color = '#C4714A';
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  }
 });
 
 const CACHE_VERSION = 'v3';
