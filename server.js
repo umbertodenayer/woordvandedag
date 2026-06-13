@@ -7,21 +7,8 @@ const app = express();
 app.use(express.json());
 const cache = new Map();
 
-let elevenlabsVoiceId = process.env.ELEVENLABS_VOICE_ID || null;
-async function getElevenlabsVoiceId() {
-  if (elevenlabsVoiceId) return elevenlabsVoiceId;
-  const res = await fetch('https://api.elevenlabs.io/v1/voices', {
-    headers: { 'xi-api-key': process.env.ELEVENLABS_API_KEY }
-  });
-  if (!res.ok) throw new Error(`ElevenLabs /v1/voices error ${res.status}`);
-  const { voices } = await res.json();
-  if (!voices || voices.length === 0) throw new Error('No ElevenLabs voices available');
-  const pick = voices.find(v => v.category === 'premade') || voices[0];
-  elevenlabsVoiceId = pick.voice_id;
-  console.log(`ElevenLabs voices: ${voices.map(v => v.name + '(' + v.category + ')').join(', ')}`);
-  console.log(`Using voice: ${pick.name} (${pick.voice_id})`);
-  return elevenlabsVoiceId;
-}
+// Adam — ElevenLabs built-in premade voice, available on all plans including free
+const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB';
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
 const CACHE_VERSION = 'v6';
 
@@ -203,8 +190,7 @@ async function fetchImage(word, definition) {
 }
 
 async function fetchAudio(word) {
-  const voiceId = await getElevenlabsVoiceId();
-  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
