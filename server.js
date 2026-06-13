@@ -46,7 +46,24 @@ async function fetchWord() {
   "definition": "een duidelijke definitie in het Nederlands",
   "etymology": "de etymologie van het woord in het Nederlands",
   "exampleSentence": "een natuurlijke voorbeeldzin in het Nederlands met het woord",
-  "exampleSource": "de bron of auteur van de voorbeeldzin, of 'Eigen voorbeeld' als zelfgemaakt"
+  "exampleSource": "de bron of auteur van de voorbeeldzin, of 'Eigen voorbeeld' als zelfgemaakt",
+  "inDePraktijk": [
+    {
+      "pub": "naam van een echte Nederlandse publicatie (bijv. de Volkskrant, NRC Handelsblad, Trouw, Het Parool, De Groene Amsterdammer, Vrij Nederland, VPRO Gids)",
+      "excerpt": "een natuurlijke, overtuigende zin uit die publicatie met het woord cursief gemarkeerd als <em>woord</em>, passend bij de toon en stijl van die publicatie",
+      "source": "de rubriek of editie (bijv. '— Weekendbijlage', '— Opinie, donderdag', '— Cultuur')"
+    },
+    {
+      "pub": "een andere echte Nederlandse publicatie",
+      "excerpt": "een andere overtuigende zin met het woord als <em>woord</em>, ander register (bijv. journalistiek, literair, of informatief)",
+      "source": "de rubriek of editie"
+    },
+    {
+      "pub": "een derde echte Nederlandse publicatie",
+      "excerpt": "nog een overtuigende zin met het woord als <em>woord</em>, weer een andere context of toon",
+      "source": "de rubriek of editie"
+    }
+  ]
 }`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
