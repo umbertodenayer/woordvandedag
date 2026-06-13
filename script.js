@@ -331,7 +331,7 @@ if (window.supabase) {
   console.warn('Supabase failed to load; auth disabled.');
 }
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 
 function todaySeed() {
   const now = new Date();
