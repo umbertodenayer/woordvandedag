@@ -54,6 +54,88 @@ let hearItTriggered = false;
 let sbClient = null;
 let sbSession = null;
 
+// === Premium auth helpers ===
+
+let premiumToastTimer = null;
+
+function showPremiumToast(message, duration) {
+  const toast = document.getElementById('premium-toast');
+  if (!toast) return;
+  clearTimeout(premiumToastTimer);
+  toast.textContent = message;
+  toast.classList.remove('visible');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    toast.classList.add('visible');
+    premiumToastTimer = setTimeout(() => toast.classList.remove('visible'), duration);
+  }));
+}
+
+function setButtonLoading(btn) {
+  btn.classList.add('loading');
+}
+
+function setButtonNormal(btn) {
+  btn.classList.remove('loading');
+}
+
+function showModalError(card, errorEl, btn, message) {
+  setButtonNormal(btn);
+  errorEl.classList.remove('fade-in');
+  errorEl.textContent = message;
+  errorEl.classList.remove('hidden');
+  requestAnimationFrame(() => errorEl.classList.add('fade-in'));
+  card.classList.remove('shake');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    card.classList.add('shake');
+    card.addEventListener('animationend', () => card.classList.remove('shake'), { once: true });
+  }));
+}
+
+function showSuccessAndClose(modal, toastMessage, toastDuration) {
+  const card = modal.querySelector('.auth-modal-card');
+  const title = modal.querySelector('.auth-modal-title');
+  const form = modal.querySelector('form');
+
+  title.style.opacity = '0';
+  form.style.opacity = '0';
+
+  setTimeout(() => {
+    const icon = document.createElement('div');
+    icon.className = 'auth-success-icon';
+    icon.innerHTML = `<svg class="checkmark-svg" viewBox="0 0 52 52">
+      <circle class="checkmark-fill" cx="26" cy="26" r="25" fill="var(--terracotta)"/>
+      <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="var(--terracotta)" stroke-width="2"/>
+      <polyline class="checkmark-tick" points="13,27 22,35 39,17" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+    card.appendChild(icon);
+
+    requestAnimationFrame(() => {
+      icon.classList.add('visible');
+      requestAnimationFrame(() => {
+        icon.querySelector('.checkmark-fill').classList.add('animate');
+        icon.querySelector('.checkmark-circle').classList.add('animate');
+        icon.querySelector('.checkmark-tick').classList.add('animate');
+      });
+    });
+
+    setTimeout(() => {
+      modal.style.transition = 'opacity 0.4s ease';
+      requestAnimationFrame(() => {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          modal.style.opacity = '';
+          modal.style.transition = '';
+          title.style.opacity = '';
+          form.style.opacity = '';
+          if (icon.parentNode) icon.parentNode.removeChild(icon);
+          showPremiumToast(toastMessage, toastDuration);
+        }, 420);
+      });
+    }, 1650);
+  }, 300);
+}
+
 if (window.supabase) {
   const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
@@ -106,18 +188,47 @@ if (window.supabase) {
   };
 
   const openModal = (modal) => {
+    const existingIcon = modal.querySelector('.auth-success-icon');
+    if (existingIcon) existingIcon.remove();
+    const title = modal.querySelector('.auth-modal-title');
+    const form = modal.querySelector('form');
+    if (title) title.style.opacity = '';
+    if (form) form.style.opacity = '';
+    const btn = modal.querySelector('.auth-submit');
+    if (btn) setButtonNormal(btn);
     modal.querySelector('form').reset();
     const error = modal.querySelector('.auth-error');
     error.classList.add('hidden');
+    error.classList.remove('fade-in');
     error.textContent = '';
     modal.querySelectorAll('.eye-open').forEach((icon) => icon.classList.remove('hidden'));
     modal.querySelectorAll('.eye-closed').forEach((icon) => icon.classList.add('hidden'));
     modal.querySelectorAll('input[type="text"]').forEach((input) => { input.type = 'password'; });
+    modal.style.opacity = '0';
     modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      modal.style.transition = 'opacity 0.3s ease';
+      modal.style.opacity = '1';
+      setTimeout(() => { modal.style.opacity = ''; modal.style.transition = ''; }, 320);
+    });
   };
 
   const closeModal = (modal) => {
-    modal.classList.add('hidden');
+    const existingIcon = modal.querySelector('.auth-success-icon');
+    if (existingIcon) existingIcon.remove();
+    const title = modal.querySelector('.auth-modal-title');
+    const form = modal.querySelector('form');
+    if (title) title.style.opacity = '';
+    if (form) form.style.opacity = '';
+    modal.style.transition = 'opacity 0.3s ease';
+    requestAnimationFrame(() => {
+      modal.style.opacity = '0';
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.style.opacity = '';
+        modal.style.transition = '';
+      }, 320);
+    });
   };
 
   document.querySelectorAll('.auth-modal').forEach((modal) => {
@@ -156,7 +267,12 @@ if (window.supabase) {
     e.preventDefault();
     const [emailInput, passwordInput] = signinForm.querySelectorAll('.auth-input');
     const errorEl = signinForm.querySelector('.auth-error');
+    const btn = signinForm.querySelector('.auth-submit');
+    const card = signinModal.querySelector('.auth-modal-card');
+
     errorEl.classList.add('hidden');
+    errorEl.classList.remove('fade-in');
+    setButtonLoading(btn);
 
     const { error } = await supabase.auth.signInWithPassword({
       email: emailInput.value,
@@ -164,19 +280,23 @@ if (window.supabase) {
     });
 
     if (error) {
-      errorEl.textContent = error.message;
-      errorEl.classList.remove('hidden');
+      showModalError(card, errorEl, btn, error.message);
       return;
     }
 
-    closeModal(signinModal);
+    showSuccessAndClose(signinModal, 'Welkom terug.', 3000);
   });
 
   signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const [emailInput, passwordInput] = signupForm.querySelectorAll('.auth-input');
     const errorEl = signupForm.querySelector('.auth-error');
+    const btn = signupForm.querySelector('.auth-submit');
+    const card = signupModal.querySelector('.auth-modal-card');
+
     errorEl.classList.add('hidden');
+    errorEl.classList.remove('fade-in');
+    setButtonLoading(btn);
 
     const { error } = await supabase.auth.signUp({
       email: emailInput.value,
@@ -184,37 +304,37 @@ if (window.supabase) {
     });
 
     if (error) {
-      errorEl.textContent = error.message;
-      errorEl.classList.remove('hidden');
+      showModalError(card, errorEl, btn, error.message);
       return;
     }
 
-    closeModal(signupModal);
-    showToast('Controleer je e-mail om je account te bevestigen voor je inlogt.');
+    showSuccessAndClose(signupModal, 'Account aangemaakt — controleer je e-mail om te bevestigen.', 5000);
   });
 
   changePasswordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const [newPasswordInput, confirmPasswordInput] = changePasswordForm.querySelectorAll('.auth-input');
     const errorEl = changePasswordForm.querySelector('.auth-error');
+    const btn = changePasswordForm.querySelector('.auth-submit');
+    const card = changePasswordModal.querySelector('.auth-modal-card');
+
     errorEl.classList.add('hidden');
+    errorEl.classList.remove('fade-in');
+    setButtonLoading(btn);
 
     if (newPasswordInput.value !== confirmPasswordInput.value) {
-      errorEl.textContent = 'Passwords do not match.';
-      errorEl.classList.remove('hidden');
+      showModalError(card, errorEl, btn, 'Wachtwoorden komen niet overeen.');
       return;
     }
 
     const { error } = await supabase.auth.updateUser({ password: newPasswordInput.value });
 
     if (error) {
-      errorEl.textContent = error.message;
-      errorEl.classList.remove('hidden');
+      showModalError(card, errorEl, btn, error.message);
       return;
     }
 
-    closeModal(changePasswordModal);
-    showToast('Password updated successfully.');
+    showSuccessAndClose(changePasswordModal, 'Wachtwoord succesvol bijgewerkt.', 3000);
   });
 
   const updateUserUI = (session) => {

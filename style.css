@@ -409,19 +409,22 @@ body.compact-view .hear-it {
 
 .auth-error {
   font-size: 13px;
-  color: #c4554d;
+  color: var(--terracotta);
   margin: 0;
+  opacity: 0;
 }
 
 .auth-error.hidden {
   display: none;
 }
 
-#change-password-form .auth-error {
-  color: var(--terracotta);
+.auth-error.fade-in {
+  animation: authErrorIn 0.3s ease forwards;
 }
 
 .auth-submit {
+  position: relative;
+  overflow: hidden;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -436,6 +439,42 @@ body.compact-view .hear-it {
 
 .auth-submit:hover {
   opacity: 0.9;
+}
+
+.auth-submit.loading {
+  pointer-events: none;
+}
+
+.auth-submit.loading .btn-text {
+  opacity: 0;
+}
+
+.auth-submit.loading .btn-spinner {
+  opacity: 1;
+}
+
+.btn-text {
+  transition: opacity 0.2s ease;
+}
+
+.btn-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.btn-spinner::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 
 .auth-toast {
@@ -902,4 +941,124 @@ html[data-theme="dark"] #word {
   #word { font-size: 3rem; }
   .in-the-wild { padding: 64px 24px; }
   .wild-cards { flex-direction: column; }
+}
+
+/* === Premium auth animations === */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes authShake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+
+@keyframes authErrorIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes checkmarkCircle {
+  from { stroke-dashoffset: 157; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes checkmarkFill {
+  0%, 50% { opacity: 0; }
+  100%    { opacity: 1; }
+}
+
+@keyframes checkmarkTick {
+  from { stroke-dashoffset: 42; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.auth-modal-card.shake {
+  animation: authShake 0.4s ease;
+}
+
+.auth-modal-title,
+.auth-form {
+  transition: opacity 0.3s ease;
+}
+
+.auth-success-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: var(--card);
+}
+
+.auth-success-icon.visible {
+  opacity: 1;
+}
+
+.checkmark-svg {
+  width: 84px;
+  height: 84px;
+  overflow: visible;
+}
+
+.checkmark-fill {
+  opacity: 0;
+}
+
+.checkmark-fill.animate {
+  animation: checkmarkFill 0.85s ease forwards;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 157;
+  stroke-dashoffset: 157;
+  transform-origin: 26px 26px;
+  transform: rotate(-90deg);
+}
+
+.checkmark-circle.animate {
+  animation: checkmarkCircle 0.5s ease forwards;
+}
+
+.checkmark-tick {
+  stroke-dasharray: 42;
+  stroke-dashoffset: 42;
+}
+
+.checkmark-tick.animate {
+  animation: checkmarkTick 0.38s ease forwards 0.48s;
+}
+
+/* Premium top-right toast */
+.premium-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+  padding: 14px 20px;
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  color: var(--text);
+  z-index: 300;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.premium-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
