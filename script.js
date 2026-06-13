@@ -250,7 +250,7 @@ if (window.supabase) {
 
   openSigninBtn.addEventListener('click', () => {
     closeDropdown();
-    openModal(signinModal);
+    window.location.href = 'login.html';
   });
 
   openSignupBtn.addEventListener('click', () => {
@@ -425,7 +425,7 @@ if (window.supabase) {
     updateUserUI(data.session);
     if (!data.session && window.location.hash === '#signin') {
       history.replaceState(null, '', window.location.pathname);
-      setTimeout(() => openModal(signinModal), 120);
+      window.location.href = 'login.html';
     }
   });
 } else {
