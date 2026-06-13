@@ -37,7 +37,7 @@
 
         <h1 class="auth-headline">Welkom terug</h1>
 
-        <form id="login-form" class="auth-form">
+        <form id="login-form" class="auth-form" novalidate>
           <input type="email" class="auth-input" id="email-input" placeholder="E-mailadres" required autocomplete="email">
           <div class="auth-password-wrap">
             <input type="password" class="auth-input" id="password-input" placeholder="Wachtwoord" required autocomplete="current-password">
@@ -96,12 +96,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Theme
+    // ── Theme ──────────────────────────────────────────────────────────────────
     const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const themeToggle = document.getElementById('auth-theme-toggle');
-    const sunIcon    = document.getElementById('auth-sun-icon');
-    const moonIcon   = document.getElementById('auth-moon-icon');
+    const sunIcon     = document.getElementById('auth-sun-icon');
+    const moonIcon    = document.getElementById('auth-moon-icon');
+
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       sunIcon.classList.toggle('hidden', theme === 'dark');
@@ -114,15 +115,29 @@
       applyTheme(next);
     });
 
-    // Supabase
+    // ── Supabase ────────────────────────────────────────────────────────────────
     const SUPABASE_URL      = 'https://lanmsexkozkrttiydtsm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) window.location.replace('index.html');
-    });
 
-    // Eye toggle
+    let supabase = null;
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('[login] Supabase client created');
+    } catch (err) {
+      console.error('[login] Failed to create Supabase client:', err);
+    }
+
+    if (supabase) {
+      supabase.auth.getSession().then(({ data, error }) => {
+        console.log('[login] getSession:', { hasSession: !!data?.session, error: error?.message });
+        if (data?.session) {
+          console.log('[login] Already signed in — redirecting');
+          window.location.replace('index.html');
+        }
+      });
+    }
+
+    // ── Eye toggle ─────────────────────────────────────────────────────────────
     document.querySelector('.auth-eye-toggle').addEventListener('click', function () {
       const input     = document.getElementById('password-input');
       const eyeOpen   = this.querySelector('.eye-open');
@@ -133,47 +148,59 @@
       eyeClosed.classList.toggle('hidden', !reveal);
     });
 
-    // Elements
-    const form        = document.getElementById('login-form');
-    const emailInput  = document.getElementById('email-input');
-    const passInput   = document.getElementById('password-input');
-    const btn         = document.getElementById('login-btn');
-    const errorEl     = document.getElementById('login-error');
-    let submitting    = false;
+    // ── Form elements ───────────────────────────────────────────────────────────
+    const form       = document.getElementById('login-form');
+    const emailInput = document.getElementById('email-input');
+    const passInput  = document.getElementById('password-input');
+    const btn        = document.getElementById('login-btn');
+    const errorEl    = document.getElementById('login-error');
+    let submitting   = false;
 
+    // ── State helpers ───────────────────────────────────────────────────────────
     function setLoading() {
-      submitting = true;
-      btn.classList.add('loading');
+      console.log('[login] → loading');
+      submitting     = true;
+      btn.disabled   = true;
       btn.classList.remove('success', 'shake');
+      btn.classList.add('loading');
       emailInput.classList.add('field-muted');
       passInput.classList.add('field-muted');
       passInput.classList.remove('field-error');
-      hideError();
+      errorEl.textContent = '';
+      errorEl.classList.remove('visible');
     }
 
     function setSuccess() {
+      console.log('[login] → success');
       btn.classList.remove('loading');
       btn.classList.add('success');
       emailInput.classList.remove('field-muted');
       passInput.classList.remove('field-muted');
     }
 
-    function setError(message, highlightPass = true) {
-      submitting = false;
+    function setError(message, highlightPass) {
+      console.log('[login] → error:', message);
+      submitting   = false;
+      btn.disabled = false;
       btn.classList.remove('loading', 'success');
       emailInput.classList.remove('field-muted');
       passInput.classList.remove('field-muted');
-      if (highlightPass) passInput.classList.add('field-error');
 
-      // Shake button
+      if (highlightPass) {
+        passInput.classList.add('field-error');
+      }
+
+      // Restart shake animation even if it's already running
       btn.classList.remove('shake');
-      void btn.offsetWidth; // force reflow to restart animation
+      void btn.offsetWidth;
       btn.classList.add('shake');
       btn.addEventListener('animationend', () => btn.classList.remove('shake'), { once: true });
 
-      // Show error
+      // Show inline error with transition
       errorEl.textContent = message;
-      errorEl.classList.add('visible');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        errorEl.classList.add('visible');
+      }));
     }
 
     function hideError() {
@@ -181,57 +208,55 @@
       passInput.classList.remove('field-error');
     }
 
-    // Clear error on input
     emailInput.addEventListener('input', hideError);
     passInput.addEventListener('input', hideError);
 
+    // ── Submit ──────────────────────────────────────────────────────────────────
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      console.log('[login] Form submit fired, submitting=', submitting);
+
       if (submitting) return;
 
       const email    = emailInput.value.trim();
       const password = passInput.value;
 
       if (!email || !password) {
-        setError('Vul alle velden in', false);
+        setError('Vul alle velden in.', false);
+        return;
+      }
+
+      if (!supabase) {
+        setError('Er is iets misgegaan. Probeer het opnieuw.', false);
         return;
       }
 
       setLoading();
 
       try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        console.log('[login] Calling signInWithPassword...');
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        console.log('[login] signInWithPassword result:', { user: !!data?.user, error: error?.message });
 
         if (error) {
           const msg = (error.message || '').toLowerCase();
-
-          if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-            // Distinguish wrong password vs unknown email
-            try {
-              const res  = await fetch('/api/check-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-              });
-              const data = await res.json();
-              setError(data.exists ? 'Ongeldig wachtwoord' : 'E-mailadres niet gevonden', data.exists);
-            } catch {
-              setError('Ongeldig wachtwoord');
-            }
-          } else if (msg.includes('email not confirmed')) {
-            setError('Bevestig eerst je e-mailadres', false);
+          if (msg.includes('email not confirmed')) {
+            setError('Bevestig eerst je e-mailadres via de mail.', false);
           } else {
-            setError('Er is iets misgegaan. Probeer het opnieuw.', false);
+            // Generic: covers wrong password, unknown email, rate limit, etc.
+            setError('Onjuist e-mailadres of wachtwoord.', true);
           }
           return;
         }
 
-        // Success: show checkmark 0.8 s then redirect with welcome flag
+        // ── Success ────────────────────────────────────────────────────────────
         setSuccess();
-        setTimeout(() => { window.location.href = 'index.html?welcome=1'; }, 800);
+        sessionStorage.setItem('just_logged_in', '1');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1000);
 
-      } catch {
-        setError('Er is iets misgegaan. Probeer het opnieuw.', false);
+      } catch (err) {
+        console.error('[login] Unexpected error:', err);
+        setError('Er is iets misgegaan. Controleer je verbinding.', false);
       }
     });
   </script>

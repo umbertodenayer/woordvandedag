@@ -55,10 +55,10 @@ let sbClient = null;
 let sbSession = null;
 
 // Welcome toast after login redirect
-if (new URLSearchParams(window.location.search).get('welcome') === '1') {
-  history.replaceState({}, '', window.location.pathname + window.location.hash);
+if (sessionStorage.getItem('just_logged_in') === '1') {
+  sessionStorage.removeItem('just_logged_in');
   window.addEventListener('load', () => {
-    setTimeout(() => showPremiumToast('Welkom terug 👋', 3000), 400);
+    setTimeout(() => showPremiumToast('Welkom terug 👋', 3000), 600);
   });
 }
 
