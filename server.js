@@ -8,12 +8,8 @@ function todaySeed() {
 }
 
 const app = express();
-const cache = new Map(); // key: `${seed}` or `image:${seed}` -> data
+const cache = new Map();
 
-// Native Dutch ElevenLabs voice so Dutch words are pronounced with a Dutch
-// accent. The multilingual model applies the *voice's* native accent, so an
-// English voice (e.g. "George") reads Dutch words with an English accent.
-// Default: "Rick" (native Dutch). Override with ELEVENLABS_VOICE_ID.
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'AyQGttFzg1EY7EIKkpHs';
 
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
@@ -147,16 +143,19 @@ async function fetchAudio(word) {
   return { mimeType: 'audio/mpeg', data: buffer.toString('base64') };
 }
 
+// Called once at midnight UTC. Never called on startup or by user requests.
 async function refreshWord() {
   const seed = todaySeed();
   const cacheKey = `v2:${seed}`;
   const imageCacheKey = `v2:image:${seed}`;
   const audioCacheKey = `v2:audio:${seed}`;
 
-  if (cache.has(cacheKey) && cache.has(imageCacheKey) && cache.has(audioCacheKey) && cache.get(cacheKey).ipa) {
-    console.log(`Already cached for seed ${seed}, skipping regeneration`);
+  if (cache.has(cacheKey) && cache.has(imageCacheKey) && cache.has(audioCacheKey)) {
+    console.log(`Already cached for seed ${seed}, skipping`);
     return;
   }
+
+  console.log(`Midnight refresh: generating word for seed ${seed}`);
 
   let data = cache.get(cacheKey);
   if (!data) {
@@ -164,9 +163,9 @@ async function refreshWord() {
       data = await fetchWord();
       cache.set(cacheKey, data);
       saveCache();
-      console.log(`Cached word of the day (seed ${seed}): ${data.word}`);
+      console.log(`Word cached: ${data.word}`);
     } catch (e) {
-      console.error('Failed to fetch word of the day:', e.message);
+      console.error('fetchWord failed:', e.message);
       return;
     }
   }
@@ -176,9 +175,9 @@ async function refreshWord() {
       const image = await fetchImage(data.word, data.definition);
       cache.set(imageCacheKey, image);
       saveCache();
-      console.log(`Cached image (seed ${seed}): ${data.word}`);
+      console.log(`Image cached: ${data.word}`);
     } catch (e) {
-      console.error('Failed to fetch image:', e.message);
+      console.error('fetchImage failed:', e.message);
     }
   }
 
@@ -187,9 +186,9 @@ async function refreshWord() {
       const audio = await fetchAudio(data.word);
       cache.set(audioCacheKey, audio);
       saveCache();
-      console.log(`Cached audio (seed ${seed}): ${data.word}`);
+      console.log(`Audio cached: ${data.word}`);
     } catch (e) {
-      console.error('Failed to fetch audio:', e.message);
+      console.error('fetchAudio failed:', e.message);
     }
   }
 }
@@ -198,6 +197,7 @@ function scheduleMidnightRefresh() {
   const now = new Date();
   const nextMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
   const delay = nextMidnight - now.getTime();
+  console.log(`Next refresh in ${Math.round(delay / 60000)} minutes`);
 
   setTimeout(() => {
     refreshWord();
@@ -205,88 +205,51 @@ function scheduleMidnightRefresh() {
   }, delay);
 }
 
-app.get('/api/image', async (req, res) => {
-  const seed = todaySeed();
-  const cacheKey = `v2:${seed}`;
-  const imageCacheKey = `v2:image:${seed}`;
-
-  let image = cache.get(imageCacheKey);
-  if (!image) {
-    let wordData = cache.get(cacheKey);
-    if (!wordData) {
-      try {
-        wordData = await fetchWord();
-        cache.set(cacheKey, wordData);
-        saveCache();
-      } catch (e) {
-        res.status(500).json({ error: e.message });
-        return;
-      }
-    }
-    try {
-      image = await fetchImage(wordData.word, wordData.definition);
-      cache.set(imageCacheKey, image);
-      saveCache();
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-      return;
-    }
+// Endpoints serve from cache only — never call APIs
+app.get('/api/word', (req, res) => {
+  const data = cache.get(`v2:${todaySeed()}`);
+  if (!data) {
+    res.status(503).json({ error: 'Woord nog niet beschikbaar. Kom later terug.' });
+    return;
   }
+  res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+  res.json(data);
+});
 
+app.get('/api/image', (req, res) => {
+  const image = cache.get(`v2:image:${todaySeed()}`);
+  if (!image) {
+    res.status(503).json({ error: 'Afbeelding nog niet beschikbaar.' });
+    return;
+  }
   res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
   res.json(image);
 });
 
-app.get('/api/pronunciation', async (req, res) => {
-  const seed = todaySeed();
-  const cacheKey = `v2:${seed}`;
-  const audioCacheKey = `v2:audio:${seed}`;
-
-  let audio = cache.get(audioCacheKey);
+app.get('/api/pronunciation', (req, res) => {
+  const audio = cache.get(`v2:audio:${todaySeed()}`);
   if (!audio) {
-    let wordData = cache.get(cacheKey);
-    if (!wordData) {
-      try {
-        wordData = await fetchWord();
-        cache.set(cacheKey, wordData);
-        saveCache();
-      } catch (e) {
-        res.status(500).json({ error: e.message });
-        return;
-      }
-    }
-    try {
-      audio = await fetchAudio(wordData.word);
-      cache.set(audioCacheKey, audio);
-      saveCache();
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-      return;
-    }
+    res.status(503).json({ error: 'Audio nog niet beschikbaar.' });
+    return;
   }
-
   res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
   res.json(audio);
 });
 
-app.get('/api/word', async (req, res) => {
-  const seed = todaySeed();
-  const cacheKey = `v2:${seed}`;
-
-  let data = cache.get(cacheKey);
-  if (!data) {
-    try {
-      data = await fetchWord();
-      cache.set(cacheKey, data);
-      saveCache();
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-      return;
-    }
+// Manual trigger for artificial refreshes (e.g. forced by the owner)
+app.post('/api/refresh', async (req, res) => {
+  const secret = req.headers['x-refresh-secret'];
+  if (!secret || secret !== process.env.REFRESH_SECRET) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
   }
-
-  res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-  res.json(data);
+  // Clear today's cache so refreshWord() regenerates everything
+  const seed = todaySeed();
+  cache.delete(`v2:${seed}`);
+  cache.delete(`v2:image:${seed}`);
+  cache.delete(`v2:audio:${seed}`);
+  res.json({ ok: true, message: 'Cache cleared, regenerating...' });
+  refreshWord();
 });
 
 app.use(express.static(path.join(__dirname), {
@@ -296,6 +259,6 @@ app.use(express.static(path.join(__dirname), {
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
-  loadCache();
-  scheduleMidnightRefresh();
+  loadCache();           // restore today's data from persistent file if available
+  scheduleMidnightRefresh();  // schedule the one daily generation
 });
