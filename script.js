@@ -342,6 +342,32 @@ function cacheKey() {
   return `wordOfTheDay:${CACHE_VERSION}:${todaySeed()}`;
 }
 
+function renderWildCards(examples) {
+  const container = document.getElementById('wild-cards-container');
+  if (!container || !Array.isArray(examples) || examples.length === 0) return;
+  container.innerHTML = examples.map((ex, i) => `
+    <article class="wild-card">
+      <p class="wild-pub">${ex.pub}</p>
+      <p class="wild-excerpt">${ex.excerpt}</p>
+      <p class="wild-source">${ex.source}</p>
+    </article>
+  `).join('');
+  container.querySelectorAll('.wild-card').forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    const cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          card.style.transitionDelay = `${i * 0.15}s`;
+          card.classList.add('visible');
+          cardObserver.unobserve(card);
+        }
+      });
+    }, { threshold: 0.2 });
+    cardObserver.observe(card);
+  });
+}
+
 function render(data) {
   definitionEl.className = 'definition';
   currentWord = data.word;
@@ -357,6 +383,7 @@ function render(data) {
   etymologyEl.textContent = data.etymology;
   exampleEl.textContent = data.exampleSentence;
   sourceEl.textContent = `— ${data.exampleSource}`;
+  renderWildCards(data.inDePraktijk);
 }
 
 function showError(msg) {
@@ -468,19 +495,7 @@ window.addEventListener('scroll', () => {
 });
 updateHeroOnScroll();
 
-const wildCards = document.querySelectorAll('.wild-card');
-const cardObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      const index = Array.from(wildCards).indexOf(entry.target);
-      entry.target.style.transitionDelay = `${index * 0.15}s`;
-      entry.target.classList.add('visible');
-      cardObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.2 });
 
-wildCards.forEach((card) => cardObserver.observe(card));
 
 const hearItSection = document.getElementById('hear-it-section');
 const youglishWidgetEl = document.getElementById('youglish-widget');
