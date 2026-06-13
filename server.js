@@ -7,7 +7,7 @@ const cache = new Map();
 
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'AyQGttFzg1EY7EIKkpHs';
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 
 function todaySeed() {
   const now = new Date();
