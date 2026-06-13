@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const cache = new Map();
@@ -8,6 +9,12 @@ const cache = new Map();
 let elevenlabsVoiceId = null;
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
 const CACHE_VERSION = 'v4';
+
+// Supabase client for persistent cache (survives container restarts/redeploys)
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lanmsexkozkrttiydtsm.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const sb = SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } }) : null;
+if (!sb) console.warn('SUPABASE_SERVICE_ROLE_KEY not set — cache will not persist across deploys.');
 
 function todaySeed() {
   const now = new Date();
@@ -32,25 +39,68 @@ function msUntilAmsterdamMidnight() {
   return (86400 - secondsElapsed) * 1000;
 }
 
-function loadCache() {
+async function loadCache() {
+  const todayKeys = [cacheKey(), imageCacheKey(), audioCacheKey()];
+
+  // 1. Try local file first (fast, works in dev)
   try {
     const raw = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
-    const seed = todaySeed();
-    const keys = [`${CACHE_VERSION}:${seed}`, `${CACHE_VERSION}:image:${seed}`, `${CACHE_VERSION}:audio:${seed}`];
     for (const [key, value] of Object.entries(raw)) {
-      if (keys.includes(key)) cache.set(key, value);
+      if (todayKeys.includes(key)) cache.set(key, value);
     }
-    console.log(`Loaded ${cache.size} cached entries for today`);
-  } catch (e) {
-    console.log('No usable cache file, starting fresh.');
+    if (cache.size > 0) {
+      console.log(`Loaded ${cache.size} cached entries from file`);
+      return;
+    }
+  } catch (e) {}
+
+  // 2. Fall back to Supabase (persists across deploys)
+  if (sb) {
+    try {
+      const { data, error } = await sb
+        .from('daily_cache')
+        .select('key, value')
+        .in('key', todayKeys);
+
+      if (error) throw error;
+
+      for (const row of (data || [])) {
+        try { cache.set(row.key, JSON.parse(row.value)); } catch {}
+      }
+
+      if (cache.size > 0) {
+        console.log(`Loaded ${cache.size} cached entries from Supabase`);
+        return;
+      }
+    } catch (e) {
+      console.error('Supabase cache load failed:', e.message);
+    }
   }
+
+  console.log('No usable cache found, starting fresh.');
 }
 
-function saveCache() {
+async function saveCache() {
+  // Write to local file (best-effort)
   try {
     fs.writeFileSync(CACHE_FILE, JSON.stringify(Object.fromEntries(cache)));
-  } catch (e) {
-    console.error('Failed to save cache:', e.message);
+  } catch (e) {}
+
+  // Persist to Supabase so the next deploy doesn't re-fetch
+  if (sb) {
+    const rows = Array.from(cache.entries()).map(([key, value]) => ({
+      key,
+      value: JSON.stringify(value)
+    }));
+    if (rows.length === 0) return;
+    try {
+      const { error } = await sb
+        .from('daily_cache')
+        .upsert(rows, { onConflict: 'key' });
+      if (error) throw error;
+    } catch (e) {
+      console.error('Supabase cache save failed:', e.message);
+    }
   }
 }
 
@@ -182,7 +232,7 @@ async function refreshWord() {
     try {
       const data = await fetchWord();
       cache.set(cacheKey(), data);
-      saveCache();
+      await saveCache();
       console.log(`Word cached: ${data.word}`);
     } catch (e) {
       console.error('fetchWord failed:', e.message);
@@ -196,7 +246,7 @@ async function refreshWord() {
     try {
       const image = await fetchImage(wordData.word, wordData.definition);
       cache.set(imageCacheKey(), image);
-      saveCache();
+      await saveCache();
       console.log('Image cached.');
     } catch (e) {
       console.error('fetchImage failed:', e.message);
@@ -207,7 +257,7 @@ async function refreshWord() {
     try {
       const audio = await fetchAudio(wordData.word);
       cache.set(audioCacheKey(), audio);
-      saveCache();
+      await saveCache();
       console.log('Audio cached.');
     } catch (e) {
       console.error('fetchAudio failed:', e.message);
@@ -265,7 +315,7 @@ app.use(express.static(path.join(__dirname), {
 const port = process.env.PORT || 3000;
 app.listen(port, async () => {
   console.log(`Listening on port ${port}`);
-  loadCache();
+  await loadCache();
   // Cold start: generate now if today's content isn't cached yet
   if (!cache.has(cacheKey()) || !cache.has(imageCacheKey()) || !cache.has(audioCacheKey())) {
     await refreshWord();
