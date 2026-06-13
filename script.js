@@ -106,7 +106,7 @@ async function loadImage() {
   }
 }
 
-dateEl.textContent = new Date().toLocaleDateString(undefined, {
+dateEl.textContent = new Date().toLocaleDateString('en-US', {
   weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
 });
 
