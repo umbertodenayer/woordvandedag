@@ -55,8 +55,9 @@ body {
 
 .topbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .label {
@@ -66,6 +67,31 @@ body {
   text-transform: uppercase;
   color: #999;
   font-weight: 500;
+}
+
+.masthead {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.masthead-word {
+  font-weight: 800;
+  color: #C4714A;
+  margin-right: 0.4em;
+}
+
+.masthead-rest {
+  font-weight: 400;
+  color: #1a1a1a;
+}
+
+.masthead-line {
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
 }
 
 .accent-bar {
