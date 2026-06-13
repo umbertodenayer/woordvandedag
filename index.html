@@ -16,49 +16,55 @@
       <img id="word-image" class="word-image" alt="" />
     </div>
     <div class="col-text">
-      <div class="topbar">
-        <p class="masthead"><span class="masthead-word">Woord</span><span class="masthead-rest">van de dag</span></p>
-        <div class="masthead-line"></div>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Donkere modus wisselen">
-          <svg id="sun-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-          </svg>
-          <svg id="moon-icon" class="theme-icon hidden" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-        </button>
-        <div class="user-menu">
-          <button id="user-icon-btn" class="theme-toggle" aria-label="Account">
-            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="8" r="4"/>
-              <path d="M4 21c0-3.5 3.5-6 8-6s8 2.5 8 6"/>
-            </svg>
-            <span id="user-dot" class="user-dot hidden"></span>
-          </button>
-          <div id="user-dropdown" class="user-dropdown hidden">
-            <div id="dropdown-signed-out">
-              <button id="open-signin-btn" class="user-dropdown-item">Inloggen</button>
-              <button id="open-signup-btn" class="user-dropdown-item">Aanmelden</button>
-            </div>
-            <div id="dropdown-signed-in" class="hidden">
-              <p id="user-email" class="user-dropdown-email"></p>
-              <button id="my-words-btn" class="user-dropdown-item">Mijn Woorden</button>
-              <button id="settings-btn" class="user-dropdown-item">Instellingen</button>
-              <div class="user-dropdown-divider"></div>
-              <button id="open-change-password-btn" class="user-dropdown-item">Wachtwoord Wijzigen</button>
-              <div class="user-dropdown-divider"></div>
-              <button id="sign-out-btn" class="user-dropdown-item">Uitloggen</button>
+      <div class="col-header">
+        <div class="topbar">
+          <p class="masthead"><span class="masthead-word">Woord</span><span class="masthead-rest">van de dag</span></p>
+          <div class="topbar-icons">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Donkere modus wisselen">
+              <svg id="sun-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+              </svg>
+              <svg id="moon-icon" class="theme-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </button>
+            <div class="user-menu">
+              <button id="user-icon-btn" class="theme-toggle" aria-label="Account">
+                <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M4 21c0-3.5 3.5-6 8-6s8 2.5 8 6"/>
+                </svg>
+                <span id="user-dot" class="user-dot hidden"></span>
+              </button>
+              <div id="user-dropdown" class="user-dropdown hidden">
+                <div id="dropdown-signed-out">
+                  <button id="open-signin-btn" class="user-dropdown-item">Inloggen</button>
+                  <button id="open-signup-btn" class="user-dropdown-item">Aanmelden</button>
+                </div>
+                <div id="dropdown-signed-in" class="hidden">
+                  <p id="user-email" class="user-dropdown-email"></p>
+                  <button id="my-words-btn" class="user-dropdown-item">Mijn Woorden</button>
+                  <button id="settings-btn" class="user-dropdown-item">Instellingen</button>
+                  <div class="user-dropdown-divider"></div>
+                  <button id="open-change-password-btn" class="user-dropdown-item">Wachtwoord Wijzigen</button>
+                  <div class="user-dropdown-divider"></div>
+                  <button id="sign-out-btn" class="user-dropdown-item">Uitloggen</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div id="cta-banner" class="cta-banner hidden">
-        <span class="cta-text">Personaliseer je ervaring — sla woorden op, bouw je streak</span>
-        <a href="signup.html" class="cta-btn">Account aanmaken</a>
+        <div class="accent-bar"></div>
+        <div id="cta-banner" class="cta-banner hidden">
+          <div class="cta-left">
+            <svg class="cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            <span class="cta-text">Personaliseer je ervaring — sla woorden op en bouw je streak</span>
+          </div>
+          <a href="signup.html" class="cta-btn">Account aanmaken</a>
+        </div>
       </div>
       <div class="content-middle">
-        <div class="accent-bar"></div>
         <h1 id="word"></h1>
         <p id="ipa" class="ipa"></p>
         <p id="pos" class="pos"></p>
