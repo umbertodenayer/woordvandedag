@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account aanmaken — Woord van de Dag</title>
+  <title>Inloggen — Woord van de Dag</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -30,13 +30,13 @@
           <span class="masthead-word">Woord</span><span class="masthead-rest"> van de dag</span>
         </a>
 
-        <h1 class="auth-headline">Maak je account aan</h1>
+        <h1 class="auth-headline">Welkom terug</h1>
 
-        <form id="signup-form" class="auth-form">
+        <form id="login-form" class="auth-form">
           <input type="email" class="auth-input" id="email-input" placeholder="E-mailadres" required autocomplete="email">
           <div class="auth-password-wrap">
-            <input type="password" class="auth-input" id="password-input" placeholder="Wachtwoord" required autocomplete="new-password">
-            <button type="button" class="auth-eye-toggle" id="eye-toggle-1" aria-label="Wachtwoord tonen/verbergen">
+            <input type="password" class="auth-input" id="password-input" placeholder="Wachtwoord" required autocomplete="current-password">
+            <button type="button" class="auth-eye-toggle" aria-label="Wachtwoord tonen/verbergen">
               <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>
               </svg>
@@ -46,68 +46,35 @@
               </svg>
             </button>
           </div>
-          <div class="auth-password-wrap">
-            <input type="password" class="auth-input" id="confirm-input" placeholder="Wachtwoord bevestigen" required autocomplete="new-password">
-            <button type="button" class="auth-eye-toggle" id="eye-toggle-2" aria-label="Wachtwoord tonen/verbergen">
-              <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-              <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            </button>
-          </div>
-          <p class="auth-error hidden" id="signup-error"></p>
+          <p class="auth-error hidden" id="login-error"></p>
           <button type="submit" class="auth-submit">
-            <span class="btn-text">Account aanmaken</span>
+            <span class="btn-text">Inloggen</span>
             <span class="btn-spinner"></span>
           </button>
         </form>
 
-        <p class="auth-switch-link">Al een account? <a href="login.html">Inloggen →</a></p>
+        <p class="auth-switch-link">Nog geen account? <a href="signup.html">Maak er een aan →</a></p>
 
       </div>
     </div>
 
-    <!-- Right: onboarding panel -->
+    <!-- Right: feature panel -->
     <div class="auth-split-right">
       <div class="auth-split-right-inner">
-        <p class="auth-right-eyebrow">Jouw leertraject</p>
-        <h2 class="auth-right-headline">Jouw gepersonaliseerde ervaring</h2>
-        <div class="auth-steps">
-          <div class="auth-step">
-            <span class="auth-step-num">1</span>
-            <span class="auth-step-text">Kies je niveau — beginner, gevorderd of expert</span>
+        <p class="auth-right-eyebrow">Woord van de Dag</p>
+        <h2 class="auth-right-headline">Elke dag een nieuw woord. Elke dag een beetje beter.</h2>
+        <div class="auth-features">
+          <div class="auth-feature">
+            <span class="auth-feature-icon">🔥</span>
+            <span class="auth-feature-text">Bouw je streak op — log elke dag in en houd je voortgang bij</span>
           </div>
-          <div class="auth-step">
-            <span class="auth-step-num">2</span>
-            <span class="auth-step-text">Volg je dagelijkse streak en blijf gemotiveerd</span>
+          <div class="auth-feature">
+            <span class="auth-feature-icon">📖</span>
+            <span class="auth-feature-text">Sla woorden op die je mooi vindt en bouw je eigen woordenboek</span>
           </div>
-          <div class="auth-step">
-            <span class="auth-step-num">3</span>
-            <span class="auth-step-text">Bouw je persoonlijke woordenboek op met woorden die je mooi vindt</span>
-          </div>
-        </div>
-        <div class="streak-mockup">
-          <p class="streak-mockup-label">Jouw streak deze week</p>
-          <div class="streak-dots">
-            <div class="streak-dot done">✓</div>
-            <div class="streak-dot done">✓</div>
-            <div class="streak-dot done">✓</div>
-            <div class="streak-dot done">✓</div>
-            <div class="streak-dot"></div>
-            <div class="streak-dot"></div>
-            <div class="streak-dot"></div>
-          </div>
-          <div class="streak-day-labels">
-            <span class="streak-day-label">Ma</span>
-            <span class="streak-day-label">Di</span>
-            <span class="streak-day-label">Wo</span>
-            <span class="streak-day-label">Do</span>
-            <span class="streak-day-label">Vr</span>
-            <span class="streak-day-label">Za</span>
-            <span class="streak-day-label">Zo</span>
+          <div class="auth-feature">
+            <span class="auth-feature-icon">✨</span>
+            <span class="auth-feature-text">Gepersonaliseerde ervaring afgestemd op jouw niveau</span>
           </div>
         </div>
       </div>
@@ -167,7 +134,7 @@
 
     function showFormError(message) {
       const btn = document.querySelector('.auth-submit');
-      const errorEl = document.getElementById('signup-error');
+      const errorEl = document.getElementById('login-error');
       const inner = document.getElementById('auth-inner');
       setButtonNormal(btn);
       errorEl.classList.remove('fade-in');
@@ -205,57 +172,38 @@
           });
         });
 
-        showPremiumToast('Account aangemaakt — controleer je e-mail om te bevestigen.', 6000);
-        setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+        showPremiumToast('Welkom terug.', 3000);
+        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
       }, 300);
     }
 
-    // Eye toggles
-    function wireEyeToggle(toggleId, inputId) {
-      document.getElementById(toggleId).addEventListener('click', function () {
-        const input = document.getElementById(inputId);
-        const eyeOpen = this.querySelector('.eye-open');
-        const eyeClosed = this.querySelector('.eye-closed');
-        const reveal = input.type === 'password';
-        input.type = reveal ? 'text' : 'password';
-        eyeOpen.classList.toggle('hidden', reveal);
-        eyeClosed.classList.toggle('hidden', !reveal);
-      });
-    }
-    wireEyeToggle('eye-toggle-1', 'password-input');
-    wireEyeToggle('eye-toggle-2', 'confirm-input');
+    // Eye toggle
+    document.querySelector('.auth-eye-toggle').addEventListener('click', function () {
+      const input = document.getElementById('password-input');
+      const eyeOpen = this.querySelector('.eye-open');
+      const eyeClosed = this.querySelector('.eye-closed');
+      const reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      eyeOpen.classList.toggle('hidden', reveal);
+      eyeClosed.classList.toggle('hidden', !reveal);
+    });
 
     // Submit
-    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email-input').value;
       const password = document.getElementById('password-input').value;
-      const confirm = document.getElementById('confirm-input').value;
       const btn = document.querySelector('.auth-submit');
-      const errorEl = document.getElementById('signup-error');
+      const errorEl = document.getElementById('login-error');
 
       errorEl.classList.add('hidden');
       errorEl.classList.remove('fade-in');
-
-      if (password !== confirm) {
-        showFormError('Wachtwoorden komen niet overeen.');
-        return;
-      }
-
       setButtonLoading(btn);
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        const msg = error.message.toLowerCase().includes('already registered')
-          ? 'Er bestaat al een account met dit e-mailadres.'
-          : error.message;
-        showFormError(msg);
-        return;
-      }
-
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        showFormError('Er bestaat al een account met dit e-mailadres.');
+        showFormError(error.message);
         return;
       }
 

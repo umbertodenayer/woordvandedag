@@ -536,6 +536,16 @@ html[data-theme="dark"] .masthead-rest {
   color: #888;
 }
 
+.masthead-logo {
+  height: 38px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+html[data-theme="dark"] .masthead-logo {
+  filter: brightness(0.9);
+}
+
 .masthead-line {
   flex: 1;
   height: 1px;
@@ -925,6 +935,11 @@ html[data-theme="dark"] #word {
   height: 22px;
 }
 
+.subpage-logo {
+  height: 44px;
+  width: auto;
+}
+
 .subpage-title {
   font-family: 'Fraunces', serif;
   font-size: 1.4rem;
@@ -1176,4 +1191,259 @@ html[data-theme="dark"] #word {
 
 .signup-signin-link a:hover {
   text-decoration: underline;
+}
+
+/* === Auth split pages (login.html / signup.html) === */
+
+.auth-page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  background: var(--bg);
+  transition: background-color 1.4s ease;
+}
+
+.auth-split-left {
+  position: relative;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 48px;
+  background: var(--bg);
+  transition: background-color 1.4s ease;
+}
+
+.auth-split-left .auth-success-icon {
+  background: var(--bg);
+  border-radius: 0;
+  transition: opacity 0.3s ease, background-color 1.4s ease;
+}
+
+.auth-split-left-inner {
+  width: 100%;
+  max-width: 360px;
+  transition: opacity 0.3s ease;
+}
+
+.auth-split-right {
+  flex: 0 0 50%;
+  min-height: 100vh;
+  background: linear-gradient(150deg, #cd7a52 0%, #7e3916 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 64px;
+}
+
+.auth-split-right-inner {
+  max-width: 340px;
+  width: 100%;
+}
+
+/* Theme toggle on auth pages */
+.auth-theme-toggle {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  z-index: 20;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.auth-theme-toggle:hover { color: var(--text); }
+
+.auth-theme-toggle .theme-icon { width: 18px; height: 18px; }
+
+/* Logo on auth pages */
+.auth-logo {
+  display: block;
+  text-decoration: none;
+  margin-bottom: 36px;
+}
+
+.auth-logo .masthead-rest {
+  color: var(--muted);
+  transition: color 1.4s ease;
+}
+
+/* Headlines */
+.auth-headline {
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 28px;
+  line-height: 1.2;
+  transition: opacity 0.3s ease, color 1.4s ease;
+}
+
+/* Switch link (already have account / no account yet) */
+.auth-switch-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 20px 0 0;
+  transition: opacity 0.3s ease;
+}
+
+.auth-switch-link a {
+  color: var(--terracotta);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-switch-link a:hover { text-decoration: underline; }
+
+/* Right panel */
+.auth-right-eyebrow {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 240, 0.5);
+  margin: 0 0 12px;
+}
+
+.auth-right-headline {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: rgba(255, 248, 240, 0.97);
+  margin: 0 0 40px;
+  line-height: 1.3;
+}
+
+.auth-features {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.auth-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.auth-feature-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.auth-feature-text {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 248, 240, 0.88);
+  line-height: 1.45;
+}
+
+/* Numbered steps */
+.auth-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-bottom: 36px;
+}
+
+.auth-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.auth-step-num {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 248, 240, 0.15);
+  border: 1px solid rgba(255, 248, 240, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 248, 240, 0.95);
+  margin-top: 1px;
+}
+
+.auth-step-text {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  color: rgba(255, 248, 240, 0.82);
+  line-height: 1.55;
+  padding-top: 3px;
+}
+
+/* Streak mockup */
+.streak-mockup {
+  background: rgba(255, 248, 240, 0.08);
+  border: 1px solid rgba(255, 248, 240, 0.18);
+  border-radius: 12px;
+  padding: 18px 22px;
+}
+
+.streak-mockup-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 240, 0.45);
+  margin: 0 0 12px;
+}
+
+.streak-dots {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.streak-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 248, 240, 0.1);
+  border: 1px solid rgba(255, 248, 240, 0.2);
+}
+
+.streak-dot.done {
+  background: rgba(255, 248, 240, 0.88);
+  border-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #9b4e2a;
+  font-weight: 700;
+}
+
+.streak-day-labels {
+  display: flex;
+  gap: 7px;
+  margin-top: 7px;
+}
+
+.streak-day-label {
+  width: 30px;
+  text-align: center;
+  font-size: 10px;
+  color: rgba(255, 248, 240, 0.38);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+@media (max-width: 768px) {
+  .auth-split-right { display: none; }
+  .auth-split-left { padding: 40px 24px; }
 }
