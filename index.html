@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="main-content">
   <main class="layout" id="hero">
     <div class="col-image">
       <img id="word-image" class="word-image" alt="" />
@@ -200,20 +201,17 @@
     </div>
   </div>
 
-  <div id="my-words-modal" class="auth-modal hidden">
-    <div class="auth-modal-backdrop"></div>
-    <div class="auth-modal-card">
-      <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Mijn Woorden</h2>
-      <div id="my-words-list" class="my-words-list"></div>
-    </div>
-  </div>
+  </div><!-- /#main-content -->
 
-  <div id="settings-modal" class="auth-modal hidden">
-    <div class="auth-modal-backdrop"></div>
-    <div class="auth-modal-card">
-      <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Instellingen</h2>
+  <!-- Settings subpage -->
+  <div id="page-settings" class="subpage hidden">
+    <div class="subpage-topbar">
+      <button class="subpage-back" id="settings-back-btn" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="subpage-title">Instellingen</span>
+    </div>
+    <div class="subpage-body">
       <div class="settings-list">
         <div class="settings-row">
           <span class="settings-label">Donkere modus standaard</span>
@@ -234,6 +232,19 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- My Words subpage -->
+  <div id="page-my-words" class="subpage hidden">
+    <div class="subpage-topbar">
+      <button class="subpage-back" id="my-words-back-btn" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="subpage-title">Mijn Woorden</span>
+    </div>
+    <div class="subpage-body">
+      <div id="my-words-list" class="my-words-list"></div>
     </div>
   </div>
 

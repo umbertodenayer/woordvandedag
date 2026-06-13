@@ -72,11 +72,9 @@ if (window.supabase) {
   const signOutBtn = document.getElementById('sign-out-btn');
   const myWordsBtn = document.getElementById('my-words-btn');
   const settingsBtn = document.getElementById('settings-btn');
-  const settingsModal = document.getElementById('settings-modal');
   const darkModeToggle = document.getElementById('setting-dark-mode');
   const weeklyEmailToggle = document.getElementById('setting-weekly-email');
   const compactViewToggle = document.getElementById('setting-compact-view');
-  const myWordsModal = document.getElementById('my-words-modal');
   const myWordsList = document.getElementById('my-words-list');
   const authToast = document.getElementById('auth-toast');
 
@@ -250,11 +248,18 @@ if (window.supabase) {
     closeDropdown();
   });
 
-  myWordsBtn.addEventListener('click', async () => {
-    closeDropdown();
-    myWordsList.innerHTML = '';
-    myWordsModal.classList.remove('hidden');
+  const mainContent = document.getElementById('main-content');
+  const pageSettings = document.getElementById('page-settings');
+  const pageMyWords = document.getElementById('page-my-words');
 
+  const showPage = (page) => {
+    mainContent.classList.toggle('hidden', !!page);
+    pageSettings.classList.toggle('hidden', page !== 'settings');
+    pageMyWords.classList.toggle('hidden', page !== 'my-words');
+  };
+
+  const loadMyWords = async () => {
+    myWordsList.innerHTML = '<p class="my-words-empty">Laden…</p>';
     const { data, error } = await supabase
       .from('user_liked_words')
       .select('word, date')
@@ -262,7 +267,7 @@ if (window.supabase) {
       .order('date', { ascending: false });
 
     if (error || !data || data.length === 0) {
-      myWordsList.innerHTML = '<p class="my-words-empty">Words you like will appear here.</p>';
+      myWordsList.innerHTML = '<p class="my-words-empty">Woorden die je leuk vindt verschijnen hier.</p>';
       return;
     }
 
@@ -272,14 +277,11 @@ if (window.supabase) {
         <span class="my-words-date">${row.date}</span>
       </div>
     `).join('');
-  });
+  };
 
-  settingsBtn.addEventListener('click', async () => {
-    closeDropdown();
-
+  const loadSettings = async () => {
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     darkModeToggle.setAttribute('aria-checked', currentTheme === 'dark');
-
     compactViewToggle.setAttribute('aria-checked', document.body.classList.contains('compact-view'));
 
     let weeklyEmail = false;
@@ -292,8 +294,40 @@ if (window.supabase) {
       weeklyEmail = !!data?.weekly_email;
     }
     weeklyEmailToggle.setAttribute('aria-checked', weeklyEmail);
+  };
 
-    settingsModal.classList.remove('hidden');
+  const handleRoute = async () => {
+    const hash = window.location.hash;
+    if (hash === '#settings') {
+      showPage('settings');
+      await loadSettings();
+    } else if (hash === '#my-words') {
+      showPage('my-words');
+      await loadMyWords();
+    } else {
+      showPage(null);
+    }
+  };
+
+  window.addEventListener('hashchange', handleRoute);
+  handleRoute();
+
+  myWordsBtn.addEventListener('click', () => {
+    closeDropdown();
+    window.location.hash = '#my-words';
+  });
+
+  settingsBtn.addEventListener('click', () => {
+    closeDropdown();
+    window.location.hash = '#settings';
+  });
+
+  document.getElementById('settings-back-btn').addEventListener('click', () => {
+    window.location.hash = '';
+  });
+
+  document.getElementById('my-words-back-btn').addEventListener('click', () => {
+    window.location.hash = '';
   });
 
   darkModeToggle.addEventListener('click', () => {
