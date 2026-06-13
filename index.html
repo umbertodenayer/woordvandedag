@@ -42,6 +42,7 @@
             </div>
             <div id="dropdown-signed-in" class="hidden">
               <p id="user-email" class="user-dropdown-email"></p>
+              <button id="my-words-btn" class="user-dropdown-item">My Words</button>
               <div class="user-dropdown-divider"></div>
               <button id="sign-out-btn" class="user-dropdown-item">Sign Out</button>
             </div>
@@ -91,12 +92,29 @@
 
   <section class="pronunciation hidden" id="pronunciation-section">
     <p class="label section-label">Pronunciation</p>
-    <div class="audio-player">
-      <button id="pronunciation-btn" class="pronunciation-btn" aria-label="Play pronunciation">
-        <svg id="play-icon" class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        <svg id="pause-icon" class="icon hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-      </button>
-      <div id="waveform" class="waveform"></div>
+    <div class="pronunciation-row">
+      <div class="audio-player">
+        <button id="pronunciation-btn" class="pronunciation-btn" aria-label="Play pronunciation">
+          <svg id="play-icon" class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="pause-icon" class="icon hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+        <div id="waveform" class="waveform"></div>
+      </div>
+      <div class="rating-spacer"></div>
+      <div class="rating">
+        <div class="rating-item">
+          <button id="thumb-up-btn" class="thumb-btn" aria-label="Like">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          </button>
+          <span id="like-count" class="rating-count">0</span>
+        </div>
+        <div class="rating-item">
+          <button id="thumb-down-btn" class="thumb-btn" aria-label="Dislike">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
+          </button>
+          <span id="dislike-count" class="rating-count">0</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -154,6 +172,15 @@
         <p class="auth-error hidden"></p>
         <button type="submit" class="auth-submit">Sign Up</button>
       </form>
+    </div>
+  </div>
+
+  <div id="my-words-modal" class="auth-modal hidden">
+    <div class="auth-modal-backdrop"></div>
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" aria-label="Close">&times;</button>
+      <h2 class="auth-modal-title">My Words</h2>
+      <div id="my-words-list" class="my-words-list"></div>
     </div>
   </div>
 
