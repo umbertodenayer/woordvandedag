@@ -10,6 +10,12 @@ function todaySeed() {
 const app = express();
 const cache = new Map(); // key: `${seed}` or `image:${seed}` -> data
 
+// Native Dutch ElevenLabs voice so Dutch words are pronounced with a Dutch
+// accent. The multilingual model applies the *voice's* native accent, so an
+// English voice (e.g. "George") reads Dutch words with an English accent.
+// Default: "Rick" (native Dutch). Override with ELEVENLABS_VOICE_ID.
+const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'AyQGttFzg1EY7EIKkpHs';
+
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
 
 function loadCache() {
@@ -119,7 +125,7 @@ async function fetchImage(word, definition) {
 }
 
 async function fetchAudio(word) {
-  const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/JBFqnCBsd6RMkjVDRZzb', {
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
