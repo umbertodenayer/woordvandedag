@@ -650,8 +650,6 @@ function renderWildCards(examples) {
     </article>
   `).join('');
   container.querySelectorAll('.wild-card').forEach((card, i) => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
     const cardObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
