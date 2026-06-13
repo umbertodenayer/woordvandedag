@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account aanmaken — Woord van de Dag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="signup-page">
+    <div class="signup-card" id="signup-card">
+      <a href="index.html" class="signup-masthead">
+        <span class="masthead-word">Woord</span><span class="masthead-rest"> van de dag</span>
+      </a>
+      <h1 class="signup-title">Maak je account aan</h1>
+      <form id="signup-form" class="auth-form">
+        <input type="email" class="auth-input" id="email-input" placeholder="E-mailadres" required autocomplete="email">
+        <div class="auth-password-wrap">
+          <input type="password" class="auth-input" id="password-input" placeholder="Wachtwoord" required autocomplete="new-password">
+          <button type="button" class="auth-eye-toggle" aria-label="Wachtwoord tonen/verbergen">
+            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <p class="auth-error hidden" id="signup-error"></p>
+        <button type="submit" class="auth-submit">
+          <span class="btn-text">Account aanmaken</span>
+          <span class="btn-spinner"></span>
+        </button>
+      </form>
+      <p class="signup-signin-link">Al een account? <a href="index.html#signin">Inloggen</a></p>
+    </div>
+  </div>
+
+  <div id="premium-toast" class="premium-toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Apply saved theme immediately to avoid flash
+    const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Redirect if already signed in
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) window.location.replace('index.html');
+    });
+
+    // --- Premium helpers (mirrored from main script.js) ---
+
+    let premiumToastTimer = null;
+    function showPremiumToast(message, duration) {
+      const toast = document.getElementById('premium-toast');
+      if (!toast) return;
+      clearTimeout(premiumToastTimer);
+      toast.textContent = message;
+      toast.classList.remove('visible');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        toast.classList.add('visible');
+        premiumToastTimer = setTimeout(() => toast.classList.remove('visible'), duration);
+      }));
+    }
+
+    function setButtonLoading(btn) { btn.classList.add('loading'); }
+    function setButtonNormal(btn) { btn.classList.remove('loading'); }
+
+    function showFormError(message) {
+      const btn = document.querySelector('.auth-submit');
+      const errorEl = document.getElementById('signup-error');
+      const card = document.getElementById('signup-card');
+      setButtonNormal(btn);
+      errorEl.classList.remove('fade-in');
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+      requestAnimationFrame(() => errorEl.classList.add('fade-in'));
+      card.classList.remove('shake');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        card.classList.add('shake');
+        card.addEventListener('animationend', () => card.classList.remove('shake'), { once: true });
+      }));
+    }
+
+    function showSuccess() {
+      const card = document.getElementById('signup-card');
+      const title = card.querySelector('.signup-title');
+      const form = card.querySelector('form');
+      const subtext = card.querySelector('.signup-signin-link');
+      const masthead = card.querySelector('.signup-masthead');
+
+      [title, form, subtext, masthead].forEach(el => { if (el) el.style.opacity = '0'; });
+
+      setTimeout(() => {
+        const icon = document.createElement('div');
+        icon.className = 'auth-success-icon';
+        icon.innerHTML = `<svg class="checkmark-svg" viewBox="0 0 52 52">
+          <circle class="checkmark-fill" cx="26" cy="26" r="25" fill="var(--terracotta)"/>
+          <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="var(--terracotta)" stroke-width="2"/>
+          <polyline class="checkmark-tick" points="13,27 22,35 39,17" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+        card.appendChild(icon);
+
+        requestAnimationFrame(() => {
+          icon.classList.add('visible');
+          requestAnimationFrame(() => {
+            icon.querySelector('.checkmark-fill').classList.add('animate');
+            icon.querySelector('.checkmark-circle').classList.add('animate');
+            icon.querySelector('.checkmark-tick').classList.add('animate');
+          });
+        });
+
+        showPremiumToast('Account aangemaakt — controleer je e-mail om te bevestigen.', 6000);
+
+        setTimeout(() => { window.location.href = 'index.html'; }, 3800);
+      }, 300);
+    }
+
+    // Eye toggle
+    document.querySelector('.auth-eye-toggle').addEventListener('click', function () {
+      const input = document.getElementById('password-input');
+      const eyeOpen = this.querySelector('.eye-open');
+      const eyeClosed = this.querySelector('.eye-closed');
+      const reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      eyeOpen.classList.toggle('hidden', reveal);
+      eyeClosed.classList.toggle('hidden', !reveal);
+    });
+
+    // Form submit
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email-input').value;
+      const password = document.getElementById('password-input').value;
+      const btn = document.querySelector('.auth-submit');
+      const errorEl = document.getElementById('signup-error');
+
+      errorEl.classList.add('hidden');
+      errorEl.classList.remove('fade-in');
+      setButtonLoading(btn);
+
+      const { data, error } = await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        const msg = error.message.toLowerCase().includes('already registered')
+          ? 'Er bestaat al een account met dit e-mailadres.'
+          : error.message;
+        showFormError(msg);
+        return;
+      }
+
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        showFormError('Er bestaat al een account met dit e-mailadres.');
+        return;
+      }
+
+      showSuccess();
+    });
+  </script>
+</body>
+</html>

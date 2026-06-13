@@ -1066,3 +1066,114 @@ html[data-theme="dark"] #word {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* CTA banner */
+.cta-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 18px;
+  height: 48px;
+  background: rgba(181, 121, 59, 0.07);
+  border-radius: 8px;
+  margin-bottom: 4px;
+  opacity: 0;
+  transition: opacity 0.5s ease, background-color 1.4s ease;
+}
+
+.cta-banner.hidden {
+  display: none;
+}
+
+.cta-banner.visible {
+  opacity: 1;
+}
+
+.cta-text {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: 'Inter', system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.cta-btn {
+  flex-shrink: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  background: var(--terracotta);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: opacity 0.2s ease;
+}
+
+.cta-btn:hover {
+  opacity: 0.85;
+}
+
+/* Signup standalone page */
+.signup-page {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  transition: background-color 1.4s ease;
+}
+
+.signup-card {
+  position: relative;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 48px 48px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  transition: background-color 1.4s ease;
+}
+
+.signup-masthead {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  margin-bottom: 36px;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease;
+}
+
+.signup-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  margin: 0 0 28px;
+  transition: opacity 0.3s ease, color 1.4s ease;
+}
+
+.signup-signin-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 20px 0 0;
+  transition: opacity 0.3s ease;
+}
+
+.signup-signin-link a {
+  color: var(--terracotta);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-signin-link a:hover {
+  text-decoration: underline;
+}

@@ -255,7 +255,7 @@ if (window.supabase) {
 
   openSignupBtn.addEventListener('click', () => {
     closeDropdown();
-    openModal(signupModal);
+    window.location.href = 'signup.html';
   });
 
   openChangePasswordBtn.addEventListener('click', () => {
@@ -346,6 +346,9 @@ if (window.supabase) {
     showSuccessAndClose(changePasswordModal, 'Wachtwoord succesvol bijgewerkt.', 3000);
   });
 
+  const ctaBanner = document.getElementById('cta-banner');
+  let ctaBannerDismissed = false;
+
   const updateUserUI = (session) => {
     sbSession = session;
     const signedIn = !!session;
@@ -354,6 +357,17 @@ if (window.supabase) {
     dropdownSignedIn.classList.toggle('hidden', !signedIn);
     if (signedIn) {
       userEmailEl.textContent = session.user.email;
+    }
+
+    if (ctaBanner) {
+      if (signedIn) {
+        ctaBannerDismissed = true;
+        ctaBanner.classList.remove('visible');
+        setTimeout(() => ctaBanner.classList.add('hidden'), 520);
+      } else if (!ctaBannerDismissed && ctaBanner.classList.contains('hidden')) {
+        ctaBanner.classList.remove('hidden');
+        requestAnimationFrame(() => requestAnimationFrame(() => ctaBanner.classList.add('visible')));
+      }
     }
   };
 
@@ -407,7 +421,13 @@ if (window.supabase) {
     updateUserUI(session);
   });
 
-  supabase.auth.getSession().then(({ data }) => updateUserUI(data.session));
+  supabase.auth.getSession().then(({ data }) => {
+    updateUserUI(data.session);
+    if (!data.session && window.location.hash === '#signin') {
+      history.replaceState(null, '', window.location.pathname);
+      setTimeout(() => openModal(signinModal), 120);
+    }
+  });
 } else {
   console.warn('Supabase failed to load; auth disabled.');
 }
