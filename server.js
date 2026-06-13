@@ -110,7 +110,8 @@ async function fetchAudio(word) {
     },
     body: JSON.stringify({
       text: word,
-      model_id: 'eleven_multilingual_v2'
+      model_id: 'eleven_multilingual_v2',
+      language_code: 'nl'
     })
   });
 
