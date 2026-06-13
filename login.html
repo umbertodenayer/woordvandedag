@@ -119,16 +119,16 @@
     const SUPABASE_URL      = 'https://lanmsexkozkrttiydtsm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
 
-    let supabase = null;
+    let sb = null;
     try {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('[login] Supabase client created');
     } catch (err) {
       console.error('[login] Failed to create Supabase client:', err);
     }
 
-    if (supabase) {
-      supabase.auth.getSession().then(({ data, error }) => {
+    if (sb) {
+      sb.auth.getSession().then(({ data, error }) => {
         console.log('[login] getSession:', { hasSession: !!data?.session, error: error?.message });
         if (data?.session) {
           console.log('[login] Already signed in — redirecting');
@@ -226,7 +226,7 @@
         return;
       }
 
-      if (!supabase) {
+      if (!sb) {
         setError('Er is iets misgegaan. Probeer het opnieuw.', false);
         return;
       }
@@ -235,7 +235,7 @@
 
       try {
         console.log('[login] Calling signInWithPassword...');
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
         console.log('[login] signInWithPassword result:', { user: !!data?.user, error: error?.message });
 
         if (error) {

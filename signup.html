@@ -496,8 +496,8 @@
     // ── Supabase ──
     const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    supabase.auth.getSession().then(({ data }) => {
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb.auth.getSession().then(({ data }) => {
       if (data.session) window.location.replace('index.html');
     });
 
@@ -569,7 +569,7 @@
         }
       } catch (_) {}
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await sb.auth.signUp({ email, password });
 
       if (error) {
         const low = (error.message || '').toLowerCase();
@@ -589,7 +589,7 @@
       // Save profile
       if (data.user) {
         try {
-          await supabase.from('user_profiles').upsert({
+          await sb.from('user_profiles').upsert({
             user_id: data.user.id,
             niveau: selectedLevel,
             leerdoelen: selectedGoals,
