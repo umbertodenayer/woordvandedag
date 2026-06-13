@@ -41,7 +41,7 @@
           <input type="email" class="auth-input" id="email-input" placeholder="E-mailadres" required autocomplete="email">
           <div class="auth-password-wrap">
             <input type="password" class="auth-input" id="password-input" placeholder="Wachtwoord" required autocomplete="current-password">
-            <button type="button" class="auth-eye-toggle" aria-label="Wachtwoord tonen/verbergen" onclick="var i=document.getElementById('password-input');var show=i.type==='password';i.type=show?'text':'password';this.querySelector('.eye-open').style.display=show?'none':'';this.querySelector('.eye-closed').style.display=show?'':'none'">
+            <button type="button" class="auth-eye-toggle" aria-label="Wachtwoord tonen/verbergen" onclick="var i=document.getElementById('password-input');var show=i.type==='password';i.type=show?'text':'password';this.querySelector('.eye-open').style.display=show?'none':'block';this.querySelector('.eye-closed').style.display=show?'block':'none'">
               <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>
               </svg>
