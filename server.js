@@ -17,8 +17,13 @@ const sb = SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { per
 if (!sb) console.warn('SUPABASE_SERVICE_ROLE_KEY not set — cache will not persist across deploys.');
 
 function todaySeed() {
-  const now = new Date();
-  return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000;
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Amsterdam',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(new Date());
+  const p = {};
+  parts.forEach(({ type, value }) => { p[type] = parseInt(value, 10); });
+  return Date.UTC(p.year, p.month - 1, p.day) / 86400000;
 }
 
 function cacheKey()      { return `${CACHE_VERSION}:${todaySeed()}`; }
