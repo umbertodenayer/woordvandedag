@@ -238,7 +238,8 @@ const hearItObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.3 });
 
-hearItObserver.observe(hearItSection);
+const pronunciationSectionEl = document.getElementById('pronunciation-section');
+hearItObserver.observe(pronunciationSectionEl);
 
 const pronunciationSection = document.getElementById('pronunciation-section');
 const pronunciationBtn = document.getElementById('pronunciation-btn');

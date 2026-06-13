@@ -386,7 +386,6 @@ html[data-theme="dark"] #word {
 }
 
 .hear-it {
-  min-height: 100vh;
   width: 100%;
   padding: 96px 64px;
   display: flex;
