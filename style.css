@@ -44,18 +44,6 @@ body {
   font-weight: 500;
 }
 
-.lang-select {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
-
 .word-image {
   display: none;
   width: 100%;

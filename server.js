@@ -2,21 +2,13 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
-const LANG_NAMES = {
-  en: 'English',
-  es: 'Spanish',
-  fr: 'French',
-  de: 'German',
-  nl: 'Dutch'
-};
-
 function todaySeed() {
   const now = new Date();
   return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000;
 }
 
 const app = express();
-const cache = new Map(); // key: `${seed}:${lang}` or `image:${seed}:${lang}` -> data
+const cache = new Map(); // key: `${seed}` or `image:${seed}` -> data
 
 const CACHE_FILE = path.join(__dirname, '.cache.json');
 
@@ -25,7 +17,7 @@ function loadCache() {
     const raw = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
     const seed = todaySeed();
     for (const [key, value] of Object.entries(raw)) {
-      if (key.startsWith(`${seed}:`) || key.startsWith(`image:${seed}:`)) {
+      if (key === `${seed}` || key === `image:${seed}`) {
         cache.set(key, value);
       }
     }
@@ -43,11 +35,10 @@ function saveCache() {
   }
 }
 
-async function fetchWord(lang) {
-  const languageName = LANG_NAMES[lang] || LANG_NAMES.en;
+async function fetchWord() {
   const seed = todaySeed();
 
-  const prompt = `Today's date seed is ${seed} (days since epoch, UTC). Using this seed so the result is deterministic and identical for everyone asking on this date, pick one interesting, uncommon word in ${languageName}. Respond with ONLY a JSON object (no markdown, no code fences) with these exact keys:
+  const prompt = `Today's date seed is ${seed} (days since epoch, UTC). Using this seed so the result is deterministic and identical for everyone asking on this date, pick one interesting, uncommon word in English. Respond with ONLY a JSON object (no markdown, no code fences) with these exact keys:
 {
   "word": "the word",
   "partOfSpeech": "its part of speech",
@@ -82,62 +73,6 @@ async function fetchWord(lang) {
   return JSON.parse(text);
 }
 
-async function refreshWord(lang) {
-  const seed = todaySeed();
-  const cacheKey = `${seed}:${lang}`;
-  if (cache.has(cacheKey) && cache.has(`image:${seed}:${lang}`)) {
-    console.log(`Already cached for ${lang} (seed ${seed}), skipping regeneration`);
-    return;
-  }
-  let data = cache.get(cacheKey);
-  if (data) {
-    try {
-      const image = await fetchImage(data.word, data.definition);
-      cache.set(`image:${seed}:${lang}`, image);
-      saveCache();
-      console.log(`Cached image for ${lang} (seed ${seed}): ${data.word}`);
-    } catch (e) {
-      console.error(`Failed to fetch image for ${lang}:`, e.message);
-    }
-    return;
-  }
-  try {
-    data = await fetchWord(lang);
-    cache.set(cacheKey, data);
-    saveCache();
-    console.log(`Cached word of the day for ${lang} (seed ${seed}): ${data.word}`);
-  } catch (e) {
-    console.error(`Failed to fetch word of the day for ${lang}:`, e.message);
-    return;
-  }
-
-  try {
-    const image = await fetchImage(data.word, data.definition);
-    cache.set(`image:${seed}:${lang}`, image);
-    saveCache();
-    console.log(`Cached image for ${lang} (seed ${seed}): ${data.word}`);
-  } catch (e) {
-    console.error(`Failed to fetch image for ${lang}:`, e.message);
-  }
-}
-
-async function refreshAllLanguages() {
-  for (const lang of Object.keys(LANG_NAMES)) {
-    await refreshWord(lang);
-  }
-}
-
-function scheduleMidnightRefresh() {
-  const now = new Date();
-  const nextMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
-  const delay = nextMidnight - now.getTime();
-
-  setTimeout(() => {
-    refreshAllLanguages();
-    setInterval(refreshAllLanguages, 24 * 60 * 60 * 1000);
-  }, delay);
-}
-
 async function fetchImage(word, definition) {
   const prompt = `A clean, minimal, modern editorial illustration representing the word "${word}" (${definition}). No text or letters in the image. Soft warm color palette, flat design, lots of negative space.`;
 
@@ -165,18 +100,61 @@ async function fetchImage(word, definition) {
   return { mimeType: 'image/png', data: b64 };
 }
 
-app.get('/api/image', async (req, res) => {
-  const lang = String(req.query.lang || 'en');
+async function refreshWord() {
   const seed = todaySeed();
-  const cacheKey = `${seed}:${lang}`;
-  const imageCacheKey = `image:${seed}:${lang}`;
+  const cacheKey = `${seed}`;
+  const imageCacheKey = `image:${seed}`;
+
+  if (cache.has(cacheKey) && cache.has(imageCacheKey)) {
+    console.log(`Already cached for seed ${seed}, skipping regeneration`);
+    return;
+  }
+
+  let data = cache.get(cacheKey);
+  if (!data) {
+    try {
+      data = await fetchWord();
+      cache.set(cacheKey, data);
+      saveCache();
+      console.log(`Cached word of the day (seed ${seed}): ${data.word}`);
+    } catch (e) {
+      console.error('Failed to fetch word of the day:', e.message);
+      return;
+    }
+  }
+
+  try {
+    const image = await fetchImage(data.word, data.definition);
+    cache.set(imageCacheKey, image);
+    saveCache();
+    console.log(`Cached image (seed ${seed}): ${data.word}`);
+  } catch (e) {
+    console.error('Failed to fetch image:', e.message);
+  }
+}
+
+function scheduleMidnightRefresh() {
+  const now = new Date();
+  const nextMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+  const delay = nextMidnight - now.getTime();
+
+  setTimeout(() => {
+    refreshWord();
+    setInterval(refreshWord, 24 * 60 * 60 * 1000);
+  }, delay);
+}
+
+app.get('/api/image', async (req, res) => {
+  const seed = todaySeed();
+  const cacheKey = `${seed}`;
+  const imageCacheKey = `image:${seed}`;
 
   let image = cache.get(imageCacheKey);
   if (!image) {
     let wordData = cache.get(cacheKey);
     if (!wordData) {
       try {
-        wordData = await fetchWord(lang);
+        wordData = await fetchWord();
         cache.set(cacheKey, wordData);
         saveCache();
       } catch (e) {
@@ -199,15 +177,15 @@ app.get('/api/image', async (req, res) => {
 });
 
 app.get('/api/word', async (req, res) => {
-  const lang = String(req.query.lang || 'en');
   const seed = todaySeed();
-  const cacheKey = `${seed}:${lang}`;
+  const cacheKey = `${seed}`;
 
   let data = cache.get(cacheKey);
   if (!data) {
     try {
-      data = await fetchWord(lang);
+      data = await fetchWord();
       cache.set(cacheKey, data);
+      saveCache();
     } catch (e) {
       res.status(500).json({ error: e.message });
       return;
@@ -218,12 +196,14 @@ app.get('/api/word', async (req, res) => {
   res.json(data);
 });
 
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname), {
+  setHeaders: (res) => res.set('Cache-Control', 'no-cache')
+}));
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
   loadCache();
-  refreshAllLanguages();
+  refreshWord();
   scheduleMidnightRefresh();
 });
