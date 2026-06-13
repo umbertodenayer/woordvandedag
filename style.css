@@ -154,6 +154,11 @@ body {
   display: none;
 }
 
+#dropdown-signed-in.hidden,
+#dropdown-signed-out.hidden {
+  display: none;
+}
+
 .user-dropdown.visible {
   opacity: 1;
   transform: translateY(0);
