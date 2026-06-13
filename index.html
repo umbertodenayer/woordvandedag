@@ -30,6 +30,7 @@
             <button id="signout-btn" class="auth-dropdown-item">Sign out</button>
           </div>
         </div>
+
       </div>
       <div class="content-middle">
         <div class="accent-bar"></div>
@@ -70,24 +71,13 @@
     </div>
   </section>
 
-  <div id="auth-modal-overlay" class="auth-overlay hidden">
-    <div class="auth-modal">
-      <button id="auth-close" class="auth-close" aria-label="Close">×</button>
-      <h2 id="auth-title" class="auth-title">Log In</h2>
-      <form id="auth-form">
-        <input type="email" id="auth-email" class="auth-input" placeholder="Email" autocomplete="email" required>
-        <input type="password" id="auth-password" class="auth-input" placeholder="Password" autocomplete="current-password" required>
-        <p id="auth-error" class="auth-error hidden"></p>
-        <button type="submit" class="auth-submit" id="auth-submit">Log In</button>
-      </form>
-      <p class="auth-toggle">
-        <span id="auth-toggle-text">Don't have an account?</span>
-        <a href="#" id="auth-toggle-link">Sign up</a>
-      </p>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key="YOUR_CLERK_PUBLISHABLE_KEY"
+    src="https://YOUR_CLERK_FRONTEND_API/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    type="text/javascript"
+  ></script>
   <script src="auth.js"></script>
   <script src="script.js"></script>
 </body>
