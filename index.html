@@ -43,6 +43,7 @@
             <div id="dropdown-signed-in" class="hidden">
               <p id="user-email" class="user-dropdown-email"></p>
               <button id="my-words-btn" class="user-dropdown-item">My Words</button>
+              <button id="settings-btn" class="user-dropdown-item">Settings</button>
               <div class="user-dropdown-divider"></div>
               <button id="open-change-password-btn" class="user-dropdown-item">Change Password</button>
               <div class="user-dropdown-divider"></div>
@@ -221,6 +222,34 @@
       <button class="auth-modal-close" aria-label="Close">&times;</button>
       <h2 class="auth-modal-title">My Words</h2>
       <div id="my-words-list" class="my-words-list"></div>
+    </div>
+  </div>
+
+  <div id="settings-modal" class="auth-modal hidden">
+    <div class="auth-modal-backdrop"></div>
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" aria-label="Close">&times;</button>
+      <h2 class="auth-modal-title">Settings</h2>
+      <div class="settings-list">
+        <div class="settings-row">
+          <span class="settings-label">Dark mode by default</span>
+          <button id="setting-dark-mode" class="toggle-switch" role="switch" aria-checked="false">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Weekly email digest</span>
+          <button id="setting-weekly-email" class="toggle-switch" role="switch" aria-checked="false">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Compact view</span>
+          <button id="setting-compact-view" class="toggle-switch" role="switch" aria-checked="false">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

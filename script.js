@@ -37,6 +37,10 @@ function applyTheme(theme, animate) {
 const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
 applyTheme(savedTheme, false);
 
+if (localStorage.getItem('wordOfTheDay:compactView') === 'true') {
+  document.body.classList.add('compact-view');
+}
+
 themeToggle.addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme') || 'light';
   const next = current === 'dark' ? 'light' : 'dark';
@@ -67,6 +71,11 @@ if (window.supabase) {
   const openChangePasswordBtn = document.getElementById('open-change-password-btn');
   const signOutBtn = document.getElementById('sign-out-btn');
   const myWordsBtn = document.getElementById('my-words-btn');
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsModal = document.getElementById('settings-modal');
+  const darkModeToggle = document.getElementById('setting-dark-mode');
+  const weeklyEmailToggle = document.getElementById('setting-weekly-email');
+  const compactViewToggle = document.getElementById('setting-compact-view');
   const myWordsModal = document.getElementById('my-words-modal');
   const myWordsList = document.getElementById('my-words-list');
   const authToast = document.getElementById('auth-toast');
@@ -263,6 +272,54 @@ if (window.supabase) {
         <span class="my-words-date">${row.date}</span>
       </div>
     `).join('');
+  });
+
+  settingsBtn.addEventListener('click', async () => {
+    closeDropdown();
+
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    darkModeToggle.setAttribute('aria-checked', currentTheme === 'dark');
+
+    compactViewToggle.setAttribute('aria-checked', document.body.classList.contains('compact-view'));
+
+    let weeklyEmail = false;
+    if (sbSession) {
+      const { data } = await supabase
+        .from('user_preferences')
+        .select('weekly_email')
+        .eq('user_id', sbSession.user.id)
+        .maybeSingle();
+      weeklyEmail = !!data?.weekly_email;
+    }
+    weeklyEmailToggle.setAttribute('aria-checked', weeklyEmail);
+
+    settingsModal.classList.remove('hidden');
+  });
+
+  darkModeToggle.addEventListener('click', () => {
+    const isDark = darkModeToggle.getAttribute('aria-checked') === 'true';
+    const next = isDark ? 'light' : 'dark';
+    darkModeToggle.setAttribute('aria-checked', !isDark);
+    localStorage.setItem('wordOfTheDay:theme', next);
+    applyTheme(next, true);
+  });
+
+  compactViewToggle.addEventListener('click', () => {
+    const isCompact = compactViewToggle.getAttribute('aria-checked') === 'true';
+    const next = !isCompact;
+    compactViewToggle.setAttribute('aria-checked', next);
+    document.body.classList.toggle('compact-view', next);
+    localStorage.setItem('wordOfTheDay:compactView', next ? 'true' : 'false');
+  });
+
+  weeklyEmailToggle.addEventListener('click', async () => {
+    if (!sbSession) return;
+    const isOn = weeklyEmailToggle.getAttribute('aria-checked') === 'true';
+    const next = !isOn;
+    weeklyEmailToggle.setAttribute('aria-checked', next);
+    await supabase
+      .from('user_preferences')
+      .upsert({ user_id: sbSession.user.id, weekly_email: next });
   });
 
   supabase.auth.onAuthStateChange((_event, session) => {
