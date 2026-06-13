@@ -782,7 +782,7 @@ function audioCacheKey() {
   return `wordOfTheDay:${CACHE_VERSION}:audio:${todaySeed()}`;
 }
 
-async function loadPronunciation() {
+async function loadPronunciation(attempt = 0) {
   const key = audioCacheKey();
   const cached = localStorage.getItem(key);
   if (cached) {
@@ -792,6 +792,10 @@ async function loadPronunciation() {
 
   try {
     const response = await fetch('/api/pronunciation');
+    if (response.status === 503 && attempt < 10) {
+      setTimeout(() => loadPronunciation(attempt + 1), 8000);
+      return;
+    }
     if (!response.ok) {
       pronunciationSection.classList.add('hidden');
       return;
