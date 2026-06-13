@@ -288,6 +288,12 @@ app.use(express.static(path.join(__dirname), {
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
-  loadCache();           // restore today's data from persistent file if available
-  scheduleMidnightRefresh();  // schedule the one daily generation
+  loadCache();
+  // Generate today's word if not already cached (cold start / first deploy of the day)
+  const seed = todaySeed();
+  if (!cache.has(`v2:${seed}`) || !cache.has(`v2:image:${seed}`) || !cache.has(`v2:audio:${seed}`)) {
+    console.log('Cold start: no cached data for today, generating now...');
+    refreshWord();
+  }
+  scheduleMidnightRefresh();
 });
