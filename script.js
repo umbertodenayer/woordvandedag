@@ -24,6 +24,7 @@ function cacheKey() {
 function render(data) {
   definitionEl.className = 'definition';
   currentWord = data.word;
+  loadPronunciation();
   if (ygWidget && hearItTriggered) {
     ygWidget.fetch(currentWord, 'english');
   }
@@ -203,3 +204,59 @@ const hearItObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.3 });
 
 hearItObserver.observe(hearItSection);
+
+const pronunciationSection = document.getElementById('pronunciation-section');
+const pronunciationBtn = document.getElementById('pronunciation-btn');
+const playIcon = document.getElementById('play-icon');
+const pauseIcon = document.getElementById('pause-icon');
+let pronunciationAudio = null;
+
+function audioCacheKey() {
+  return `wordOfTheDay:audio:${todaySeed()}`;
+}
+
+async function loadPronunciation() {
+  const key = audioCacheKey();
+  const cached = localStorage.getItem(key);
+  if (cached) {
+    setupAudio(cached);
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/pronunciation');
+    if (!response.ok) {
+      pronunciationSection.classList.add('hidden');
+      return;
+    }
+    const data = await response.json();
+    const src = `data:${data.mimeType};base64,${data.data}`;
+    localStorage.setItem(key, src);
+    setupAudio(src);
+  } catch (e) {
+    pronunciationSection.classList.add('hidden');
+  }
+}
+
+function setupAudio(src) {
+  pronunciationAudio = new Audio(src);
+  pronunciationSection.classList.remove('hidden');
+
+  pronunciationAudio.addEventListener('ended', () => {
+    playIcon.classList.remove('hidden');
+    pauseIcon.classList.add('hidden');
+  });
+}
+
+pronunciationBtn.addEventListener('click', () => {
+  if (!pronunciationAudio) return;
+  if (pronunciationAudio.paused) {
+    pronunciationAudio.play();
+    playIcon.classList.add('hidden');
+    pauseIcon.classList.remove('hidden');
+  } else {
+    pronunciationAudio.pause();
+    playIcon.classList.remove('hidden');
+    pauseIcon.classList.add('hidden');
+  }
+});

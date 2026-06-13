@@ -177,6 +177,56 @@ app.get('/api/image', async (req, res) => {
   res.json(image);
 });
 
+app.get('/api/pronunciation', async (req, res) => {
+  const seed = todaySeed();
+  const cacheKey = `${seed}`;
+  const audioCacheKey = `audio:${seed}`;
+
+  let audio = cache.get(audioCacheKey);
+  if (!audio) {
+    let wordData = cache.get(cacheKey);
+    if (!wordData) {
+      try {
+        wordData = await fetchWord();
+        cache.set(cacheKey, wordData);
+        saveCache();
+      } catch (e) {
+        res.status(500).json({ error: e.message });
+        return;
+      }
+    }
+    try {
+      const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/JBFqnCBsd6RMkjVDRZzb', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'XI_API_KEY': process.env.ELEVENLABS_API_KEY
+        },
+        body: JSON.stringify({
+          text: wordData.word,
+          model_id: 'eleven_flash_v2_5'
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`ElevenLabs API error ${response.status}: ${errText}`);
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      audio = { mimeType: 'audio/mpeg', data: buffer.toString('base64') };
+      cache.set(audioCacheKey, audio);
+      saveCache();
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+      return;
+    }
+  }
+
+  res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+  res.json(audio);
+});
+
 app.get('/api/word', async (req, res) => {
   const seed = todaySeed();
   const cacheKey = `${seed}`;
