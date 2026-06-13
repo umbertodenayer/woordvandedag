@@ -52,13 +52,25 @@ body {
   height: 100vh;
   background: var(--panel-bg);
   line-height: 0;
+  position: relative;
+}
+
+.col-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(to right, transparent, var(--panel-bg));
+  pointer-events: none;
 }
 
 .col-text {
   flex: 1;
   min-width: 0;
   text-align: left;
-  padding: 0 64px 64px 112px;
+  padding: 0 64px 48px 112px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -616,16 +628,24 @@ html[data-theme="dark"] .masthead-rest {
   color: #888;
 }
 
+.masthead-logo-link {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  text-decoration: none;
+}
+
 .masthead-logo {
-  height: 32px;
+  height: 36px;
   width: auto;
   flex-shrink: 0;
   mix-blend-mode: multiply;
+  display: block;
 }
 
 html[data-theme="dark"] .masthead-logo {
-  mix-blend-mode: normal;
-  filter: brightness(0.85);
+  mix-blend-mode: screen;
+  filter: brightness(1.1);
 }
 
 .masthead-line {
@@ -664,11 +684,12 @@ html[data-theme="dark"] .masthead-line {
 
 #word {
   font-family: 'Fraunces', serif;
-  font-size: clamp(4.5rem, 9vw, 5rem);
-  font-weight: 600;
+  font-size: clamp(4.5rem, 9vw, 6rem);
+  font-weight: 700;
   text-transform: lowercase;
   line-height: 1.05;
   color: #1a1a1a;
+  margin-bottom: 16px;
 }
 
 html[data-theme="dark"] #word {
@@ -740,13 +761,25 @@ html[data-theme="dark"] #word {
 }
 
 .date {
-  font-size: 11px;
+  font-size: 0.85rem;
   color: var(--muted);
   margin: 0;
   padding-top: 16px;
   border-top: 1px solid var(--border);
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.date::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 2px;
+  background: #C4714A;
+  flex-shrink: 0;
 }
 
 .error {
@@ -1221,7 +1254,7 @@ html[data-theme="dark"] #word {
   font-size: 0.8rem;
   font-weight: 600;
   padding: 7px 18px;
-  background: var(--terracotta);
+  background: #C4714A;
   color: #fff;
   border: none;
   border-radius: 20px;
