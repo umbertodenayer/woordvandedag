@@ -1447,3 +1447,23 @@ html[data-theme="dark"] #word {
   .auth-split-right { display: none; }
   .auth-split-left { padding: 40px 24px; }
 }
+
+.auth-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  margin-bottom: 28px;
+  transition: color 0.2s ease;
+}
+
+.auth-back-btn:hover {
+  color: var(--text);
+}
+
+.auth-back-btn svg {
+  width: 15px;
+  height: 15px;
+}
