@@ -193,15 +193,44 @@ async function refreshWord() {
   }
 }
 
-function scheduleMidnightRefresh() {
+function msUntilAmsterdamMidnight() {
   const now = new Date();
-  const nextMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
-  const delay = nextMidnight - now.getTime();
-  console.log(`Next refresh in ${Math.round(delay / 60000)} minutes`);
+  // Get current date parts in Amsterdam time
+  const fmt = new Intl.DateTimeFormat('nl-NL', {
+    timeZone: 'Europe/Amsterdam',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false
+  });
+  const parts = Object.fromEntries(fmt.formatToParts(now).filter(p => p.type !== 'literal').map(p => [p.type, parseInt(p.value)]));
+  // Next midnight Amsterdam = today+1 at 00:00:00 Amsterdam
+  const nextMidnightAmsterdam = new Date(Date.UTC(parts.year, parts.month - 1, parts.day + 1));
+  // Adjust: the date string gives us the Amsterdam calendar date, but we need to
+  // find the UTC instant that corresponds to 00:00:00 Amsterdam on that date
+  const nextMidnightStr = `${parts.year}-${String(parts.month).padStart(2,'0')}-${String(parts.day + 1).padStart(2,'0')}T00:00:00`;
+  const nextMidnight = new Date(new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Amsterdam', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date(now.getTime() + 24 * 60 * 60 * 1000)).replace(/\//g, '-') + 'T00:00:00+00:00');
+  // Simpler: use the offset trick
+  const tzOffset = (new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Amsterdam' })) - new Date(new Date().toLocaleString('en-US', { timeZone: 'UTC' })));
+  const nowAmsterdam = new Date(now.getTime() + tzOffset);
+  const tomorrowAmsterdam = new Date(Date.UTC(nowAmsterdam.getUTCFullYear(), nowAmsterdam.getUTCMonth(), nowAmsterdam.getUTCDate() + 1));
+  return tomorrowAmsterdam.getTime() - tzOffset - now.getTime();
+}
+
+function scheduleMidnightRefresh() {
+  const delay = msUntilAmsterdamMidnight();
+  console.log(`Next refresh in ${Math.round(delay / 60000)} minutes (Amsterdam midnight)`);
 
   setTimeout(() => {
     refreshWord();
-    setInterval(refreshWord, 24 * 60 * 60 * 1000);
+    // Re-schedule each day using Amsterdam midnight (handles DST shifts)
+    function scheduleNext() {
+      const nextDelay = msUntilAmsterdamMidnight();
+      console.log(`Next refresh in ${Math.round(nextDelay / 60000)} minutes (Amsterdam midnight)`);
+      setTimeout(() => { refreshWord(); scheduleNext(); }, nextDelay);
+    }
+    scheduleNext();
   }, delay);
 }
 
