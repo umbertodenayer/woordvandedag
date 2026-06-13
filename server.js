@@ -7,7 +7,19 @@ const app = express();
 app.use(express.json());
 const cache = new Map();
 
-const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'; // Rachel — ElevenLabs premade, free tier
+let elevenlabsVoiceId = process.env.ELEVENLABS_VOICE_ID || null;
+async function getElevenlabsVoiceId() {
+  if (elevenlabsVoiceId) return elevenlabsVoiceId;
+  const res = await fetch('https://api.elevenlabs.io/v1/voices', {
+    headers: { 'xi-api-key': process.env.ELEVENLABS_API_KEY }
+  });
+  if (!res.ok) throw new Error(`ElevenLabs /v1/voices error ${res.status}`);
+  const { voices } = await res.json();
+  if (!voices || voices.length === 0) throw new Error('No ElevenLabs voices available');
+  elevenlabsVoiceId = voices[0].voice_id;
+  console.log(`Using ElevenLabs voice: ${voices[0].name} (${elevenlabsVoiceId})`);
+  return elevenlabsVoiceId;
+}
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
 const CACHE_VERSION = 'v5';
 
@@ -189,7 +201,8 @@ async function fetchImage(word, definition) {
 }
 
 async function fetchAudio(word) {
-  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
+  const voiceId = await getElevenlabsVoiceId();
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
