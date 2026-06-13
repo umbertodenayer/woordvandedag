@@ -8,264 +8,616 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Progress bar ── */
+    .ob-progress {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--border);
+      z-index: 100;
+    }
+    .ob-progress-fill {
+      height: 100%;
+      background: var(--terracotta);
+      width: 33.33%;
+      transition: width 0.5s ease-in-out;
+    }
+
+    /* ── Page shell ── */
+    .ob-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+    .ob-header {
+      display: flex;
+      justify-content: center;
+      padding: 36px 24px 0;
+    }
+    .ob-header img { height: 40px; width: auto; }
+
+    /* ── Step dots ── */
+    .ob-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 20px 0 0;
+    }
+    .ob-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.35s ease, transform 0.35s ease;
+    }
+    .ob-dot.active {
+      background: var(--terracotta);
+      transform: scale(1.25);
+    }
+
+    /* ── Sliding steps ── */
+    .ob-steps-outer {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+    }
+    .ob-steps-track {
+      display: flex;
+      width: 100%;
+      flex: none;
+      transition: transform 0.5s ease-in-out;
+    }
+    .ob-step {
+      flex: 0 0 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px 72px;
+    }
+    .ob-step-inner { width: 100%; max-width: 560px; }
+
+    .ob-step-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 28px;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* ── Selection cards ── */
+    .select-grid {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .select-grid-2 { grid-template-columns: 1fr 1fr; }
+    .select-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .select-card {
+      position: relative;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 14px 14px;
+      cursor: pointer;
+      background: var(--bg);
+      transition: border-color 0.2s ease, background 0.2s ease;
+      user-select: none;
+    }
+    .select-card:hover {
+      border-color: rgba(196,113,74,0.5);
+      background: rgba(196,113,74,0.04);
+    }
+    .select-card.selected {
+      border-color: var(--terracotta);
+      background: rgba(196,113,74,0.08);
+    }
+
+    .select-card-check {
+      position: absolute;
+      top: 9px; right: 9px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.4);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+    .select-card.selected .select-card-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .select-card-check svg { width: 9px; height: 9px; pointer-events: none; }
+
+    .select-card-title {
+      font-family: 'Fraunces', serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    .select-card-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    /* ── Next button ── */
+    .ob-next-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: var(--terracotta);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.1s ease;
+    }
+    .ob-next-btn:hover { opacity: 0.9; }
+    .ob-next-btn:active { transform: scale(0.98); }
+    .ob-next-btn.hidden { opacity: 0; pointer-events: none; }
+
+    /* ── Step 3 form ── */
+    .ob-form { display: flex; flex-direction: column; gap: 14px; }
+
+    .ob-pw-mismatch {
+      font-size: 12px;
+      color: var(--terracotta);
+      margin: -8px 0 0;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .ob-pw-mismatch.show { opacity: 1; }
+
+    .ob-form-error {
+      font-size: 13px;
+      color: var(--terracotta);
+      margin: 0;
+      min-height: 18px;
+    }
+
+    .ob-submit-btn {
+      position: relative;
+      overflow: hidden;
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: var(--terracotta);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+    .ob-submit-btn:hover { opacity: 0.9; }
+    .ob-submit-btn .btn-text { transition: opacity 0.2s ease; }
+    .ob-submit-btn.loading .btn-text { opacity: 0; }
+    .ob-submit-btn .btn-spinner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .ob-submit-btn.loading .btn-spinner { opacity: 1; }
+    .ob-submit-btn .btn-spinner::after {
+      content: '';
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .ob-switch-link {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 14px 0 0;
+    }
+    .ob-switch-link a { color: var(--terracotta); text-decoration: none; }
+    .ob-switch-link a:hover { text-decoration: underline; }
+
+    /* ── Success overlay ── */
+    .ob-success {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease;
+    }
+    .ob-success.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .ob-success-svg {
+      width: 110px; height: 110px;
+      overflow: visible;
+      margin-bottom: 24px;
+    }
+    .ob-success-msg {
+      font-family: 'Fraunces', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease 0.9s, transform 0.4s ease 0.9s;
+    }
+    .ob-success.visible .ob-success-msg {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .select-grid-3 { grid-template-columns: 1fr 1fr; }
+      .ob-step-title { font-size: 1.4rem; }
+    }
+    @media (max-width: 340px) {
+      .select-grid-2, .select-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
+  <!-- Progress bar -->
+  <div class="ob-progress">
+    <div class="ob-progress-fill" id="ob-progress-fill"></div>
+  </div>
+
+  <!-- Dark mode toggle -->
   <button id="auth-theme-toggle" class="auth-theme-toggle" aria-label="Donkere modus wisselen">
     <svg id="auth-sun-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
     </svg>
-    <svg id="auth-moon-icon" class="theme-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+    <svg id="auth-moon-icon" class="theme-icon" style="display:none" viewBox="0 0 24 24" fill="currentColor">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
     </svg>
   </button>
 
-  <div class="auth-page-wrapper">
+  <div class="ob-page" id="ob-page">
 
-    <!-- Left: form -->
-    <div class="auth-split-left" id="auth-left">
-      <div class="auth-split-left-inner" id="auth-inner">
+    <!-- Logo -->
+    <div class="ob-header">
+      <a href="index.html"><img src="logo.png" alt="Woord van de Dag"></a>
+    </div>
 
-        <a href="index.html" class="auth-logo">
-          <img src="logo.png" alt="Woord van de Dag" class="subpage-logo">
-        </a>
+    <!-- Step dots -->
+    <div class="ob-dots">
+      <div class="ob-dot active" id="dot-0"></div>
+      <div class="ob-dot" id="dot-1"></div>
+      <div class="ob-dot" id="dot-2"></div>
+    </div>
 
-        <a href="index.html" class="auth-back-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          Terug
-        </a>
+    <!-- Steps -->
+    <div class="ob-steps-outer">
+      <div class="ob-steps-track" id="ob-steps-track">
 
-        <h1 class="auth-headline">Maak je account aan</h1>
+        <!-- Stap 1: Niveau -->
+        <div class="ob-step">
+          <div class="ob-step-inner">
+            <h1 class="ob-step-title">Wat is je Nederlands niveau?</h1>
+            <div class="select-grid select-grid-2" id="level-grid">
 
-        <form id="signup-form" class="auth-form">
-          <input type="email" class="auth-input" id="email-input" placeholder="E-mailadres" required autocomplete="email">
-          <div class="auth-password-wrap">
-            <input type="password" class="auth-input" id="password-input" placeholder="Wachtwoord" required autocomplete="new-password">
-            <button type="button" class="auth-eye-toggle" id="eye-toggle-1" aria-label="Wachtwoord tonen/verbergen" onclick="var i=document.getElementById('password-input');var show=i.type==='password';i.type=show?'text':'password';this.querySelector('.eye-open').style.display=show?'none':'block';this.querySelector('.eye-closed').style.display=show?'block':'none'">
-              <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-              <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            </button>
+              <div class="select-card" data-value="Beginner" onclick="selectLevel(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Beginner</p>
+                <p class="select-card-sub">A0 / A1 — Ik ken nog weinig Nederlands</p>
+              </div>
+
+              <div class="select-card" data-value="Basis" onclick="selectLevel(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Basis</p>
+                <p class="select-card-sub">A2 / B1 — Ik begrijp eenvoudige zinnen</p>
+              </div>
+
+              <div class="select-card" data-value="Gevorderd" onclick="selectLevel(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Gevorderd</p>
+                <p class="select-card-sub">B2 / C1 — Ik spreek redelijk vloeiend</p>
+              </div>
+
+              <div class="select-card" data-value="Moedertaal" onclick="selectLevel(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Moedertaal</p>
+                <p class="select-card-sub">C2 — Nederlands is mijn moedertaal</p>
+              </div>
+
+            </div>
+            <button class="ob-next-btn hidden" id="step0-next" onclick="goToStep(1)">Volgende →</button>
           </div>
-          <div class="auth-password-wrap">
-            <input type="password" class="auth-input" id="confirm-input" placeholder="Wachtwoord bevestigen" required autocomplete="new-password">
-            <button type="button" class="auth-eye-toggle" id="eye-toggle-2" aria-label="Wachtwoord tonen/verbergen" onclick="var i=document.getElementById('confirm-input');var show=i.type==='password';i.type=show?'text':'password';this.querySelector('.eye-open').style.display=show?'none':'block';this.querySelector('.eye-closed').style.display=show?'block':'none'">
-              <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-              <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            </button>
-          </div>
-          <p class="auth-error hidden" id="signup-error"></p>
-          <button type="submit" class="auth-submit">
-            <span class="btn-text">Account aanmaken</span>
-            <span class="btn-spinner"></span>
-          </button>
-        </form>
+        </div>
 
-        <p class="auth-switch-link">Al een account? <a href="login.html">Inloggen →</a></p>
+        <!-- Stap 2: Leerdoelen -->
+        <div class="ob-step">
+          <div class="ob-step-inner">
+            <h1 class="ob-step-title">Wat voor Nederlands wil je leren?</h1>
+            <div class="select-grid select-grid-3" id="goal-grid">
+
+              <div class="select-card" data-value="Alledaags" onclick="toggleGoal(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Alledaags</p>
+                <p class="select-card-sub">Dagelijkse gesprekken en situaties</p>
+              </div>
+
+              <div class="select-card" data-value="Professioneel" onclick="toggleGoal(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Professioneel</p>
+                <p class="select-card-sub">Zakelijke communicatie en werk</p>
+              </div>
+
+              <div class="select-card" data-value="Academisch" onclick="toggleGoal(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Academisch</p>
+                <p class="select-card-sub">Universitair en wetenschappelijk taalgebruik</p>
+              </div>
+
+              <div class="select-card" data-value="Literair" onclick="toggleGoal(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Literair</p>
+                <p class="select-card-sub">Poëzie, literatuur en schrijfstijl</p>
+              </div>
+
+              <div class="select-card" data-value="Spreektaal" onclick="toggleGoal(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Spreektaal</p>
+                <p class="select-card-sub">Informeel, dialect en straattaal</p>
+              </div>
+
+              <div class="select-card" data-value="Reizen" onclick="toggleGoal(this)">
+                <div class="select-card-check">
+                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                </div>
+                <p class="select-card-title">Reizen</p>
+                <p class="select-card-sub">Praktisch Nederlands voor onderweg</p>
+              </div>
+
+            </div>
+            <button class="ob-next-btn hidden" id="step1-next" onclick="goToStep(2)">Volgende →</button>
+          </div>
+        </div>
+
+        <!-- Stap 3: Account aanmaken -->
+        <div class="ob-step">
+          <div class="ob-step-inner">
+            <h1 class="ob-step-title">Maak je account aan</h1>
+            <form id="signup-form" class="ob-form" onsubmit="handleSignup(event)">
+              <input type="email" class="auth-input" id="email-input" placeholder="E-mailadres" required autocomplete="email">
+
+              <div class="auth-password-wrap">
+                <input type="password" class="auth-input" id="password-input" placeholder="Wachtwoord" required autocomplete="new-password">
+                <button type="button" class="auth-eye-toggle" aria-label="Wachtwoord tonen/verbergen"
+                  onclick="var i=document.getElementById('password-input'),s=i.type==='password';i.type=s?'text':'password';this.querySelector('.eye-open').style.display=s?'none':'block';this.querySelector('.eye-closed').style.display=s?'block':'none'">
+                  <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="eye-icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;pointer-events:none"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+
+              <div class="auth-password-wrap">
+                <input type="password" class="auth-input" id="confirm-input" placeholder="Wachtwoord bevestigen" required autocomplete="new-password" oninput="checkPasswords()">
+                <button type="button" class="auth-eye-toggle" aria-label="Wachtwoord tonen/verbergen"
+                  onclick="var i=document.getElementById('confirm-input'),s=i.type==='password';i.type=s?'text':'password';this.querySelector('.eye-open').style.display=s?'none':'block';this.querySelector('.eye-closed').style.display=s?'block':'none'">
+                  <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="eye-icon eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;pointer-events:none"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+
+              <p class="ob-pw-mismatch" id="pw-mismatch">Wachtwoorden komen niet overeen</p>
+              <p class="ob-form-error" id="signup-error"></p>
+
+              <button type="submit" class="ob-submit-btn" id="signup-btn">
+                <span class="btn-text">Account aanmaken</span>
+                <span class="btn-spinner"></span>
+              </button>
+            </form>
+            <p class="ob-switch-link">Al een account? <a href="login.html">Inloggen →</a></p>
+          </div>
+        </div>
 
       </div>
     </div>
+  </div>
 
-    <!-- Right: onboarding panel -->
-    <div class="auth-split-right">
-      <div class="auth-split-right-inner">
-        <p class="auth-right-eyebrow">Jouw leertraject</p>
-        <h2 class="auth-right-headline">Jouw gepersonaliseerde ervaring</h2>
-        <div class="auth-steps">
-          <div class="auth-step">
-            <span class="auth-step-num">1</span>
-            <span class="auth-step-text">Kies je niveau — beginner, gevorderd of expert</span>
-          </div>
-          <div class="auth-step">
-            <span class="auth-step-num">2</span>
-            <span class="auth-step-text">Volg je dagelijkse streak en blijf gemotiveerd</span>
-          </div>
-          <div class="auth-step">
-            <span class="auth-step-num">3</span>
-            <span class="auth-step-text">Bouw je persoonlijke woordenboek op met woorden die je mooi vindt</span>
-          </div>
-        </div>
-        <div class="streak-mockup">
-          <p class="streak-mockup-label">Jouw streak deze week</p>
-          <div class="streak-dots">
-            <div class="streak-dot done">✓</div>
-            <div class="streak-dot done">✓</div>
-            <div class="streak-dot done">✓</div>
-            <div class="streak-dot done">✓</div>
-            <div class="streak-dot"></div>
-            <div class="streak-dot"></div>
-            <div class="streak-dot"></div>
-          </div>
-          <div class="streak-day-labels">
-            <span class="streak-day-label">Ma</span>
-            <span class="streak-day-label">Di</span>
-            <span class="streak-day-label">Wo</span>
-            <span class="streak-day-label">Do</span>
-            <span class="streak-day-label">Vr</span>
-            <span class="streak-day-label">Za</span>
-            <span class="streak-day-label">Zo</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
+  <!-- Success overlay -->
+  <div class="ob-success" id="ob-success">
+    <svg class="ob-success-svg" viewBox="0 0 52 52">
+      <circle class="checkmark-fill" cx="26" cy="26" r="25" fill="var(--terracotta)"/>
+      <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="var(--terracotta)" stroke-width="2"/>
+      <polyline class="checkmark-tick" points="13,27 22,35 39,17" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p class="ob-success-msg">Welkom! Je account is aangemaakt.</p>
   </div>
 
   <div id="premium-toast" class="premium-toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Theme
+    // ── Theme ──
     const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-
     const themeToggle = document.getElementById('auth-theme-toggle');
-    const sunIcon = document.getElementById('auth-sun-icon');
+    const sunIcon  = document.getElementById('auth-sun-icon');
     const moonIcon = document.getElementById('auth-moon-icon');
-
-    function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      sunIcon.classList.toggle('hidden', theme === 'dark');
-      moonIcon.classList.toggle('hidden', theme !== 'dark');
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      sunIcon.style.display  = t === 'dark' ? 'none'  : '';
+      moonIcon.style.display = t === 'dark' ? 'block' : 'none';
     }
     applyTheme(savedTheme);
-
     themeToggle.addEventListener('click', () => {
       const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       localStorage.setItem('wordOfTheDay:theme', next);
       applyTheme(next);
     });
 
-    // Supabase
+    // ── Supabase ──
     const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) window.location.replace('index.html');
     });
 
-    // Toast
-    let toastTimer = null;
-    function showPremiumToast(message, duration) {
-      const toast = document.getElementById('premium-toast');
-      clearTimeout(toastTimer);
-      toast.textContent = message;
-      toast.classList.remove('visible');
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        toast.classList.add('visible');
-        toastTimer = setTimeout(() => toast.classList.remove('visible'), duration);
-      }));
+    // ── State ──
+    let selectedLevel = null;
+    let selectedGoals = [];
+
+    // ── Step navigation ──
+    function goToStep(index) {
+      document.getElementById('ob-steps-track').style.transform = `translateX(-${index * 100}%)`;
+      document.getElementById('ob-progress-fill').style.width = `${(index + 1) / 3 * 100}%`;
+      document.querySelectorAll('.ob-dot').forEach((d, i) => d.classList.toggle('active', i <= index));
     }
 
-    function setButtonLoading(btn) { btn.classList.add('loading'); }
-    function setButtonNormal(btn) { btn.classList.remove('loading'); }
-
-    function showFormError(message) {
-      const btn = document.querySelector('.auth-submit');
-      const errorEl = document.getElementById('signup-error');
-      const inner = document.getElementById('auth-inner');
-      setButtonNormal(btn);
-      errorEl.classList.remove('fade-in');
-      errorEl.textContent = message;
-      errorEl.classList.remove('hidden');
-      requestAnimationFrame(() => errorEl.classList.add('fade-in'));
-      inner.classList.remove('shake');
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        inner.classList.add('shake');
-        inner.addEventListener('animationend', () => inner.classList.remove('shake'), { once: true });
-      }));
+    // ── Step 1: single-select level ──
+    function selectLevel(card) {
+      document.querySelectorAll('#level-grid .select-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedLevel = card.dataset.value;
+      document.getElementById('step0-next').classList.remove('hidden');
     }
 
-    function showSuccess() {
-      const leftPanel = document.getElementById('auth-left');
-      const inner = document.getElementById('auth-inner');
-      inner.style.opacity = '0';
-
-      setTimeout(() => {
-        const icon = document.createElement('div');
-        icon.className = 'auth-success-icon';
-        icon.innerHTML = `<svg class="checkmark-svg" viewBox="0 0 52 52">
-          <circle class="checkmark-fill" cx="26" cy="26" r="25" fill="var(--terracotta)"/>
-          <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="var(--terracotta)" stroke-width="2"/>
-          <polyline class="checkmark-tick" points="13,27 22,35 39,17" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>`;
-        leftPanel.appendChild(icon);
-
-        requestAnimationFrame(() => {
-          icon.classList.add('visible');
-          requestAnimationFrame(() => {
-            icon.querySelector('.checkmark-fill').classList.add('animate');
-            icon.querySelector('.checkmark-circle').classList.add('animate');
-            icon.querySelector('.checkmark-tick').classList.add('animate');
-          });
-        });
-
-        showPremiumToast('Account aangemaakt — controleer je e-mail om te bevestigen.', 6000);
-        setTimeout(() => { window.location.href = 'index.html'; }, 2000);
-      }, 300);
+    // ── Step 2: multi-select goals ──
+    function toggleGoal(card) {
+      card.classList.toggle('selected');
+      const v = card.dataset.value;
+      selectedGoals = card.classList.contains('selected')
+        ? [...selectedGoals.filter(g => g !== v), v]
+        : selectedGoals.filter(g => g !== v);
+      document.getElementById('step1-next').classList.toggle('hidden', selectedGoals.length === 0);
     }
 
-    // Submit
-    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+    // ── Step 3: password match ──
+    function checkPasswords() {
+      const pw   = document.getElementById('password-input').value;
+      const conf = document.getElementById('confirm-input').value;
+      document.getElementById('pw-mismatch').classList.toggle('show', !!conf && pw !== conf);
+    }
+
+    // ── Step 3: submit ──
+    async function handleSignup(e) {
       e.preventDefault();
-      const email = document.getElementById('email-input').value;
+      const email    = document.getElementById('email-input').value.trim();
       const password = document.getElementById('password-input').value;
-      const confirm = document.getElementById('confirm-input').value;
-      const btn = document.querySelector('.auth-submit');
-      const errorEl = document.getElementById('signup-error');
+      const confirm  = document.getElementById('confirm-input').value;
+      const btn      = document.getElementById('signup-btn');
+      const errorEl  = document.getElementById('signup-error');
 
-      errorEl.classList.add('hidden');
-      errorEl.classList.remove('fade-in');
-
+      errorEl.textContent = '';
       if (password !== confirm) {
-        showFormError('Wachtwoorden komen niet overeen.');
+        document.getElementById('pw-mismatch').classList.add('show');
         return;
       }
 
-      setButtonLoading(btn);
+      btn.classList.add('loading');
+      btn.disabled = true;
 
-      // Server-side check: definitively detect duplicate emails before calling signUp.
+      // Server-side duplicate check
       try {
-        const checkRes = await fetch('/api/check-email', {
+        const r = await fetch('/api/check-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email })
         });
-        if (checkRes.ok) {
-          const checkData = await checkRes.json();
-          if (checkData.exists) {
-            showFormError('Dit e-mailadres is al in gebruik.');
-            return;
-          }
+        if (r.ok && (await r.json()).exists) {
+          errorEl.textContent = 'Dit e-mailadres is al in gebruik.';
+          btn.classList.remove('loading'); btn.disabled = false;
+          return;
         }
       } catch (_) {}
 
       const { data, error } = await supabase.auth.signUp({ email, password });
 
       if (error) {
-        const lower = (error.message || '').toLowerCase();
-        const isDuplicate = lower.includes('already registered') || lower.includes('already in use') || lower.includes('email exists');
-        showFormError(isDuplicate ? 'Dit e-mailadres is al in gebruik.' : error.message);
+        const low = (error.message || '').toLowerCase();
+        errorEl.textContent = (low.includes('already registered') || low.includes('already in use'))
+          ? 'Dit e-mailadres is al in gebruik.'
+          : error.message;
+        btn.classList.remove('loading'); btn.disabled = false;
         return;
       }
 
       if (data.user?.identities !== undefined && data.user.identities.length === 0) {
-        showFormError('Dit e-mailadres is al in gebruik.');
+        errorEl.textContent = 'Dit e-mailadres is al in gebruik.';
+        btn.classList.remove('loading'); btn.disabled = false;
         return;
       }
 
+      // Save profile
+      if (data.user) {
+        try {
+          await supabase.from('user_profiles').upsert({
+            user_id: data.user.id,
+            niveau: selectedLevel,
+            leerdoelen: selectedGoals,
+            created_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
+        } catch (_) {}
+      }
+
       showSuccess();
-    });
+    }
+
+    // ── Success animation ──
+    function showSuccess() {
+      const page = document.getElementById('ob-page');
+      page.style.transition = 'opacity 0.4s ease';
+      page.style.opacity = '0';
+
+      setTimeout(() => {
+        const overlay = document.getElementById('ob-success');
+        overlay.classList.add('visible');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          overlay.querySelector('.checkmark-fill').classList.add('animate');
+          overlay.querySelector('.checkmark-circle').classList.add('animate');
+          overlay.querySelector('.checkmark-tick').classList.add('animate');
+        }));
+        setTimeout(() => { window.location.href = 'index.html'; }, 2200);
+      }, 400);
+    }
   </script>
 </body>
 </html>
