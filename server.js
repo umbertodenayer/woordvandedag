@@ -16,8 +16,10 @@ async function getElevenlabsVoiceId() {
   if (!res.ok) throw new Error(`ElevenLabs /v1/voices error ${res.status}`);
   const { voices } = await res.json();
   if (!voices || voices.length === 0) throw new Error('No ElevenLabs voices available');
-  elevenlabsVoiceId = voices[0].voice_id;
-  console.log(`Using ElevenLabs voice: ${voices[0].name} (${elevenlabsVoiceId})`);
+  const pick = voices.find(v => v.category === 'premade') || voices[0];
+  elevenlabsVoiceId = pick.voice_id;
+  console.log(`ElevenLabs voices: ${voices.map(v => v.name + '(' + v.category + ')').join(', ')}`);
+  console.log(`Using voice: ${pick.name} (${pick.voice_id})`);
   return elevenlabsVoiceId;
 }
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
