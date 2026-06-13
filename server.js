@@ -23,7 +23,7 @@ async function getElevenlabsVoiceId() {
   return elevenlabsVoiceId;
 }
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 
 // Supabase client for persistent cache (survives container restarts/redeploys)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lanmsexkozkrttiydtsm.supabase.co';
