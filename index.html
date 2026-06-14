@@ -1172,33 +1172,54 @@
       };
     }
 
-    let currentIllus = illusPickUnique(10, []);
+    // Tracks the illustration currently shown in each slot (parallel to illusSlots)
+    const currentIllus = illusPickUnique(10, []);
     illusSlots.forEach((slot, i) => illusLoad(slot, currentIllus[i]));
 
-    // After entrance completes (last illusReveal: 4.82s + 0.9s = 5.72s),
-    // release CSS animation fill-mode so inline opacity can drive cinematic fades.
-    setTimeout(() => {
-      illusSlots.forEach(el => {
-        el.style.animation  = 'none';
-        el.style.transition = 'none';
-        el.style.opacity    = '1';
-        el.offsetHeight; // force reflow before re-enabling transition
-        el.style.transition = 'opacity 2.5s ease-in-out';
-      });
+    // Pick an illustration not currently displayed in ANY of the 10 cards (no dupes)
+    function illusPickFresh() {
+      const candidates = illustrations.filter(x => !currentIllus.includes(x));
+      const pool = candidates.length ? candidates : illustrations;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
 
-      setInterval(() => {
-        // Fade out over 2.5s
-        illusSlots.forEach(el => { el.style.opacity = '0'; });
-        // Hold 0.5s after fade completes, then swap srcs
-        setTimeout(() => {
-          currentIllus = illusPickUnique(10, currentIllus);
-          illusSlots.forEach((slot, i) => illusLoad(slot, currentIllus[i]));
-          // Fade back in over 2.5s
-          setTimeout(() => {
-            illusSlots.forEach(el => { el.style.opacity = '1'; });
-          }, 50);
-        }, 3000); // 2500ms fade-out + 500ms hold
-      }, 35000);
+    // Refresh ONE card: fade out 2s → swap src while invisible → fade in 2s → reschedule
+    function illusRefresh(i) {
+      const el = illusSlots[i];
+      el.style.opacity = '0';                          // fade out over 2.0s
+      setTimeout(() => {
+        const pick = illusPickFresh();
+        currentIllus[i] = pick;
+        illusLoad(el, pick);                           // swap src while fully invisible
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          el.style.opacity = '1';                      // fade back in over 2.0s
+        }));
+        // Once the full cycle completes (~2s fade-in done), start a new random timer
+        setTimeout(() => illusScheduleNext(i), 2100);
+      }, 2000);
+    }
+
+    // Each card lives its own life on an independent random 10–60s rhythm
+    function illusScheduleNext(i) {
+      setTimeout(() => illusRefresh(i), Math.random() * 50000 + 10000);
+    }
+
+    const prefersReducedMotion =
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // After entrance completes (last illusReveal: 4.82s + 0.9s = 5.72s),
+    // release CSS animation fill-mode so inline opacity can drive the fades,
+    // then kick off each card on its own independent timer.
+    setTimeout(() => {
+      illusSlots.forEach((el, i) => {
+        el.style.animation = 'none';
+        el.style.opacity   = '1';
+        if (prefersReducedMotion) return; // static collage, no rotation
+        el.style.transition = 'none';
+        el.offsetHeight; // force reflow before re-enabling transition
+        el.style.transition = 'opacity 2.0s ease-in-out';
+        illusScheduleNext(i);
+      });
     }, 6200);
 
     // ── If already logged in, swap nav CTAs ─────────────────
