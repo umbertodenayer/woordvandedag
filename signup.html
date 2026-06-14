@@ -6,7 +6,7 @@
   <title>Account aanmaken — Woord van de Dag</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -15,54 +15,53 @@
   <link rel="manifest" href="site.webmanifest">
   <meta name="theme-color" content="#C4714A">
   <style>
-    /* ── Progress bar ── */
+    /* ── Progress bar ─────────────────────────────────────────── */
     .ob-progress {
       position: fixed;
       top: 0; left: 0; right: 0;
       height: 3px;
       background: var(--border);
       z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
     }
+    .ob-progress.visible { opacity: 1; }
     .ob-progress-fill {
       height: 100%;
       background: var(--terracotta);
-      width: 33.33%;
-      transition: width 0.5s ease-in-out;
+      width: 0%;
+      transition: width 0.45s ease-in-out;
     }
 
-    /* ── Page shell ── */
+    /* ── Step counter ─────────────────────────────────────────── */
+    .ob-step-counter {
+      position: fixed;
+      top: 14px;
+      left: 0; right: 0;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      z-index: 99;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .ob-step-counter.visible { opacity: 1; }
+
+    /* ── Page shell ───────────────────────────────────────────── */
     .ob-page {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       background: var(--bg);
     }
-    .ob-header {
-      display: flex;
-      justify-content: center;
-      padding: 36px 24px 0;
-    }
-    .ob-header img { height: 40px; width: auto; }
 
-    /* ── Step dots ── */
-    .ob-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      padding: 20px 0 0;
-    }
-    .ob-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      transition: background 0.35s ease, transform 0.35s ease;
-    }
-    .ob-dot.active {
-      background: var(--terracotta);
-      transform: scale(1.25);
-    }
-
-    /* ── Sliding steps ── */
+    /* ── Sliding steps ────────────────────────────────────────── */
     .ob-steps-outer {
       flex: 1;
       overflow: hidden;
@@ -72,7 +71,7 @@
       display: flex;
       width: 100%;
       flex: none;
-      transition: transform 0.5s ease-in-out;
+      transition: transform 0.45s ease-in-out;
     }
     .ob-step {
       flex: 0 0 100%;
@@ -81,24 +80,97 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 24px 72px;
+      padding: 56px 24px 72px;
     }
     .ob-step-inner { width: 100%; max-width: 560px; }
 
+    /* ── Welcome step ─────────────────────────────────────────── */
+    .ob-welcome-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .ob-welcome-logo {
+      height: 52px;
+      width: auto;
+      margin-bottom: 52px;
+    }
+    .ob-welcome-headline {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--text);
+      margin: 0 0 14px;
+      letter-spacing: -0.01em;
+    }
+    .ob-welcome-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--muted);
+      margin: 0 0 48px;
+      line-height: 1.6;
+    }
+    .ob-feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 56px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      text-align: left;
+      width: 100%;
+      max-width: 400px;
+    }
+    .ob-feature-list li {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .ob-begin-btn {
+      display: block;
+      width: 100%;
+      max-width: 400px;
+      height: 54px;
+      background: #C4714A;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+    .ob-begin-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .ob-begin-btn:active { transform: scale(0.98); opacity: 1; }
+
+    /* ── Step headings ────────────────────────────────────────── */
     .ob-step-title {
       font-family: 'Fraunces', serif;
       font-size: 1.75rem;
       font-weight: 600;
       color: var(--text);
-      margin: 0 0 28px;
+      margin: 0 0 10px;
       text-align: center;
       line-height: 1.3;
     }
+    .ob-step-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin: 0 0 40px;
+      text-align: center;
+      line-height: 1.55;
+    }
 
-    /* ── Selection cards ── */
+    /* ── Selection cards ──────────────────────────────────────── */
     .select-grid {
       display: grid;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 28px;
     }
     .select-grid-2 { grid-template-columns: 1fr 1fr; }
@@ -107,28 +179,38 @@
     .select-card {
       position: relative;
       border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 14px 14px;
+      border-radius: 14px;
+      padding: 28px 20px 22px;
       cursor: pointer;
       background: var(--bg);
-      transition: border-color 0.2s ease, background 0.2s ease;
+      transition: border-color 0.25s ease, background 0.25s ease,
+                  transform 0.25s ease, box-shadow 0.25s ease;
       user-select: none;
     }
     .select-card:hover {
       border-color: rgba(196,113,74,0.5);
       background: rgba(196,113,74,0.04);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
     .select-card.selected {
-      border-color: var(--terracotta);
+      border-color: #C4714A;
       background: rgba(196,113,74,0.08);
+    }
+
+    .select-card-emoji {
+      font-size: 2rem;
+      line-height: 1;
+      display: block;
+      margin-bottom: 12px;
     }
 
     .select-card-check {
       position: absolute;
-      top: 9px; right: 9px;
-      width: 18px; height: 18px;
+      top: 12px; right: 12px;
+      width: 20px; height: 20px;
       border-radius: 50%;
-      background: var(--terracotta);
+      background: #C4714A;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -140,47 +222,48 @@
       opacity: 1;
       transform: scale(1);
     }
-    .select-card-check svg { width: 9px; height: 9px; pointer-events: none; }
+    .select-card-check svg { width: 10px; height: 10px; pointer-events: none; }
 
     .select-card-title {
       font-family: 'Fraunces', serif;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 600;
       color: var(--text);
-      margin: 0 0 4px;
+      margin: 0 0 5px;
     }
     .select-card-sub {
-      font-size: 11px;
+      font-size: 0.78rem;
       color: var(--muted);
       margin: 0;
       line-height: 1.4;
     }
 
-    /* ── Next button ── */
+    /* ── Next button ──────────────────────────────────────────── */
     .ob-next-btn {
       display: block;
       width: 100%;
-      padding: 14px;
-      background: var(--terracotta);
+      height: 52px;
+      background: #C4714A;
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 999px;
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 15px;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.2s ease, transform 0.1s ease;
+      letter-spacing: 0.01em;
+      transition: opacity 0.2s ease, transform 0.15s ease;
     }
-    .ob-next-btn:hover { opacity: 0.9; }
-    .ob-next-btn:active { transform: scale(0.98); }
+    .ob-next-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .ob-next-btn:active { transform: scale(0.98); opacity: 1; }
     .ob-next-btn.hidden { opacity: 0; pointer-events: none; }
 
-    /* ── Step 3 form ── */
+    /* ── Step 3 form ──────────────────────────────────────────── */
     .ob-form { display: flex; flex-direction: column; gap: 14px; }
 
     .ob-pw-mismatch {
       font-size: 12px;
-      color: var(--terracotta);
+      color: #C4714A;
       margin: -8px 0 0;
       opacity: 0;
       transition: opacity 0.2s ease;
@@ -189,7 +272,7 @@
 
     .ob-form-error {
       font-size: 13px;
-      color: var(--terracotta);
+      color: #C4714A;
       margin: 0;
       min-height: 18px;
     }
@@ -199,18 +282,19 @@
       overflow: hidden;
       display: block;
       width: 100%;
-      padding: 14px;
-      background: var(--terracotta);
+      height: 54px;
+      padding: 0;
+      background: #C4714A;
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 999px;
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 15px;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.2s ease;
     }
-    .ob-submit-btn:hover { opacity: 0.9; }
+    .ob-submit-btn:hover { opacity: 0.88; }
     .ob-submit-btn .btn-text { transition: opacity 0.2s ease; }
     .ob-submit-btn.loading .btn-text { opacity: 0; }
     .ob-submit-btn .btn-spinner {
@@ -225,7 +309,7 @@
     .ob-submit-btn.loading .btn-spinner { opacity: 1; }
     .ob-submit-btn .btn-spinner::after {
       content: '';
-      width: 18px; height: 18px;
+      width: 20px; height: 20px;
       border: 2px solid rgba(255,255,255,0.35);
       border-top-color: #fff;
       border-radius: 50%;
@@ -236,12 +320,12 @@
       text-align: center;
       font-size: 13px;
       color: var(--muted);
-      margin: 14px 0 0;
+      margin: 18px 0 0;
     }
-    .ob-switch-link a { color: var(--terracotta); text-decoration: none; }
+    .ob-switch-link a { color: #C4714A; text-decoration: none; }
     .ob-switch-link a:hover { text-decoration: underline; }
 
-    /* ── Success overlay ── */
+    /* ── Success overlay ──────────────────────────────────────── */
     .ob-success {
       position: fixed;
       inset: 0;
@@ -279,10 +363,12 @@
       transform: translateY(0);
     }
 
-    /* ── Responsive ── */
+    /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width: 520px) {
       .select-grid-3 { grid-template-columns: 1fr 1fr; }
       .ob-step-title { font-size: 1.4rem; }
+      .ob-welcome-headline { font-size: 1.8rem; }
+      .ob-step { padding: 56px 20px 60px; }
     }
     @media (max-width: 340px) {
       .select-grid-2, .select-grid-3 { grid-template-columns: 1fr; }
@@ -292,9 +378,12 @@
 <body>
 
   <!-- Progress bar -->
-  <div class="ob-progress">
+  <div class="ob-progress" id="ob-progress">
     <div class="ob-progress-fill" id="ob-progress-fill"></div>
   </div>
+
+  <!-- Step counter -->
+  <div class="ob-step-counter" id="ob-step-counter"></div>
 
   <!-- Dark mode toggle -->
   <button id="auth-theme-toggle" class="auth-theme-toggle" aria-label="Donkere modus wisselen">
@@ -307,129 +396,145 @@
   </button>
 
   <div class="ob-page" id="ob-page">
-
-    <!-- Logo -->
-    <div class="ob-header">
-      <a href="index.html"><img src="logoreal.png?v=2" alt="Woord van de Dag"></a>
-    </div>
-
-    <!-- Step dots -->
-    <div class="ob-dots">
-      <div class="ob-dot active" id="dot-0"></div>
-      <div class="ob-dot" id="dot-1"></div>
-      <div class="ob-dot" id="dot-2"></div>
-    </div>
-
-    <!-- Steps -->
     <div class="ob-steps-outer">
       <div class="ob-steps-track" id="ob-steps-track">
 
-        <!-- Stap 1: Niveau -->
+        <!-- ── Step 0: Welkom ──────────────────────────────────── -->
+        <div class="ob-step">
+          <div class="ob-step-inner ob-welcome-inner">
+            <a href="index.html">
+              <img src="logoreal.png?v=2" alt="Woord van de Dag" class="ob-welcome-logo">
+            </a>
+            <h1 class="ob-welcome-headline">Welkom bij<br>Woord van de Dag</h1>
+            <p class="ob-welcome-sub">Personaliseer je ervaring in 30 seconden.</p>
+            <ul class="ob-feature-list">
+              <li>📖 Eén zorgvuldig gekozen woord per dag</li>
+              <li>🔥 Bouw een dagelijkse leerstreak op</li>
+              <li>✨ Ontdek de rijkdom van de Nederlandse taal</li>
+            </ul>
+            <button class="ob-begin-btn" onclick="goToStep(1)">Begin →</button>
+          </div>
+        </div>
+
+        <!-- ── Step 1: Niveau ──────────────────────────────────── -->
         <div class="ob-step">
           <div class="ob-step-inner">
             <h1 class="ob-step-title">Wat is je Nederlands niveau?</h1>
+            <p class="ob-step-sub">We kiezen dagelijkse woorden die passen bij jouw niveau.</p>
             <div class="select-grid select-grid-2" id="level-grid">
 
               <div class="select-card" data-value="Beginner" onclick="selectLevel(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">🌱</span>
                 <p class="select-card-title">Beginner</p>
                 <p class="select-card-sub">A0 / A1 — Ik ken nog weinig Nederlands</p>
               </div>
 
               <div class="select-card" data-value="Basis" onclick="selectLevel(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">🏗️</span>
                 <p class="select-card-title">Basis</p>
                 <p class="select-card-sub">A2 / B1 — Ik begrijp eenvoudige zinnen</p>
               </div>
 
               <div class="select-card" data-value="Gevorderd" onclick="selectLevel(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">🌉</span>
                 <p class="select-card-title">Gevorderd</p>
                 <p class="select-card-sub">B2 / C1 — Ik spreek redelijk vloeiend</p>
               </div>
 
               <div class="select-card" data-value="Moedertaal" onclick="selectLevel(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">🗣️</span>
                 <p class="select-card-title">Moedertaal</p>
                 <p class="select-card-sub">C2 — Nederlands is mijn moedertaal</p>
               </div>
 
             </div>
-            <button class="ob-next-btn hidden" id="step0-next" onclick="goToStep(1)">Volgende →</button>
+            <button class="ob-next-btn hidden" id="level-next" onclick="goToStep(2)">Volgende →</button>
           </div>
         </div>
 
-        <!-- Stap 2: Leerdoelen -->
+        <!-- ── Step 2: Leerdoelen ──────────────────────────────── -->
         <div class="ob-step">
           <div class="ob-step-inner">
             <h1 class="ob-step-title">Wat voor Nederlands wil je leren?</h1>
+            <p class="ob-step-sub">Kies wat je wilt verbeteren. Je kunt meerdere opties kiezen.</p>
             <div class="select-grid select-grid-3" id="goal-grid">
 
               <div class="select-card" data-value="Alledaags" onclick="toggleGoal(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">💬</span>
                 <p class="select-card-title">Alledaags</p>
                 <p class="select-card-sub">Dagelijkse gesprekken en situaties</p>
               </div>
 
               <div class="select-card" data-value="Professioneel" onclick="toggleGoal(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">💼</span>
                 <p class="select-card-title">Professioneel</p>
                 <p class="select-card-sub">Zakelijke communicatie en werk</p>
               </div>
 
               <div class="select-card" data-value="Academisch" onclick="toggleGoal(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">🎓</span>
                 <p class="select-card-title">Academisch</p>
                 <p class="select-card-sub">Universitair en wetenschappelijk taalgebruik</p>
               </div>
 
               <div class="select-card" data-value="Literair" onclick="toggleGoal(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">📚</span>
                 <p class="select-card-title">Literair</p>
                 <p class="select-card-sub">Poëzie, literatuur en schrijfstijl</p>
               </div>
 
               <div class="select-card" data-value="Spreektaal" onclick="toggleGoal(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">🏄</span>
                 <p class="select-card-title">Spreektaal</p>
                 <p class="select-card-sub">Informeel, dialect en straattaal</p>
               </div>
 
               <div class="select-card" data-value="Reizen" onclick="toggleGoal(this)">
                 <div class="select-card-check">
-                  <svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg>
+                  <svg viewBox="0 0 10 8" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 3.5,6.5 9,1.5"/></svg>
                 </div>
+                <span class="select-card-emoji">✈️</span>
                 <p class="select-card-title">Reizen</p>
                 <p class="select-card-sub">Praktisch Nederlands voor onderweg</p>
               </div>
 
             </div>
-            <button class="ob-next-btn hidden" id="step1-next" onclick="goToStep(2)">Volgende →</button>
+            <button class="ob-next-btn hidden" id="goal-next" onclick="goToStep(3)">Volgende →</button>
           </div>
         </div>
 
-        <!-- Stap 3: Account aanmaken -->
+        <!-- ── Step 3: Account aanmaken ────────────────────────── -->
         <div class="ob-step">
           <div class="ob-step-inner">
-            <h1 class="ob-step-title">Maak je account aan</h1>
+            <h1 class="ob-step-title">Bijna klaar!</h1>
+            <p class="ob-step-sub">Maak je account aan en begin direct.</p>
             <form id="signup-form" class="ob-form" onsubmit="handleSignup(event)">
               <input type="email" class="auth-input" id="email-input" placeholder="E-mailadres" required autocomplete="email">
 
@@ -479,42 +584,9 @@
 
   <div id="premium-toast" class="premium-toast"></div>
 
-  <!-- ── Footer ─────────────────────────────────────────────────── -->
-  <footer class="site-footer">
-    <div class="site-footer-inner">
-      <div class="site-footer-cols">
-        <div class="site-footer-col">
-          <a href="index.html"><img src="logoreal.png?v=1" alt="Woord van de Dag" class="site-footer-logo"></a>
-          <p class="site-footer-tagline">Eén woord. Elke dag rijker.</p>
-        </div>
-        <div class="site-footer-col">
-          <nav class="site-footer-nav">
-            <a href="woord.html">Woord van de Dag</a>
-            <a href="#">Archief</a>
-            <a href="#">Over Ons</a>
-          </nav>
-        </div>
-        <div class="site-footer-col">
-          <p class="site-footer-social-label">Volg ons</p>
-          <div class="site-footer-socials">
-            <a href="#" aria-label="Instagram" class="site-footer-social-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
-            </a>
-            <a href="#" aria-label="X (Twitter)" class="site-footer-social-link">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.254 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="site-footer-bottom">
-        <p>© 2026 Woord van de Dag. Alle rechten voorbehouden.</p>
-      </div>
-    </div>
-  </footer>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ── Theme ──
+    // ── Theme ──────────────────────────────────────────────────────────────────
     const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const themeToggle = document.getElementById('auth-theme-toggle');
@@ -532,7 +604,7 @@
       applyTheme(next);
     });
 
-    // ── Supabase ──
+    // ── Supabase ───────────────────────────────────────────────────────────────
     const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -540,47 +612,59 @@
       if (data.session) window.location.replace('woord.html');
     });
 
-    // ── State ──
+    // ── State ──────────────────────────────────────────────────────────────────
     let selectedLevel = null;
-    let selectedGoal  = null;
+    let selectedGoals = [];
 
-    // ── Step navigation ──
+    // ── Step navigation ────────────────────────────────────────────────────────
+    // index: 0=welcome, 1=niveau, 2=leerdoelen, 3=account
     function goToStep(index) {
       document.getElementById('ob-steps-track').style.transform = `translateX(-${index * 100}%)`;
-      document.getElementById('ob-progress-fill').style.width = `${(index + 1) / 3 * 100}%`;
-      document.querySelectorAll('.ob-dot').forEach((d, i) => d.classList.toggle('active', i <= index));
+
+      const progress = document.getElementById('ob-progress');
+      const fill     = document.getElementById('ob-progress-fill');
+      const counter  = document.getElementById('ob-step-counter');
+
+      if (index === 0) {
+        progress.classList.remove('visible');
+        counter.classList.remove('visible');
+      } else {
+        fill.style.width      = `${Math.round(index / 3 * 100)}%`;
+        counter.textContent   = `Stap ${index} van 3`;
+        progress.classList.add('visible');
+        counter.classList.add('visible');
+      }
     }
 
-    // ── Step 1: single-select level ──
+    // ── Step 1: single-select level ───────────────────────────────────────────
     function selectLevel(card) {
       document.querySelectorAll('#level-grid .select-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selectedLevel = card.dataset.value;
-      document.getElementById('step0-next').classList.remove('hidden');
+      document.getElementById('level-next').classList.remove('hidden');
     }
 
-    // ── Step 2: single-select goal (click again to deselect) ──
+    // ── Step 2: multi-select goals ────────────────────────────────────────────
     function toggleGoal(card) {
       const v = card.dataset.value;
-      const isSelected = card.classList.contains('selected');
-      document.querySelectorAll('#goal-grid .select-card').forEach(c => c.classList.remove('selected'));
-      if (!isSelected) {
-        card.classList.add('selected');
-        selectedGoal = v;
+      if (card.classList.contains('selected')) {
+        card.classList.remove('selected');
+        selectedGoals = selectedGoals.filter(g => g !== v);
       } else {
-        selectedGoal = null;
+        card.classList.add('selected');
+        selectedGoals.push(v);
       }
-      document.getElementById('step1-next').classList.toggle('hidden', selectedGoal === null);
+      document.getElementById('goal-next').classList.toggle('hidden', selectedGoals.length === 0);
     }
 
-    // ── Step 3: password match ──
+    // ── Step 3: password match ────────────────────────────────────────────────
     function checkPasswords() {
       const pw   = document.getElementById('password-input').value;
       const conf = document.getElementById('confirm-input').value;
       document.getElementById('pw-mismatch').classList.toggle('show', !!conf && pw !== conf);
     }
 
-    // ── Step 3: submit ──
+    // ── Step 3: submit ────────────────────────────────────────────────────────
     async function handleSignup(e) {
       e.preventDefault();
       const email    = document.getElementById('email-input').value.trim();
@@ -638,7 +722,7 @@
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${data.session.access_token}`,
             },
-            body: JSON.stringify({ niveau: selectedLevel, leerdoelen: selectedGoal ? [selectedGoal] : [] }),
+            body: JSON.stringify({ niveau: selectedLevel, leerdoelen: selectedGoals }),
           });
         } catch (_) {}
       }
@@ -646,7 +730,7 @@
       showSuccess();
     }
 
-    // ── Success animation ──
+    // ── Success animation ─────────────────────────────────────────────────────
     function showSuccess() {
       const page = document.getElementById('ob-page');
       page.style.transition = 'opacity 0.4s ease';
