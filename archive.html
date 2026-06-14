@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archief — Woord van de Dag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#C4714A">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .hidden { display: none; }
+    body { opacity: 0; transition: opacity 0.3s ease; }
+    body.loaded { opacity: 1; }
+
+    /* ── Nav ── */
+    .lnav { position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 56px;background:var(--bg);border-bottom:1px solid var(--border);transition:box-shadow 0.3s ease; }
+    .lnav.scrolled { box-shadow:0 2px 24px rgba(0,0,0,0.06); }
+    .lnav-left { flex:1;display:flex;align-items:center; }
+    .lnav-logo { height:44px;width:auto;display:block; }
+    .lnav-center { flex:1;display:flex;justify-content:center; }
+    .lnav-links { display:flex;align-items:center;gap:36px;list-style:none; }
+    .lnav-links a { font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s; }
+    .lnav-links a:hover { color:var(--text); }
+    .lnav-right { flex:1;display:flex;align-items:center;justify-content:flex-end;gap:10px; }
+    .lnav-theme { background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;padding:4px;border-radius:6px;transition:color 0.2s;margin-right:6px; }
+    .lnav-theme:hover { color:var(--text); }
+    .lnav-theme svg { width:18px;height:18px; }
+    .lnav-login { font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;padding:7px 18px;background:#C4714A;color:#fff;border:none;border-radius:20px;cursor:pointer;text-decoration:none;transition:opacity 0.2s; }
+    .lnav-login:hover { opacity:0.85; }
+    .lnav-signup { font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;padding:6px 18px;background:transparent;color:var(--text);border:1.5px solid var(--border);border-radius:20px;cursor:pointer;text-decoration:none;transition:border-color 0.2s,color 0.2s; }
+    .lnav-signup:hover { border-color:#C4714A;color:#C4714A; }
+
+    /* ── Footer ── */
+    .lfooter { border-top:1px solid var(--border);padding:32px 56px;display:flex;align-items:center;justify-content:space-between; }
+    .lfooter-logo { height:32px;width:auto; }
+    .lfooter-links { display:flex;align-items:center;gap:28px; }
+    .lfooter-links a { font-family:'Inter',sans-serif;font-size:0.8rem;color:var(--muted);text-decoration:none;transition:color 0.2s; }
+    .lfooter-links a:hover { color:var(--text); }
+    .lfooter-copy { font-family:'Inter',sans-serif;font-size:0.75rem;color:var(--muted); }
+
+    /* ── Scroll animation ── */
+    .fade-up { opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease; }
+    .fade-up.visible { opacity:1;transform:translateY(0); }
+
+    /* ── Hero ── */
+    .archive-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 140px 56px 72px;
+      text-align: center;
+    }
+    .archive-hero-ghost {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fraunces', serif;
+      font-size: clamp(7rem, 22vw, 18rem);
+      font-weight: 600;
+      font-style: italic;
+      color: var(--text);
+      opacity: 0.04;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .archive-hero-inner { position: relative; z-index: 1; }
+    .archive-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .archive-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(4rem, 9vw, 7rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.0;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    .archive-subline {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Search ── */
+    .archive-search-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 0 56px 48px;
+    }
+    .archive-search {
+      width: 100%;
+      max-width: 800px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--panel-bg, var(--bg));
+      border: 1.5px solid var(--border);
+      border-radius: 40px;
+      padding: 13px 24px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .archive-search::placeholder { color: var(--muted); }
+    .archive-search:focus { border-color: #C4714A; box-shadow: 0 0 0 3px rgba(196,113,74,0.12); }
+
+    /* ── List ── */
+    .archive-list-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 56px 80px;
+    }
+    .archive-status {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 48px 0;
+    }
+    .archive-list { border-top: 1px solid var(--border); }
+    .archive-row {
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .archive-row:hover { background: rgba(196,113,74,0.04); }
+    .archive-row[data-hidden="true"] { display: none; }
+    .archive-row-head {
+      display: grid;
+      grid-template-columns: 110px 1fr auto 28px;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 12px;
+    }
+    .archive-row-date {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .archive-row-word {
+      font-family: 'Fraunces', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: #C4714A;
+      text-align: center;
+      letter-spacing: -0.01em;
+    }
+    .archive-row-pos {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.76rem;
+      font-style: italic;
+      color: var(--muted);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .archive-row-chevron {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      color: var(--muted);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+    .archive-row-chevron svg { width: 16px; height: 16px; }
+    .archive-row.open .archive-row-chevron { transform: rotate(180deg); }
+
+    /* ── Expand ── */
+    .archive-row-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .archive-row.open .archive-row-body { max-height: 600px; }
+    .archive-row-body-inner {
+      padding: 0 12px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .archive-definition {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .archive-etymology-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #C4714A;
+      margin-bottom: 4px;
+    }
+    .archive-etymology-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .archive-example {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 0.98rem;
+      color: var(--text);
+      line-height: 1.65;
+      border-left: 3px solid #C4714A;
+      padding-left: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .lnav { padding: 12px 24px; }
+      .lnav-center { display: none; }
+      .lnav-signup { display: none; }
+      .lfooter { flex-direction: column; gap: 20px; text-align: center; padding: 32px 24px; }
+      .lfooter-links { flex-wrap: wrap; justify-content: center; }
+      .archive-hero { padding: 120px 24px 56px; }
+      .archive-search-wrap { padding: 0 24px 36px; }
+      .archive-list-wrap { padding: 0 24px 60px; }
+      .archive-row-head { grid-template-columns: 90px 1fr auto 24px; gap: 8px; padding: 14px 8px; }
+      .archive-row-body-inner { padding: 0 8px 20px; }
+    }
+    @media (max-width: 560px) {
+      .archive-row-head { grid-template-columns: 1fr auto 20px; }
+      .archive-row-date { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="lnav" id="lnav">
+  <div class="lnav-left">
+    <a href="index.html"><img src="logoreal.png?v=2" alt="Woord van de Dag" class="lnav-logo"></a>
+  </div>
+  <div class="lnav-center">
+    <ul class="lnav-links">
+      <li><a href="woord.html">Woord van de Dag</a></li>
+      <li><a href="archive.html" style="color:var(--text);">Archief</a></li>
+      <li><a href="over.html">Over Ons</a></li>
+    </ul>
+  </div>
+  <div class="lnav-right">
+    <button class="lnav-theme" id="lnav-theme" aria-label="Thema wisselen">
+      <svg id="lnav-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg id="lnav-moon" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <a href="login.html" class="lnav-login">Inloggen</a>
+    <a href="signup.html" class="lnav-signup">Account aanmaken</a>
+  </div>
+</nav>
+
+<main>
+  <section class="archive-hero">
+    <div class="archive-hero-ghost">archief</div>
+    <div class="archive-hero-inner fade-up">
+      <p class="archive-eyebrow">Woord van de Dag</p>
+      <h1 class="archive-title">Archief</h1>
+      <p class="archive-subline">Elk woord dat ooit verscheen, op één plek.</p>
+    </div>
+  </section>
+
+  <div class="archive-search-wrap fade-up">
+    <input
+      type="search"
+      class="archive-search"
+      id="archive-search"
+      placeholder="Zoek een woord…"
+      autocomplete="off"
+      spellcheck="false"
+    >
+  </div>
+
+  <div class="archive-list-wrap">
+    <div id="archive-status" class="archive-status">Woorden laden…</div>
+    <div class="archive-list" id="archive-list" style="display:none;"></div>
+  </div>
+</main>
+
+<footer class="lfooter">
+  <a href="index.html"><img src="logoreal.png?v=2" alt="Woord van de Dag" class="lfooter-logo"></a>
+  <div class="lfooter-links">
+    <a href="archive.html">Archief</a>
+    <a href="over.html">Over Ons</a>
+    <a href="#">Contact</a>
+  </div>
+  <p class="lfooter-copy">© 2025 Woord van de Dag</p>
+</footer>
+
+<script>
+// Theme
+const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+const lnavSun = document.getElementById('lnav-sun');
+const lnavMoon = document.getElementById('lnav-moon');
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('wordOfTheDay:theme', t);
+  lnavSun.classList.toggle('hidden', t === 'dark');
+  lnavMoon.classList.toggle('hidden', t !== 'dark');
+}
+applyTheme(savedTheme);
+document.getElementById('lnav-theme').addEventListener('click', () => {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+// Nav shadow on scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('lnav').classList.toggle('scrolled', window.scrollY > 8);
+}, { passive: true });
+
+// Page fade-in
+requestAnimationFrame(() => document.body.classList.add('loaded'));
+
+// Page fade-out on navigation
+document.querySelectorAll('a[href]').forEach(a => {
+  const h = a.getAttribute('href');
+  if (!h || h.startsWith('#') || h.startsWith('http') || h.startsWith('mailto') || a.target === '_blank') return;
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.body.classList.remove('loaded');
+    setTimeout(() => window.location.href = h, 280);
+  });
+});
+
+// Scroll fade-in
+const fadeObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); fadeObs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => fadeObs.observe(el));
+
+// Auth: swap nav if logged in
+(async () => {
+  if (!window.supabase) return;
+  const sb = window.supabase.createClient('https://lanmsexkozkrttiydtsm.supabase.co', 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37');
+  const { data } = await sb.auth.getSession();
+  if (data?.session) {
+    const login = document.querySelector('.lnav-login');
+    const signup = document.querySelector('.lnav-signup');
+    if (login) { login.textContent = 'Mijn woord'; login.href = 'woord.html'; }
+    if (signup) { signup.textContent = 'Mijn profiel'; signup.href = 'woord.html'; }
+  }
+})();
+
+// Archive
+(async () => {
+  const sb = window.supabase.createClient('https://lanmsexkozkrttiydtsm.supabase.co', 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37');
+  const statusEl = document.getElementById('archive-status');
+  const listEl = document.getElementById('archive-list');
+  const searchEl = document.getElementById('archive-search');
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString('nl-NL', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+  }
+
+  function buildRow(row) {
+    const div = document.createElement('div');
+    div.className = 'archive-row';
+    div.setAttribute('data-word', (row.word || '').toLowerCase());
+
+    let bodyHTML = '';
+    if (row.definition) {
+      bodyHTML += `<p class="archive-definition">${row.definition}</p>`;
+    }
+    if (row.etymology) {
+      bodyHTML += `<div><p class="archive-etymology-label">Etymologie</p><p class="archive-etymology-text">${row.etymology}</p></div>`;
+    }
+    if (row.example || row.exampleSentence) {
+      bodyHTML += `<p class="archive-example">${row.example || row.exampleSentence}</p>`;
+    }
+
+    div.innerHTML = `
+      <div class="archive-row-head">
+        <span class="archive-row-date">${formatDate(row.date)}</span>
+        <span class="archive-row-word">${row.word || ''}</span>
+        <span class="archive-row-pos">${row.pos || ''}</span>
+        <span class="archive-row-chevron">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </span>
+      </div>
+      <div class="archive-row-body">
+        <div class="archive-row-body-inner">${bodyHTML}</div>
+      </div>
+    `;
+
+    div.querySelector('.archive-row-head').addEventListener('click', () => {
+      div.classList.toggle('open');
+    });
+
+    return div;
+  }
+
+  const { data, error } = await sb
+    .from('word_archive')
+    .select('*')
+    .order('date', { ascending: false });
+
+  if (error) {
+    statusEl.textContent = 'Kon de woorden niet laden. Probeer het later opnieuw.';
+    return;
+  }
+  if (!data || data.length === 0) {
+    statusEl.textContent = 'Nog geen woorden in het archief.';
+    return;
+  }
+
+  statusEl.style.display = 'none';
+  listEl.style.display = 'block';
+  data.forEach(row => listEl.appendChild(buildRow(row)));
+
+  searchEl.addEventListener('input', () => {
+    const q = searchEl.value.trim().toLowerCase();
+    document.querySelectorAll('.archive-row').forEach(row => {
+      const word = row.getAttribute('data-word') || '';
+      row.setAttribute('data-hidden', q && !word.includes(q) ? 'true' : 'false');
+    });
+  });
+})();
+</script>
+</body>
+</html>
