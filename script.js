@@ -607,24 +607,35 @@ document.getElementById('profile-save-btn').addEventListener('click', async () =
   btn.textContent = 'Opslaan…';
   status.textContent = '';
 
-  const { error } = await sbClient
-    .from('user_profiles')
-    .upsert({
-      user_id:    sbSession.user.id,
-      niveau:     profileNiveau,
-      leerdoelen: Array.from(profileGoals),
-    }, { onConflict: 'user_id' });
+  try {
+    const r = await fetch('/api/save-profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sbSession.access_token}`,
+      },
+      body: JSON.stringify({
+        niveau:     profileNiveau,
+        leerdoelen: Array.from(profileGoals),
+      }),
+    });
 
-  btn.disabled    = false;
-  btn.textContent = 'Opslaan';
+    btn.disabled    = false;
+    btn.textContent = 'Opslaan';
 
-  if (error) {
-    status.textContent = 'Er is iets misgegaan. Probeer het opnieuw.';
-    status.style.color = '#c4554d';
-  } else {
+    if (!r.ok) {
+      const body = await r.json().catch(() => ({}));
+      throw new Error(body.error || r.status);
+    }
     status.textContent = 'Voorkeuren opgeslagen ✓';
     status.style.color = '#C4714A';
     setTimeout(() => { status.textContent = ''; }, 3000);
+  } catch (e) {
+    btn.disabled    = false;
+    btn.textContent = 'Opslaan';
+    status.textContent = 'Er is iets misgegaan. Probeer het opnieuw.';
+    status.style.color = '#c4554d';
+    console.error('[profile save]', e);
   }
 });
 

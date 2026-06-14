@@ -586,15 +586,17 @@
         return;
       }
 
-      // Save profile
-      if (data.user) {
+      // Save profile via server (bypasses RLS)
+      if (data.user && data.session) {
         try {
-          await sb.from('user_profiles').upsert({
-            user_id: data.user.id,
-            niveau: selectedLevel,
-            leerdoelen: selectedGoals,
-            created_at: new Date().toISOString()
-          }, { onConflict: 'user_id' });
+          await fetch('/api/save-profile', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${data.session.access_token}`,
+            },
+            body: JSON.stringify({ niveau: selectedLevel, leerdoelen: selectedGoals }),
+          });
         } catch (_) {}
       }
 

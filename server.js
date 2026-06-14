@@ -323,6 +323,27 @@ app.post('/api/check-email', async (req, res) => {
   }
 });
 
+app.post('/api/save-profile', async (req, res) => {
+  if (!sb) return res.status(503).json({ error: 'Auth unavailable' });
+
+  const auth  = req.headers['authorization'] || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { data: { user }, error: authError } = await sb.auth.getUser(token);
+  if (authError || !user) return res.status(401).json({ error: 'Invalid token' });
+
+  const { niveau, leerdoelen } = req.body || {};
+
+  const { error } = await sb.from('user_profiles').upsert(
+    { user_id: user.id, niveau: niveau || null, leerdoelen: leerdoelen || [] },
+    { onConflict: 'user_id' }
+  );
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ ok: true });
+});
+
 app.use(express.static(path.join(__dirname), {
   setHeaders: (res) => res.set('Cache-Control', 'no-cache')
 }));
