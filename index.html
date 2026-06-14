@@ -29,7 +29,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 48px;
-      padding: 18px 64px;
+      padding: 10px 64px;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
       transition: box-shadow 0.3s ease;
@@ -42,7 +42,7 @@
       display: flex;
       align-items: center;
     }
-    .lnav-logo { height: 48px; width: auto; display: block; image-rendering: auto; }
+    .lnav-logo { height: 52px; width: auto; display: block; }
     .lnav-center {
       flex: 1;
       display: flex;
@@ -56,11 +56,11 @@
     }
     .lnav-links a {
       font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      letter-spacing: 0.09em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: #2a2a2a;
       text-decoration: none;
       transition: color 0.2s;
     }
@@ -151,7 +151,7 @@
     }
     .hero-eyebrow {
       font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.8rem;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -249,7 +249,7 @@
     }
     .section-eyebrow {
       font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.8rem;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -337,7 +337,7 @@
     .preview-pos {
       display: inline-block;
       font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.8rem;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -596,6 +596,17 @@
       .lfooter { flex-direction: column; gap: 20px; text-align: center; }
       .lfooter-links { flex-wrap: wrap; justify-content: center; }
     }
+
+    /* ── Nav search ── */
+    .lnav-search-wrap { display:flex;align-items:center;margin-right:4px; }
+    .lnav-search-input { width:0;overflow:hidden;border:none;border-bottom:1.5px solid transparent;outline:none;font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--text);background:transparent;padding:2px 0;transition:width 0.3s ease,border-color 0.2s,opacity 0.15s;opacity:0;pointer-events:none; }
+    .lnav-search-input::placeholder { color:var(--muted); }
+    .lnav-search-input.open { width:220px;opacity:1;pointer-events:auto;border-bottom-color:#C4714A;padding:2px 8px; }
+    .lnav-search-btn { background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;padding:6px;border-radius:6px;transition:color 0.2s;flex-shrink:0; }
+    .lnav-search-btn:hover { color:var(--text); }
+    .lnav-search-btn svg { width:17px;height:17px; }
+    html[data-theme="dark"] .lnav-links a { color:rgba(255,255,255,0.75); }
+    html[data-theme="dark"] .lnav-links a:hover { color:#fff; }
   </style>
 </head>
 <body>
@@ -613,6 +624,12 @@
       </ul>
     </div>
     <div class="lnav-right">
+    <div class="lnav-search-wrap" id="lnav-search-wrap">
+      <input type="text" class="lnav-search-input" id="lnav-search-input" placeholder="Zoek een woord…" autocomplete="off" spellcheck="false">
+      <button class="lnav-search-btn" id="lnav-search-btn" aria-label="Zoeken">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      </button>
+    </div>
       <button class="lnav-theme" id="lnav-theme" aria-label="Thema wisselen">
         <svg id="lnav-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -897,6 +914,33 @@
         setTimeout(() => window.location.href = h, 280);
       });
     });
-  </script>
+  
+// Nav search
+(function() {
+  const lsBtn = document.getElementById('lnav-search-btn');
+  const lsInput = document.getElementById('lnav-search-input');
+  let lsOpen = false;
+  function lsExpand() {
+    lsOpen = true;
+    lsInput.classList.add('open');
+    setTimeout(() => lsInput.focus(), 320);
+  }
+  function lsCollapse() {
+    lsOpen = false;
+    lsInput.classList.remove('open');
+    lsInput.value = '';
+    const ps = document.getElementById('archive-search');
+    if (ps) { ps.value = ''; ps.dispatchEvent(new Event('input')); }
+  }
+  lsBtn.addEventListener('click', e => { e.stopPropagation(); lsOpen ? lsCollapse() : lsExpand(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && lsOpen) lsCollapse(); });
+  document.addEventListener('click', e => { if (lsOpen && !e.target.closest('.lnav-search-wrap')) lsCollapse(); });
+  lsInput.addEventListener('input', () => {
+    const ps = document.getElementById('archive-search');
+    if (ps) { ps.value = lsInput.value; ps.dispatchEvent(new Event('input')); }
+  });
+})();
+
+</script>
 </body>
 </html>
