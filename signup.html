@@ -90,63 +90,113 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
+      max-width: 480px;
     }
     .ob-welcome-logo {
-      height: 52px;
+      height: 56px;
       width: auto;
-      margin-bottom: 52px;
+      margin-bottom: 48px;
     }
     .ob-welcome-headline {
       font-family: 'Fraunces', serif;
-      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-size: 2.8rem;
       font-weight: 400;
-      line-height: 1.2;
+      line-height: 1.15;
       color: var(--text);
-      margin: 0 0 14px;
+      margin: 0;
       letter-spacing: -0.01em;
     }
     .ob-welcome-sub {
       font-family: 'Inter', sans-serif;
       font-size: 1rem;
-      color: var(--muted);
-      margin: 0 0 48px;
-      line-height: 1.6;
-    }
-    .ob-feature-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 56px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      text-align: left;
-      width: 100%;
-      max-width: 400px;
-    }
-    .ob-feature-list li {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.92rem;
-      color: var(--muted);
+      font-weight: 400;
+      color: #999;
+      margin: 32px 0 0;
       line-height: 1.5;
     }
-    .ob-begin-btn {
-      display: block;
+    /* ── Benefits card ────────────────────────────────────────── */
+    .ob-benefits-card {
+      margin: 40px 0 0;
+      background: rgba(196, 113, 74, 0.06);
+      border-radius: 16px;
+      padding: 32px 40px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
       width: 100%;
-      max-width: 400px;
-      height: 54px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: left;
+    }
+    .ob-benefit-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .ob-benefit-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #C4714A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ob-benefit-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+    .ob-benefit-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-top: 1px;
+    }
+    .ob-benefit-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+      line-height: 1.3;
+    }
+    .ob-benefit-desc {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.4;
+    }
+    /* ── Begin button ─────────────────────────────────────────── */
+    .ob-begin-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      height: 52px;
       background: #C4714A;
       color: #fff;
       border: none;
-      border-radius: 999px;
+      border-radius: 12px;
       font-family: 'Inter', sans-serif;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       letter-spacing: 0.01em;
-      transition: opacity 0.2s ease, transform 0.15s ease;
+      margin-top: 4px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
-    .ob-begin-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-    .ob-begin-btn:active { transform: scale(0.98); opacity: 1; }
+    .ob-begin-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(196, 113, 74, 0.35);
+    }
+    .ob-begin-btn:active { transform: scale(0.98); }
+    .ob-begin-arrow {
+      display: inline-block;
+      transition: transform 0.25s ease;
+    }
+    .ob-begin-btn:hover .ob-begin-arrow { transform: translateX(4px); }
 
     /* ── Step headings ────────────────────────────────────────── */
     .ob-step-title {
@@ -369,6 +419,7 @@
       .ob-step-title { font-size: 1.4rem; }
       .ob-welcome-headline { font-size: 1.8rem; }
       .ob-step { padding: 56px 20px 60px; }
+      .ob-benefits-card { padding: 24px 24px; }
     }
     @media (max-width: 340px) {
       .select-grid-2, .select-grid-3 { grid-template-columns: 1fr; }
@@ -405,14 +456,51 @@
             <a href="index.html">
               <img src="logoreal.png?v=2" alt="Woord van de Dag" class="ob-welcome-logo">
             </a>
-            <h1 class="ob-welcome-headline">Welkom bij<br>Woord van de Dag</h1>
-            <p class="ob-welcome-sub">Personaliseer je ervaring in 30 seconden.</p>
-            <ul class="ob-feature-list">
-              <li>📖 Eén zorgvuldig gekozen woord per dag</li>
-              <li>🔥 Bouw een dagelijkse leerstreak op</li>
-              <li>✨ Ontdek de rijkdom van de Nederlandse taal</li>
-            </ul>
-            <button class="ob-begin-btn" onclick="goToStep(1)">Begin →</button>
+            <h1 class="ob-welcome-headline">Welkom bij Woord van de Dag</h1>
+            <p class="ob-welcome-sub">Personaliseer je ervaring in 30 seconden</p>
+            <div class="ob-benefits-card">
+              <!-- Benefit 1: open book -->
+              <div class="ob-benefit-row">
+                <div class="ob-benefit-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                  </svg>
+                </div>
+                <div class="ob-benefit-text">
+                  <p class="ob-benefit-label">Eén woord per dag</p>
+                  <p class="ob-benefit-desc">Zorgvuldig gekozen uit de rijke Nederlandse taal</p>
+                </div>
+              </div>
+              <!-- Benefit 2: flame -->
+              <div class="ob-benefit-row">
+                <div class="ob-benefit-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/>
+                  </svg>
+                </div>
+                <div class="ob-benefit-text">
+                  <p class="ob-benefit-label">Bouw je streak op</p>
+                  <p class="ob-benefit-desc">Kom elke dag terug en zie je vooruitgang</p>
+                </div>
+              </div>
+              <!-- Benefit 3: bookmark -->
+              <div class="ob-benefit-row">
+                <div class="ob-benefit-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </div>
+                <div class="ob-benefit-text">
+                  <p class="ob-benefit-label">Jouw persoonlijke woordenboek</p>
+                  <p class="ob-benefit-desc">Sla woorden op die jou raken</p>
+                </div>
+              </div>
+              <!-- CTA button inside card -->
+              <button class="ob-begin-btn" onclick="goToStep(1)">
+                Begin <span class="ob-begin-arrow">→</span>
+              </button>
+            </div>
           </div>
         </div>
 
