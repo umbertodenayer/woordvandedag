@@ -718,7 +718,7 @@
         animation: none !important;
         opacity: 0.04;
       }
-      #illus-p1, #illus-p2, #illus-p3 {
+      .illus-parallax {
         animation: none !important;
         opacity: 1;
       }
@@ -760,19 +760,33 @@
       pointer-events: none;
       opacity: 0; /* must stay 0 until illusReveal fires */
     }
-    /* Staggered: start after CTA buttons are fully visible (~3.906s + 0.93s = 4.836s) */
-    #illus-p1 { animation: illusReveal 0.9s ease 4.1s both; }
-    #illus-p3 { animation: illusReveal 0.9s ease 4.3s both; }
-    #illus-p2 { animation: illusReveal 0.9s ease 4.5s both; }
+    /* Staggered entrance: 10 cards reveal after CTA sequence, alternating left/right */
+    #illus-l1 { animation: illusReveal 0.9s ease 4.10s both; }
+    #illus-r1 { animation: illusReveal 0.9s ease 4.18s both; }
+    #illus-l2 { animation: illusReveal 0.9s ease 4.26s both; }
+    #illus-r2 { animation: illusReveal 0.9s ease 4.34s both; }
+    #illus-l3 { animation: illusReveal 0.9s ease 4.42s both; }
+    #illus-r3 { animation: illusReveal 0.9s ease 4.50s both; }
+    #illus-l4 { animation: illusReveal 0.9s ease 4.58s both; }
+    #illus-r4 { animation: illusReveal 0.9s ease 4.66s both; }
+    #illus-l5 { animation: illusReveal 0.9s ease 4.74s both; }
+    #illus-r5 { animation: illusReveal 0.9s ease 4.82s both; }
 
     /* Layer 2 — float wrapper: CSS animation only, independent of parallax */
     .illus-float {
       will-change: transform;
       animation: float 4s ease-in-out infinite alternate;
     }
-    #illus-p1 .illus-float { animation-delay: 0s; }
-    #illus-p2 .illus-float { animation-delay: 1.3s; }
-    #illus-p3 .illus-float { animation-delay: 0.7s; }
+    #illus-l1 .illus-float { animation-delay: 0s;    }
+    #illus-l2 .illus-float { animation-delay: 0.5s;  }
+    #illus-l3 .illus-float { animation-delay: 1.0s;  }
+    #illus-l4 .illus-float { animation-delay: 1.5s;  }
+    #illus-l5 .illus-float { animation-delay: 2.0s;  }
+    #illus-r1 .illus-float { animation-delay: 0.25s; }
+    #illus-r2 .illus-float { animation-delay: 0.75s; }
+    #illus-r3 .illus-float { animation-delay: 1.25s; }
+    #illus-r4 .illus-float { animation-delay: 1.75s; }
+    #illus-r5 .illus-float { animation-delay: 2.25s; }
 
     /* Layer 3 — card: rotation + skeleton bg (invisible against page until img loads) */
     .illus-card {
@@ -842,24 +856,73 @@
 
   <!-- ── Hero ───────────────────────────────────────────────── -->
   <section class="hero">
-    <!-- Illustration cards: visible only at ≥1200px. src set dynamically by JS. -->
-    <div class="illus-parallax" id="illus-p1" style="left:3%;top:50%">
+    <!-- Illustration cards: 5 left + 5 right, visible only at ≥1200px. src set by JS. -->
+    <div class="illus-parallax" id="illus-l1" style="left:2%;top:5%">
       <div class="illus-float">
-        <div class="illus-card loading" style="transform:translateY(-60%) rotate(-5deg);width:210px">
+        <div class="illus-card loading" style="transform:rotate(-5deg);width:200px">
           <img alt="" class="illus-img">
         </div>
       </div>
     </div>
-    <div class="illus-parallax illus-right" id="illus-p2" style="right:2%;top:25%">
+    <div class="illus-parallax" id="illus-l2" style="left:7%;top:24%">
       <div class="illus-float">
-        <div class="illus-card loading" style="transform:rotate(4deg);width:190px">
+        <div class="illus-card loading" style="transform:rotate(-3deg);width:170px">
           <img alt="" class="illus-img">
         </div>
       </div>
     </div>
-    <div class="illus-parallax" id="illus-p3" style="left:6%;top:72%">
+    <div class="illus-parallax" id="illus-l3" style="left:1%;top:44%">
       <div class="illus-float">
-        <div class="illus-card loading" style="transform:rotate(-3deg);width:180px">
+        <div class="illus-card loading" style="transform:rotate(-6deg);width:215px">
+          <img alt="" class="illus-img">
+        </div>
+      </div>
+    </div>
+    <div class="illus-parallax" id="illus-l4" style="left:8%;top:63%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(-2deg);width:165px">
+          <img alt="" class="illus-img">
+        </div>
+      </div>
+    </div>
+    <div class="illus-parallax" id="illus-l5" style="left:3%;top:80%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(-4deg);width:190px">
+          <img alt="" class="illus-img">
+        </div>
+      </div>
+    </div>
+    <div class="illus-parallax illus-right" id="illus-r1" style="right:3%;top:12%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(4deg);width:185px">
+          <img alt="" class="illus-img">
+        </div>
+      </div>
+    </div>
+    <div class="illus-parallax illus-right" id="illus-r2" style="right:7%;top:31%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(6deg);width:210px">
+          <img alt="" class="illus-img">
+        </div>
+      </div>
+    </div>
+    <div class="illus-parallax illus-right" id="illus-r3" style="right:2%;top:50%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(3deg);width:165px">
+          <img alt="" class="illus-img">
+        </div>
+      </div>
+    </div>
+    <div class="illus-parallax illus-right" id="illus-r4" style="right:6%;top:68%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(5deg);width:205px">
+          <img alt="" class="illus-img">
+        </div>
+      </div>
+    </div>
+    <div class="illus-parallax illus-right" id="illus-r5" style="right:1%;top:85%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(2deg);width:175px">
           <img alt="" class="illus-img">
         </div>
       </div>
@@ -1054,12 +1117,36 @@
       'illustration-1.png',
       'illustration-2.png',
       'illustration-3.png',
+      'illustration-4.png',
+      'illustration-5.png',
+      'illustration-6.png',
+      'illustration-7.png',
+      'illustration-8.png',
+      'illustration-9.png',
+      'illustration-10.png',
+      'illustration-11.png',
+      'illustration-12.png',
+      'illustration-13.png',
+      'illustration-14.png',
+      'illustration-15.png',
+      'illustration-16.png',
+      'illustration-17.png',
+      'illustration-18.png',
+      'illustration-19.png',
+      'illustration-20.png',
     ];
 
     const illusSlots = [
-      document.getElementById('illus-p1'),
-      document.getElementById('illus-p2'),
-      document.getElementById('illus-p3'),
+      document.getElementById('illus-l1'),
+      document.getElementById('illus-l2'),
+      document.getElementById('illus-l3'),
+      document.getElementById('illus-l4'),
+      document.getElementById('illus-l5'),
+      document.getElementById('illus-r1'),
+      document.getElementById('illus-r2'),
+      document.getElementById('illus-r3'),
+      document.getElementById('illus-r4'),
+      document.getElementById('illus-r5'),
     ];
 
     function illusPickUnique(n, exclude) {
@@ -1085,31 +1172,34 @@
       };
     }
 
-    let currentIllus = illusPickUnique(3, []);
+    let currentIllus = illusPickUnique(10, []);
     illusSlots.forEach((slot, i) => illusLoad(slot, currentIllus[i]));
 
-    // After entrance completes (last illusReveal: 4.5s + 0.9s = 5.4s),
-    // release CSS animation fill-mode so inline opacity can drive fades.
+    // After entrance completes (last illusReveal: 4.82s + 0.9s = 5.72s),
+    // release CSS animation fill-mode so inline opacity can drive cinematic fades.
     setTimeout(() => {
       illusSlots.forEach(el => {
         el.style.animation  = 'none';
         el.style.transition = 'none';
         el.style.opacity    = '1';
         el.offsetHeight; // force reflow before re-enabling transition
-        el.style.transition = 'opacity 0.8s ease';
+        el.style.transition = 'opacity 2.5s ease-in-out';
       });
 
       setInterval(() => {
+        // Fade out over 2.5s
         illusSlots.forEach(el => { el.style.opacity = '0'; });
+        // Hold 0.5s after fade completes, then swap srcs
         setTimeout(() => {
-          currentIllus = illusPickUnique(3, currentIllus);
+          currentIllus = illusPickUnique(10, currentIllus);
           illusSlots.forEach((slot, i) => illusLoad(slot, currentIllus[i]));
+          // Fade back in over 2.5s
           setTimeout(() => {
             illusSlots.forEach(el => { el.style.opacity = '1'; });
           }, 50);
-        }, 800);
-      }, 30000);
-    }, 5500);
+        }, 3000); // 2500ms fade-out + 500ms hold
+      }, 35000);
+    }, 6200);
 
     // ── If already logged in, swap nav CTAs ─────────────────
     if (window.supabase) {
