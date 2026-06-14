@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Over Ons — Woord van de Dag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#C4714A">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .hidden { display: none; }
+    body { opacity: 0; transition: opacity 0.3s ease; }
+    body.loaded { opacity: 1; }
+
+    /* ── Nav ── */
+    .lnav { position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 56px;background:var(--bg);border-bottom:1px solid var(--border);transition:box-shadow 0.3s ease; }
+    .lnav.scrolled { box-shadow:0 2px 24px rgba(0,0,0,0.06); }
+    .lnav-left { flex:1;display:flex;align-items:center; }
+    .lnav-logo { height:44px;width:auto;display:block; }
+    .lnav-center { flex:1;display:flex;justify-content:center; }
+    .lnav-links { display:flex;align-items:center;gap:36px;list-style:none; }
+    .lnav-links a { font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s; }
+    .lnav-links a:hover { color:var(--text); }
+    .lnav-right { flex:1;display:flex;align-items:center;justify-content:flex-end;gap:10px; }
+    .lnav-theme { background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;padding:4px;border-radius:6px;transition:color 0.2s;margin-right:6px; }
+    .lnav-theme:hover { color:var(--text); }
+    .lnav-theme svg { width:18px;height:18px; }
+    .lnav-login { font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;padding:7px 18px;background:#C4714A;color:#fff;border:none;border-radius:20px;cursor:pointer;text-decoration:none;transition:opacity 0.2s; }
+    .lnav-login:hover { opacity:0.85; }
+    .lnav-signup { font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;padding:6px 18px;background:transparent;color:var(--text);border:1.5px solid var(--border);border-radius:20px;cursor:pointer;text-decoration:none;transition:border-color 0.2s,color 0.2s; }
+    .lnav-signup:hover { border-color:#C4714A;color:#C4714A; }
+
+    /* ── Footer ── */
+    .lfooter { border-top:1px solid var(--border);padding:32px 56px;display:flex;align-items:center;justify-content:space-between; }
+    .lfooter-logo { height:32px;width:auto; }
+    .lfooter-links { display:flex;align-items:center;gap:28px; }
+    .lfooter-links a { font-family:'Inter',sans-serif;font-size:0.8rem;color:var(--muted);text-decoration:none;transition:color 0.2s; }
+    .lfooter-links a:hover { color:var(--text); }
+    .lfooter-copy { font-family:'Inter',sans-serif;font-size:0.75rem;color:var(--muted); }
+
+    /* ── Scroll animation ── */
+    .fade-up { opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease; }
+    .fade-up.visible { opacity:1;transform:translateY(0); }
+
+    /* ── Hero ── */
+    .over-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 140px 56px 80px;
+      text-align: center;
+    }
+    .over-hero-ghost {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fraunces', serif;
+      font-size: clamp(7rem, 22vw, 18rem);
+      font-weight: 600;
+      font-style: italic;
+      color: var(--text);
+      opacity: 0.04;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .over-hero-inner { position: relative; z-index: 1; }
+    .over-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .over-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.8rem, 7vw, 5.2rem);
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.08;
+      margin-bottom: 22px;
+      letter-spacing: -0.02em;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .over-subline {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* ── Section 1: Ons verhaal ── */
+    .over-verhaal {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 80px 56px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+    }
+    .over-verhaal-quote {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 2rem;
+      font-weight: 400;
+      color: #C4714A;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+    .over-verhaal-text {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .over-verhaal-text p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    /* ── Section 2: Onze missie ── */
+    .over-missie {
+      background: var(--panel-bg, rgba(0,0,0,0.025));
+      padding: 96px 56px;
+      text-align: center;
+    }
+    .over-missie-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .over-missie-statement {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      max-width: 760px;
+      margin: 0 auto 40px;
+    }
+    .over-missie-support {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+    .over-missie-support p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── Section 3: CTA ── */
+    .over-cta {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 96px 56px;
+      text-align: center;
+    }
+    .over-cta-section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+    .over-cta-note {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 36px;
+    }
+    .btn-primary {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #fff;
+      background: #C4714A;
+      border: none;
+      border-radius: 40px;
+      padding: 14px 36px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    @media (max-width: 860px) {
+      .lnav { padding: 12px 24px; }
+      .lnav-center { display: none; }
+      .lnav-signup { display: none; }
+      .lfooter { flex-direction: column; gap: 20px; text-align: center; padding: 32px 24px; }
+      .lfooter-links { flex-wrap: wrap; justify-content: center; }
+      .over-hero { padding: 120px 24px 64px; }
+      .over-verhaal { grid-template-columns: 1fr; gap: 36px; padding: 64px 24px; }
+      .over-verhaal-quote { font-size: 1.65rem; }
+      .over-missie { padding: 72px 24px; }
+      .over-cta { padding: 72px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="lnav" id="lnav">
+  <div class="lnav-left">
+    <a href="index.html"><img src="logoreal.png?v=2" alt="Woord van de Dag" class="lnav-logo"></a>
+  </div>
+  <div class="lnav-center">
+    <ul class="lnav-links">
+      <li><a href="woord.html">Woord van de Dag</a></li>
+      <li><a href="archive.html">Archief</a></li>
+      <li><a href="over.html" style="color:var(--text);">Over Ons</a></li>
+    </ul>
+  </div>
+  <div class="lnav-right">
+    <button class="lnav-theme" id="lnav-theme" aria-label="Thema wisselen">
+      <svg id="lnav-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg id="lnav-moon" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <a href="login.html" class="lnav-login">Inloggen</a>
+    <a href="signup.html" class="lnav-signup">Account aanmaken</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- Hero -->
+  <section class="over-hero">
+    <div class="over-hero-ghost">taal</div>
+    <div class="over-hero-inner fade-up">
+      <p class="over-eyebrow">Woord van de Dag</p>
+      <h1 class="over-title">Over Woord van de Dag</h1>
+      <p class="over-subline">Wij geloven dat elk woord een wereld op zich is — klaar om ontdekt te worden.</p>
+    </div>
+  </section>
+
+  <!-- Ons verhaal -->
+  <section class="over-verhaal">
+    <div class="fade-up">
+      <p class="over-verhaal-quote">"Taal is de sleutel tot een wereld die je nog niet kent."</p>
+    </div>
+    <div class="over-verhaal-text fade-up">
+      <p>Woord van de Dag is ontstaan vanuit een eenvoudige overtuiging: de Nederlandse taal is rijker dan de meeste mensen beseffen. Achter elk woord schuilt een verhaal — een geschiedenis, een gevoel, een nuance die je denken kan verrijken.</p>
+      <p>Elke dag bieden wij één zorgvuldig gekozen woord aan: met definitie, etymologie en een voorbeeld dat laat zien hoe het woord echt tot leven komt. Zo ontdek je de taal één woord per keer, zonder te worden overweldigd.</p>
+    </div>
+  </section>
+
+  <!-- Onze missie -->
+  <section class="over-missie">
+    <div class="fade-up">
+      <p class="over-missie-eyebrow">Onze missie</p>
+      <p class="over-missie-statement">"Eén woord per dag. Elke dag een beetje rijker."</p>
+      <div class="over-missie-support">
+        <p>De Nederlandse taal toegankelijk maken voor iedereen — nieuwsgierig, laagdrempelig en dagelijks.</p>
+        <p>Van vergeten archaïsmen tot levendige nieuwe woorden: elk woord verdient een plek in het bewustzijn.</p>
+        <p>Samen bouwen wij aan een gemeenschap van mensen die houden van taal en haar mogelijkheden.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gebouwd met liefde voor taal -->
+  <section class="over-cta fade-up">
+    <h2 class="over-cta-section-title">Gebouwd met liefde voor taal</h2>
+    <p class="over-cta-note">Woord van de Dag is een passieproject, gemaakt voor iedereen die van taal houdt. Geen algoritmes, geen advertenties — alleen woorden, zorgvuldig geselecteerd voor mensen die nieuwsgierig zijn naar de wereld om hen heen.</p>
+    <a href="signup.html" class="btn-primary">Begin vandaag →</a>
+  </section>
+
+</main>
+
+<footer class="lfooter">
+  <a href="index.html"><img src="logoreal.png?v=2" alt="Woord van de Dag" class="lfooter-logo"></a>
+  <div class="lfooter-links">
+    <a href="archive.html">Archief</a>
+    <a href="over.html">Over Ons</a>
+    <a href="#">Contact</a>
+  </div>
+  <p class="lfooter-copy">© 2025 Woord van de Dag</p>
+</footer>
+
+<script>
+// Theme
+const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+const lnavSun = document.getElementById('lnav-sun');
+const lnavMoon = document.getElementById('lnav-moon');
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('wordOfTheDay:theme', t);
+  lnavSun.classList.toggle('hidden', t === 'dark');
+  lnavMoon.classList.toggle('hidden', t !== 'dark');
+}
+applyTheme(savedTheme);
+document.getElementById('lnav-theme').addEventListener('click', () => {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+// Nav shadow on scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('lnav').classList.toggle('scrolled', window.scrollY > 8);
+}, { passive: true });
+
+// Page fade-in
+requestAnimationFrame(() => document.body.classList.add('loaded'));
+
+// Page fade-out on navigation
+document.querySelectorAll('a[href]').forEach(a => {
+  const h = a.getAttribute('href');
+  if (!h || h.startsWith('#') || h.startsWith('http') || h.startsWith('mailto') || a.target === '_blank') return;
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.body.classList.remove('loaded');
+    setTimeout(() => window.location.href = h, 280);
+  });
+});
+
+// Scroll fade-in
+const fadeObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); fadeObs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => fadeObs.observe(el));
+
+// Auth: swap nav if logged in
+(async () => {
+  if (!window.supabase) return;
+  const sb = window.supabase.createClient('https://lanmsexkozkrttiydtsm.supabase.co', 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37');
+  const { data } = await sb.auth.getSession();
+  if (data?.session) {
+    const login = document.querySelector('.lnav-login');
+    const signup = document.querySelector('.lnav-signup');
+    if (login) { login.textContent = 'Mijn woord'; login.href = 'woord.html'; }
+    if (signup) { signup.textContent = 'Mijn profiel'; signup.href = 'woord.html'; }
+  }
+})();
+</script>
+</body>
+</html>
