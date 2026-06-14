@@ -660,18 +660,16 @@ function renderWildCards(examples) {
       <p class="wild-source">${ex.source}</p>
     </article>
   `).join('');
-  container.querySelectorAll('.wild-card').forEach((card, i) => {
-    const cardObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          card.style.transitionDelay = `${i * 0.15}s`;
-          card.classList.add('visible');
-          cardObserver.unobserve(card);
-        }
-      });
-    }, { threshold: 0.2 });
-    cardObserver.observe(card);
-  });
+  const cards = [...container.querySelectorAll('.wild-card')];
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.style.transitionDelay = `${cards.indexOf(entry.target) * 0.15}s`;
+      entry.target.classList.add('visible');
+      obs.unobserve(entry.target);
+    });
+  }, { threshold: 0.2 });
+  cards.forEach(card => obs.observe(card));
 }
 
 function render(data) {
@@ -1023,11 +1021,5 @@ async function castVote(type) {
 thumbUpBtn.addEventListener('click', () => castVote('like'));
 thumbDownBtn.addEventListener('click', () => castVote('dislike'));
 
-// Logo load check
-const _logo = document.querySelector('.masthead-logo');
-if (_logo) {
-  _logo.addEventListener('load', () => console.log('Logo loaded:', _logo.src));
-  _logo.addEventListener('error', () => console.error('Logo failed to load — check path:', _logo.src));
-}
 load();
 loadImage();
