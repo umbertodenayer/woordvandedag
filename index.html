@@ -17,6 +17,8 @@
   <meta name="theme-color" content="#C4714A">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { opacity: 0; transition: opacity 0.3s ease; }
+    body.loaded { opacity: 1; }
 
     /* ── Nav ────────────────────────────────────────────────── */
     .lnav {
@@ -608,8 +610,8 @@
     <div class="lnav-center">
       <ul class="lnav-links">
         <li><a href="woord.html">Woord van de Dag</a></li>
-        <li><a href="#">Archief</a></li>
-        <li><a href="#">Over ons</a></li>
+        <li><a href="archive.html">Archief</a></li>
+        <li><a href="over.html">Over Ons</a></li>
       </ul>
     </div>
     <div class="lnav-right">
@@ -883,6 +885,20 @@
     }, { threshold: 0.12 });
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Page fade-in on load
+    requestAnimationFrame(() => document.body.classList.add('loaded'));
+
+    // Page fade-out before navigating
+    document.querySelectorAll('a[href]').forEach(a => {
+      const h = a.getAttribute('href');
+      if (!h || h.startsWith('#') || h.startsWith('http') || h.startsWith('mailto') || a.target === '_blank') return;
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        document.body.classList.remove('loaded');
+        setTimeout(() => window.location.href = h, 280);
+      });
+    });
   </script>
 </body>
 </html>
