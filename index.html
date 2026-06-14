@@ -1,352 +1,872 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Woord van de Dag</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Woord van de Dag — Ontdek de Nederlandse taal, één woord per dag</title>
+  <meta name="description" content="Elke dag een nieuw, zorgvuldig gekozen Nederlands woord. Met etymologie, uitspraak en echte voorbeelden uit de literatuur.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,600;9..144,1,300;9..144,1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Nav ────────────────────────────────────────────────── */
+    .lnav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 56px;
+      height: 68px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: box-shadow 0.3s ease;
+    }
+    .lnav.scrolled {
+      box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+    }
+    .lnav-logo { height: 44px; width: auto; display: block; mix-blend-mode: multiply; }
+    html[data-theme="dark"] .lnav-logo { mix-blend-mode: screen; }
+    .lnav-right {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .lnav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+    .lnav-links a {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .lnav-links a:hover { color: var(--text); }
+    .lnav-ctas { display: flex; align-items: center; gap: 10px; }
+    .lnav-login {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 7px 18px;
+      background: #C4714A;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .lnav-login:hover { opacity: 0.85; }
+    .lnav-signup {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 18px;
+      background: transparent;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .lnav-signup:hover { border-color: #C4714A; color: #C4714A; }
+
+    /* ── Theme toggle nav ────────────────────────────────────── */
+    .lnav-theme {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.2s;
+    }
+    .lnav-theme:hover { color: var(--text); }
+    .lnav-theme svg { width: 18px; height: 18px; }
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 100px 24px 80px;
+    }
+    .hero-ghost {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -48%) rotate(-8deg);
+      font-family: 'Fraunces', serif;
+      font-size: clamp(120px, 22vw, 300px);
+      font-weight: 300;
+      font-style: italic;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(139,117,97,0.08);
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    html[data-theme="dark"] .hero-ghost {
+      -webkit-text-stroke: 1px rgba(255,255,255,0.04);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 760px;
+    }
+    .hero-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #C4714A;
+      margin-bottom: 24px;
+    }
+    .hero-headline {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(3.2rem, 7vw, 6rem);
+      font-weight: 400;
+      line-height: 1.05;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+    }
+    .hero-headline em {
+      font-style: italic;
+      font-weight: 300;
+      color: #C4714A;
+    }
+    .hero-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 48px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 64px;
+    }
+    .btn-primary {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 14px 36px;
+      background: #C4714A;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+      display: inline-block;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-ghost {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 13px 36px;
+      background: transparent;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s, transform 0.2s;
+      display: inline-block;
+    }
+    .btn-ghost:hover { border-color: #C4714A; color: #C4714A; transform: translateY(-1px); }
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      animation: bounce-down 1.8s ease-in-out infinite;
+    }
+    .scroll-indicator span {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .scroll-indicator svg { width: 18px; height: 18px; }
+    @keyframes bounce-down {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(7px); }
+    }
+
+    /* ── Shared section styles ──────────────────────────────── */
+    .lsection {
+      padding: 96px 56px;
+    }
+    .section-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .section-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #C4714A;
+      margin-bottom: 16px;
+    }
+    .section-headline {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 56px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Scroll fade-in ────────────────────────────────────── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fade-up:nth-child(1) { transition-delay: 0s; }
+    .fade-up:nth-child(2) { transition-delay: 0.12s; }
+    .fade-up:nth-child(3) { transition-delay: 0.24s; }
+
+    /* ── Hoe het werkt ──────────────────────────────────────── */
+    .hiw-section { background: var(--panel-bg); }
+    .hiw-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
+    }
+    .hiw-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .hiw-icon {
+      width: 48px;
+      height: 48px;
+      color: #C4714A;
+    }
+    .hiw-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .hiw-body {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── Word preview ───────────────────────────────────────── */
+    .preview-section { border-top: 1px solid var(--border); }
+    .preview-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: start;
+    }
+    .preview-left {}
+    .preview-word {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.8rem, 5vw, 4.5rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .preview-ipa {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .preview-pos {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #C4714A;
+      border: 1px solid rgba(196,113,74,0.35);
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+    }
+    .preview-def {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .preview-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 0 24px;
+    }
+    .preview-ex {
+      font-family: 'Fraunces', serif;
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 4px;
+    }
+    .preview-ex-src {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .preview-right {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .preview-wild {
+      background: var(--panel-bg);
+      border-radius: 12px;
+      padding: 20px 24px;
+      border-left: 3px solid #C4714A;
+    }
+    .preview-wild-pub {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #C4714A;
+      margin-bottom: 8px;
+    }
+    .preview-wild-text {
+      font-family: 'Fraunces', serif;
+      font-size: 0.95rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .preview-wild-src {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    .preview-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #C4714A;
+      text-decoration: none;
+      margin-top: 8px;
+      transition: gap 0.2s;
+    }
+    .preview-cta:hover { gap: 10px; }
+    .preview-skeleton {
+      background: var(--border);
+      border-radius: 6px;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* ── Audience ───────────────────────────────────────────── */
+    .audience-section { background: var(--panel-bg); border-top: 1px solid var(--border); }
+    .audience-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .audience-card {
+      background: var(--bg);
+      border-radius: 16px;
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .audience-icon {
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .audience-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .audience-body {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── App store ──────────────────────────────────────────── */
+    .app-section { border-top: 1px solid var(--border); text-align: center; }
+    .app-headline {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .app-sub-lede {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+    .app-badges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .app-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 22px;
+      background: var(--text);
+      color: var(--bg);
+      border-radius: 10px;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .app-badge:hover { opacity: 0.82; transform: translateY(-2px); }
+    .app-badge svg { flex-shrink: 0; }
+    .app-badge-text { text-align: left; }
+    .app-badge-sub {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 500;
+      opacity: 0.75;
+      letter-spacing: 0.02em;
+    }
+    .app-badge-name {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .app-notify {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .app-form {
+      display: inline-flex;
+      gap: 0;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      max-width: 420px;
+      width: 100%;
+    }
+    .app-form input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      color: var(--text);
+      outline: none;
+    }
+    .app-form input::placeholder { color: var(--muted); }
+    .app-form button {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 12px 22px;
+      background: #C4714A;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .app-form button:hover { opacity: 0.85; }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    .lfooter {
+      border-top: 1px solid var(--border);
+      padding: 32px 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .lfooter-logo { height: 32px; width: auto; mix-blend-mode: multiply; }
+    html[data-theme="dark"] .lfooter-logo { mix-blend-mode: screen; }
+    .lfooter-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .lfooter-links a {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .lfooter-links a:hover { color: var(--text); }
+    .lfooter-copy {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .lnav { padding: 0 24px; }
+      .lnav-links { display: none; }
+      .lsection { padding: 64px 24px; }
+      .hiw-grid { grid-template-columns: 1fr; gap: 36px; }
+      .audience-grid { grid-template-columns: 1fr; gap: 16px; }
+      .preview-wrap { grid-template-columns: 1fr; gap: 36px; }
+      .hero { padding: 80px 24px 60px; }
+      .hero-ctas { flex-direction: column; align-items: center; }
+      .lfooter { flex-direction: column; gap: 20px; text-align: center; }
+      .lfooter-links { flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
 </head>
 <body>
-  <div id="main-content">
-  <main class="layout" id="hero">
-    <div class="col-image">
-      <img id="word-image" class="word-image" alt="" />
-    </div>
-    <div class="col-text">
-      <div class="col-header">
-        <div class="topbar">
-          <a href="index.html" class="masthead-logo-link"><img src="logo.png?v=3" alt="Woord van de Dag" class="masthead-logo"></a>
-          <div class="topbar-icons">
-            <button id="theme-toggle" class="theme-toggle" aria-label="Donkere modus wisselen">
-              <svg id="sun-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="4"/>
-                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-              </svg>
-              <svg id="moon-icon" class="theme-icon hidden" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-            </button>
-            <div class="user-menu">
-              <button id="user-icon-btn" class="theme-toggle" aria-label="Account">
-                <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="8" r="4"/>
-                  <path d="M4 21c0-3.5 3.5-6 8-6s8 2.5 8 6"/>
-                </svg>
-                <span id="user-dot" class="user-dot hidden"></span>
-              </button>
-              <div id="user-dropdown" class="user-dropdown hidden">
-                <div id="dropdown-signed-out">
-                  <button id="open-signin-btn" class="user-dropdown-item">Inloggen</button>
-                  <button id="open-signup-btn" class="user-dropdown-item">Aanmelden</button>
-                </div>
-                <div id="dropdown-signed-in" class="hidden">
-                  <p id="user-email" class="user-dropdown-email"></p>
-                  <button id="my-words-btn" class="user-dropdown-item">Mijn Woorden</button>
-                  <button id="profile-btn" class="user-dropdown-item">Mijn Profiel</button>
-                  <button id="settings-btn" class="user-dropdown-item">Instellingen</button>
-                  <div class="user-dropdown-divider"></div>
-                  <button id="open-change-password-btn" class="user-dropdown-item">Wachtwoord Wijzigen</button>
-                  <div class="user-dropdown-divider"></div>
-                  <button id="sign-out-btn" class="user-dropdown-item">Uitloggen</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="accent-bar"></div>
-        <div id="cta-banner" class="cta-banner hidden">
-          <div class="cta-left">
-            <svg class="cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            <span class="cta-text">Personaliseer je ervaring — sla woorden op en bouw je streak</span>
-          </div>
-          <a href="signup.html" class="cta-btn">Account aanmaken</a>
-        </div>
-      </div>
-      <div class="content-middle">
-        <h1 id="word"></h1>
-        <p id="ipa" class="ipa"></p>
-        <p id="pos" class="pos"></p>
-        <p id="definition" class="definition"></p>
-        <hr class="divider">
-        <div class="etymology">
-          <p class="etymology-label">Etymologie</p>
-          <p id="etymology" class="etymology-text"></p>
-        </div>
-        <p id="example" class="example"></p>
-        <p id="source" class="source"></p>
-      </div>
-      <p id="date" class="date"></p>
-    </div>
-  </main>
 
-  <section class="in-the-wild">
-    <hr class="section-rule">
-    <p class="label section-label">In de Praktijk</p>
-    <div class="wild-cards" id="wild-cards-container"></div>
-    <hr class="section-rule">
-  </section>
-
-  <section class="pronunciation hidden" id="pronunciation-section">
-    <p class="label section-label">Uitspraak</p>
-    <div class="pronunciation-row">
-      <div class="audio-player">
-        <button id="pronunciation-btn" class="pronunciation-btn" aria-label="Uitspraak afspelen">
-          <svg id="play-icon" class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          <svg id="pause-icon" class="icon hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+  <!-- ── Navigation ─────────────────────────────────────────── -->
+  <nav class="lnav" id="lnav">
+    <a href="index.html"><img src="logo.png" alt="Woord van de Dag" class="lnav-logo"></a>
+    <div class="lnav-right">
+      <ul class="lnav-links">
+        <li><a href="woord.html">Woord van de Dag</a></li>
+        <li><a href="#">Archief</a></li>
+        <li><a href="#">Over ons</a></li>
+      </ul>
+      <div class="lnav-ctas">
+        <button class="lnav-theme" id="lnav-theme" aria-label="Thema wisselen">
+          <svg id="lnav-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <svg id="lnav-moon" class="hidden" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
         </button>
-        <div id="waveform" class="waveform"></div>
+        <a href="login.html" class="lnav-login">Inloggen</a>
+        <a href="signup.html" class="lnav-signup">Account aanmaken</a>
       </div>
-      <div class="rating-spacer"></div>
-      <div class="rating">
-        <div class="rating-item">
-          <button id="thumb-up-btn" class="thumb-btn" aria-label="Leuk">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-          </button>
-          <span id="like-count" class="rating-count">0</span>
+    </div>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-ghost" id="hero-ghost">woord</div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Woord van de Dag</p>
+      <h1 class="hero-headline">Één woord.<br><em>Elke dag.</em></h1>
+      <p class="hero-sub">Ontdek de rijkdom van de Nederlandse taal, één zorgvuldig gekozen woord per dag.</p>
+      <div class="hero-ctas">
+        <a href="woord.html" class="btn-primary">Begin vandaag</a>
+        <a href="signup.html" class="btn-ghost">Maak een account</a>
+      </div>
+      <div class="scroll-indicator">
+        <span>Ontdek meer</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Hoe het werkt ──────────────────────────────────────── -->
+  <section class="lsection hiw-section">
+    <div class="section-inner">
+      <p class="section-eyebrow fade-up">Hoe het werkt</p>
+      <h2 class="section-headline fade-up">Leer bewust, dag voor dag</h2>
+      <div class="hiw-grid">
+        <div class="hiw-card fade-up">
+          <svg class="hiw-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+          </svg>
+          <p class="hiw-title">Eén woord per dag</p>
+          <p class="hiw-body">Elke ochtend een nieuw, zorgvuldig gekozen woord uit de Nederlandse taal. Niet overweldigend — één woord, perfect uitgelegd.</p>
         </div>
-        <div class="rating-item">
-          <button id="thumb-down-btn" class="thumb-btn" aria-label="Niet leuk">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
-          </button>
-          <span id="dislike-count" class="rating-count">0</span>
+        <div class="hiw-card fade-up">
+          <svg class="hiw-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          <p class="hiw-title">Leer de context</p>
+          <p class="hiw-body">Etymologie, IPA-uitspraak en echte voorbeeldzinnen uit de Nederlandse literatuur en journalistiek. Woorden zoals ze echt worden gebruikt.</p>
+        </div>
+        <div class="hiw-card fade-up">
+          <svg class="hiw-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+          </svg>
+          <p class="hiw-title">Bouw je vocabulaire</p>
+          <p class="hiw-body">Sla woorden op die je aanspreken, volg je dagelijkse streak en zie je woordenschat groeien. Kleine stappen, groot resultaat.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="hear-it hidden" id="hear-it-section">
-    <p class="label section-label">Beluister het</p>
-    <div id="youglish-widget"></div>
+  <!-- ── Woord preview ──────────────────────────────────────── -->
+  <section class="lsection preview-section">
+    <div class="section-inner">
+      <p class="section-eyebrow fade-up">Woord van vandaag</p>
+      <h2 class="section-headline fade-up">Zie hoe het eruitziet</h2>
+      <div class="preview-wrap fade-up">
+        <div class="preview-left">
+          <p class="preview-pos" id="preview-pos">&nbsp;</p>
+          <h3 class="preview-word" id="preview-word">
+            <span class="preview-skeleton" style="display:inline-block;width:220px;height:56px;border-radius:8px;">&nbsp;</span>
+          </h3>
+          <p class="preview-ipa" id="preview-ipa">
+            <span class="preview-skeleton" style="display:inline-block;width:100px;height:16px;border-radius:4px;">&nbsp;</span>
+          </p>
+          <hr class="preview-divider" style="margin-top:20px;">
+          <p class="preview-def" id="preview-def">
+            <span class="preview-skeleton" style="display:block;width:90%;height:14px;border-radius:4px;margin-bottom:8px;">&nbsp;</span>
+            <span class="preview-skeleton" style="display:block;width:75%;height:14px;border-radius:4px;">&nbsp;</span>
+          </p>
+          <p class="preview-ex" id="preview-ex"></p>
+          <p class="preview-ex-src" id="preview-ex-src"></p>
+        </div>
+        <div class="preview-right" id="preview-wild">
+          <div class="preview-skeleton" style="height:110px;border-radius:12px;">&nbsp;</div>
+          <div class="preview-skeleton" style="height:110px;border-radius:12px;">&nbsp;</div>
+        </div>
+      </div>
+      <a href="woord.html" class="preview-cta fade-up" style="margin-top:40px; display:inline-flex;">
+        Bekijk het woord van vandaag
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
   </section>
 
-  <div id="signin-modal" class="auth-modal hidden">
-    <div class="auth-modal-backdrop"></div>
-    <div class="auth-modal-card">
-      <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Inloggen</h2>
-      <form id="signin-form" class="auth-form">
-        <input type="email" class="auth-input" placeholder="E-mailadres" required autocomplete="email">
-        <div class="auth-password-wrap">
-          <input type="password" class="auth-input" placeholder="Wachtwoord" required autocomplete="current-password">
-          <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
-            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
-            </svg>
-          </button>
+  <!-- ── Voor wie ───────────────────────────────────────────── -->
+  <section class="lsection audience-section">
+    <div class="section-inner">
+      <p class="section-eyebrow fade-up">Voor wie is dit?</p>
+      <h2 class="section-headline fade-up">Voor iedereen die van taal houdt</h2>
+      <div class="audience-grid">
+        <div class="audience-card fade-up">
+          <div class="audience-icon">🌱</div>
+          <p class="audience-title">Taalleerders</p>
+          <p class="audience-body">Perfect voor iedereen die Nederlands leert als tweede taal. Bouw je woordenschat op met echte, levende woorden in context.</p>
         </div>
-        <p class="auth-error hidden"></p>
-        <button type="submit" class="auth-submit"><span class="btn-text">Inloggen</span><span class="btn-spinner"></span></button>
-      </form>
-    </div>
-  </div>
-
-  <div id="signup-modal" class="auth-modal hidden">
-    <div class="auth-modal-backdrop"></div>
-    <div class="auth-modal-card">
-      <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Aanmelden</h2>
-      <form id="signup-form" class="auth-form">
-        <input type="email" class="auth-input" placeholder="E-mailadres" required autocomplete="email">
-        <div class="auth-password-wrap">
-          <input type="password" class="auth-input" placeholder="Wachtwoord" required autocomplete="new-password">
-          <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
-            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
-            </svg>
-          </button>
+        <div class="audience-card fade-up">
+          <div class="audience-icon">📚</div>
+          <p class="audience-title">Taalliefhebbers</p>
+          <p class="audience-body">Voor wie geniet van de schoonheid en diepte van de Nederlandse taal. Ontdek vergeten woorden, rijke etymologieën en poëtisch gebruik.</p>
         </div>
-        <p class="auth-error hidden"></p>
-        <button type="submit" class="auth-submit"><span class="btn-text">Aanmelden</span><span class="btn-spinner"></span></button>
-      </form>
-    </div>
-  </div>
-
-  <div id="change-password-modal" class="auth-modal hidden">
-    <div class="auth-modal-backdrop"></div>
-    <div class="auth-modal-card">
-      <button class="auth-modal-close" aria-label="Close">&times;</button>
-      <h2 class="auth-modal-title">Wachtwoord Wijzigen</h2>
-      <form id="change-password-form" class="auth-form">
-        <div class="auth-password-wrap">
-          <input type="password" class="auth-input" placeholder="Nieuw wachtwoord" required autocomplete="new-password">
-          <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
-            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
-            </svg>
-          </button>
-        </div>
-        <div class="auth-password-wrap">
-          <input type="password" class="auth-input" placeholder="Bevestig nieuw wachtwoord" required autocomplete="new-password">
-          <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
-            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
-            </svg>
-          </button>
-        </div>
-        <p class="auth-error hidden"></p>
-        <button type="submit" class="auth-submit"><span class="btn-text">Wachtwoord bijwerken</span><span class="btn-spinner"></span></button>
-      </form>
-    </div>
-  </div>
-
-  </div><!-- /#main-content -->
-
-  <!-- Profile subpage -->
-  <div id="page-profile" class="subpage hidden">
-    <div class="subpage-topbar">
-      <button class="subpage-back" id="profile-back-btn" aria-label="Terug">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <img src="logo.png?v=3" alt="Woord van de Dag" class="subpage-logo">
-      <span class="subpage-title">Mijn Profiel</span>
-    </div>
-    <div class="subpage-body">
-
-      <div class="pref-section">
-        <p class="pref-section-label">Niveau</p>
-        <div class="pref-grid pref-grid-2" id="profile-level-grid">
-          <div class="pref-card" data-value="Beginner">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Beginner</p>
-            <p class="pref-card-sub">A0 / A1 — Ik ken nog weinig Nederlands</p>
-          </div>
-          <div class="pref-card" data-value="Basis">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Basis</p>
-            <p class="pref-card-sub">A2 / B1 — Ik begrijp eenvoudige zinnen</p>
-          </div>
-          <div class="pref-card" data-value="Gevorderd">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Gevorderd</p>
-            <p class="pref-card-sub">B2 / C1 — Ik spreek redelijk vloeiend</p>
-          </div>
-          <div class="pref-card" data-value="Moedertaal">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Moedertaal</p>
-            <p class="pref-card-sub">C2 — Nederlands is mijn moedertaal</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="pref-section">
-        <p class="pref-section-label">Leerdoelen</p>
-        <div class="pref-grid pref-grid-3" id="profile-goal-grid">
-          <div class="pref-card" data-value="Alledaags">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Alledaags</p>
-            <p class="pref-card-sub">Dagelijkse gesprekken en situaties</p>
-          </div>
-          <div class="pref-card" data-value="Professioneel">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Professioneel</p>
-            <p class="pref-card-sub">Zakelijke communicatie en werk</p>
-          </div>
-          <div class="pref-card" data-value="Academisch">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Academisch</p>
-            <p class="pref-card-sub">Universitair en wetenschappelijk taalgebruik</p>
-          </div>
-          <div class="pref-card" data-value="Literair">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Literair</p>
-            <p class="pref-card-sub">Poëzie, literatuur en schrijfstijl</p>
-          </div>
-          <div class="pref-card" data-value="Spreektaal">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Spreektaal</p>
-            <p class="pref-card-sub">Informeel, dialect en straattaal</p>
-          </div>
-          <div class="pref-card" data-value="Reizen">
-            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
-            <p class="pref-card-title">Reizen</p>
-            <p class="pref-card-sub">Praktisch Nederlands voor onderweg</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="pref-footer">
-        <button class="pref-save-btn" id="profile-save-btn">Opslaan</button>
-        <p class="pref-save-status" id="profile-save-status"></p>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Settings subpage -->
-  <div id="page-settings" class="subpage hidden">
-    <div class="subpage-topbar">
-      <button class="subpage-back" id="settings-back-btn" aria-label="Terug">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <img src="logo.png?v=3" alt="Woord van de Dag" class="subpage-logo">
-      <span class="subpage-title">Instellingen</span>
-    </div>
-    <div class="subpage-body">
-      <div class="settings-list">
-        <div class="settings-row">
-          <span class="settings-label">Donkere modus standaard</span>
-          <button id="setting-dark-mode" class="toggle-switch" role="switch" aria-checked="false">
-            <span class="toggle-knob"></span>
-          </button>
-        </div>
-        <div class="settings-row">
-          <span class="settings-label">Wekelijkse e-maildigest</span>
-          <button id="setting-weekly-email" class="toggle-switch" role="switch" aria-checked="false">
-            <span class="toggle-knob"></span>
-          </button>
-        </div>
-        <div class="settings-row">
-          <span class="settings-label">Compacte weergave</span>
-          <button id="setting-compact-view" class="toggle-switch" role="switch" aria-checked="false">
-            <span class="toggle-knob"></span>
-          </button>
+        <div class="audience-card fade-up">
+          <div class="audience-icon">💼</div>
+          <p class="audience-title">Professionals</p>
+          <p class="audience-body">Vergroot je zakelijke en academische woordenschat. Schrijf scherper, spreek preciezer en kom professioneler over in het Nederlands.</p>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- My Words subpage -->
-  <div id="page-my-words" class="subpage hidden">
-    <div class="subpage-topbar">
-      <button class="subpage-back" id="my-words-back-btn" aria-label="Terug">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <img src="logo.png?v=3" alt="Woord van de Dag" class="subpage-logo">
-      <span class="subpage-title">Mijn Woorden</span>
+  <!-- ── App store ──────────────────────────────────────────── -->
+  <section class="lsection app-section">
+    <div class="section-inner" style="text-align:center;">
+      <p class="section-eyebrow fade-up">Binnenkort</p>
+      <h2 class="app-headline fade-up">Ook als app op je telefoon</h2>
+      <p class="app-sub-lede fade-up">Woord van de Dag in je broekzak. Elke ochtend een notificatie met het woord van de dag.</p>
+      <div class="app-badges fade-up">
+        <a href="#" class="app-badge" aria-label="Download in de App Store">
+          <svg width="24" height="28" viewBox="0 0 24 28" fill="currentColor"><path d="M17.05 14.37c-.03-3.27 2.67-4.85 2.79-4.93-1.52-2.22-3.88-2.52-4.72-2.56-2.01-.2-3.93 1.18-4.95 1.18-1.02 0-2.6-1.15-4.28-1.12C3.55 7 1.38 8.38.36 10.49c-2.07 3.59-.53 8.9 1.48 11.81 1 1.43 2.17 3.03 3.71 2.97 1.49-.06 2.06-.96 3.86-.96s2.31.96 3.89.93c1.6-.03 2.62-1.45 3.6-2.89.88-1.24 1.27-2.44 1.29-2.5-.03-.01-2.44-.94-2.14-4.48zm-2.04-8.25c.81-.99 1.36-2.37 1.21-3.75-1.17.05-2.6.78-3.44 1.76-.75.87-1.42 2.27-1.24 3.61 1.3.1 2.63-.67 3.47-1.62z"/></svg>
+          <div class="app-badge-text">
+            <span class="app-badge-sub">Download in de</span>
+            <span class="app-badge-name">App Store</span>
+          </div>
+        </a>
+        <a href="#" class="app-badge" aria-label="Beschikbaar op Google Play">
+          <svg width="24" height="26" viewBox="0 0 24 26" fill="currentColor"><path d="M1.22.63C.77 1.1.5 1.83.5 2.77v20.46c0 .94.27 1.67.73 2.14l.11.11 11.46-11.46v-.27L1.33.52l-.11.11zm15.65 15.77l-3.82-3.82v-.27l3.82-3.82.08.05 4.52 2.57c1.29.73 1.29 1.93 0 2.67l-4.52 2.57-.08.05zm-3.82-3.82L1.22 24.51c.43.45 1.14.5 1.94.05l13.89-7.89-3.99-3.99zM3.16 1.49L17.05 9.38l-3.99 3.99L1.22.5c.43-.45 1.14-.5 1.94-.05l.01.04z"/></svg>
+          <div class="app-badge-text">
+            <span class="app-badge-sub">Beschikbaar op</span>
+            <span class="app-badge-name">Google Play</span>
+          </div>
+        </a>
+      </div>
+      <p class="app-notify fade-up">Meld je aan en we laten je weten wanneer de app beschikbaar is.</p>
+      <div class="app-form fade-up" id="app-form">
+        <input type="email" placeholder="jouw@emailadres.nl" id="notify-email" autocomplete="email">
+        <button type="button" onclick="handleNotify()">Houd me op de hoogte</button>
+      </div>
+      <p id="notify-msg" style="margin-top:14px;font-family:'Inter',sans-serif;font-size:0.85rem;color:#C4714A;min-height:20px;"></p>
     </div>
-    <div class="subpage-body">
-      <div id="my-words-list" class="my-words-list"></div>
-    </div>
-  </div>
+  </section>
 
-  <div id="auth-toast" class="auth-toast hidden"></div>
-  <div id="premium-toast" class="premium-toast"></div>
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <footer class="lfooter">
+    <a href="index.html"><img src="logo.png" alt="Woord van de Dag" class="lfooter-logo"></a>
+    <div class="lfooter-links">
+      <a href="#">Privacy</a>
+      <a href="#">Voorwaarden</a>
+      <a href="#">Contact</a>
+    </div>
+    <p class="lfooter-copy">© 2025 Woord van de Dag</p>
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://youglish.com/apiv2/youglish.js" async></script>
-  <script src="script.js"></script>
+  <script>
+    // ── Theme ───────────────────────────────────────────────
+    const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    const lnavSun  = document.getElementById('lnav-sun');
+    const lnavMoon = document.getElementById('lnav-moon');
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      lnavSun.classList.toggle('hidden', t === 'dark');
+      lnavMoon.classList.toggle('hidden', t !== 'dark');
+    }
+    applyTheme(savedTheme);
+    document.getElementById('lnav-theme').addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('wordOfTheDay:theme', next);
+      applyTheme(next);
+    });
+
+    // ── Nav shadow on scroll ────────────────────────────────
+    const lnav = document.getElementById('lnav');
+    window.addEventListener('scroll', () => {
+      lnav.classList.toggle('scrolled', window.scrollY > 8);
+    }, { passive: true });
+
+    // ── If already logged in, swap nav CTAs ─────────────────
+    if (window.supabase) {
+      const sb = window.supabase.createClient(
+        'https://lanmsexkozkrttiydtsm.supabase.co',
+        'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37'
+      );
+      sb.auth.getSession().then(({ data }) => {
+        if (data?.session) {
+          const login = document.querySelector('.lnav-login');
+          const signup = document.querySelector('.lnav-signup');
+          if (login)  { login.textContent = 'Mijn woord'; login.href = 'woord.html'; }
+          if (signup) { signup.textContent = 'Mijn profiel'; signup.href = 'woord.html#profile'; }
+        }
+      });
+    }
+
+    // ── Fetch today's word for preview + ghost ──────────────
+    async function loadWord() {
+      try {
+        const r = await fetch('/api/word');
+        if (!r.ok) return;
+        const d = await r.json();
+
+        // Ghost word
+        document.getElementById('hero-ghost').textContent = d.word || 'woord';
+
+        // Preview left
+        document.getElementById('preview-pos').textContent = d.partOfSpeech || '';
+        document.getElementById('preview-word').textContent = d.word || '';
+        document.getElementById('preview-ipa').textContent = d.ipa || '';
+        document.getElementById('preview-def').textContent = d.definition || '';
+        if (d.exampleSentence) {
+          document.getElementById('preview-ex').textContent = '“' + d.exampleSentence + '”';
+          document.getElementById('preview-ex-src').textContent = '— ' + (d.exampleSource || '');
+        }
+
+        // Preview right — in de praktijk cards
+        const wild = document.getElementById('preview-wild');
+        if (d.inDePraktijk && d.inDePraktijk.length > 0) {
+          wild.innerHTML = d.inDePraktijk.slice(0, 2).map(item => `
+            <div class="preview-wild">
+              <p class="preview-wild-pub">${item.pub}</p>
+              <p class="preview-wild-text">${item.excerpt}</p>
+              <p class="preview-wild-src">${item.source}</p>
+            </div>
+          `).join('');
+        }
+      } catch (e) {}
+    }
+    loadWord();
+
+    // ── Notify form ─────────────────────────────────────────
+    function handleNotify() {
+      const email = document.getElementById('notify-email').value.trim();
+      const msg   = document.getElementById('notify-msg');
+      if (!email || !email.includes('@')) {
+        msg.textContent = 'Vul een geldig e-mailadres in.';
+        msg.style.color = '#c4554d';
+        return;
+      }
+      msg.textContent = 'Dank je! We laten je weten zodra de app beschikbaar is.';
+      msg.style.color = '#C4714A';
+      document.getElementById('notify-email').value = '';
+    }
+    document.getElementById('notify-email').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleNotify();
+    });
+
+    // ── Scroll fade-in ──────────────────────────────────────
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>

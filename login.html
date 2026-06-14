@@ -132,7 +132,7 @@
         console.log('[login] getSession:', { hasSession: !!data?.session, error: error?.message });
         if (data?.session) {
           console.log('[login] Already signed in — redirecting');
-          window.location.replace('index.html');
+          window.location.replace('woord.html');
         }
       });
     }
@@ -241,7 +241,7 @@
         // ── Success ────────────────────────────────────────────────────────────
         setSuccess();
         sessionStorage.setItem('just_logged_in', '1');
-        setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+        setTimeout(() => { window.location.href = 'woord.html'; }, 1000);
 
       } catch (err) {
         console.error('[login] Unexpected error:', err);

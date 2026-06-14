@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woord van de Dag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="main-content">
+  <main class="layout" id="hero">
+    <div class="col-image">
+      <img id="word-image" class="word-image" alt="" />
+    </div>
+    <div class="col-text">
+      <div class="col-header">
+        <div class="topbar">
+          <a href="index.html" class="masthead-logo-link"><img src="logo.png?v=3" alt="Woord van de Dag" class="masthead-logo"></a>
+          <div class="topbar-icons">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Donkere modus wisselen">
+              <svg id="sun-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+              </svg>
+              <svg id="moon-icon" class="theme-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </button>
+            <div class="user-menu">
+              <button id="user-icon-btn" class="theme-toggle" aria-label="Account">
+                <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M4 21c0-3.5 3.5-6 8-6s8 2.5 8 6"/>
+                </svg>
+                <span id="user-dot" class="user-dot hidden"></span>
+              </button>
+              <div id="user-dropdown" class="user-dropdown hidden">
+                <div id="dropdown-signed-out">
+                  <button id="open-signin-btn" class="user-dropdown-item">Inloggen</button>
+                  <button id="open-signup-btn" class="user-dropdown-item">Aanmelden</button>
+                </div>
+                <div id="dropdown-signed-in" class="hidden">
+                  <p id="user-email" class="user-dropdown-email"></p>
+                  <button id="my-words-btn" class="user-dropdown-item">Mijn Woorden</button>
+                  <button id="profile-btn" class="user-dropdown-item">Mijn Profiel</button>
+                  <button id="settings-btn" class="user-dropdown-item">Instellingen</button>
+                  <div class="user-dropdown-divider"></div>
+                  <button id="open-change-password-btn" class="user-dropdown-item">Wachtwoord Wijzigen</button>
+                  <div class="user-dropdown-divider"></div>
+                  <button id="sign-out-btn" class="user-dropdown-item">Uitloggen</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="accent-bar"></div>
+        <div id="cta-banner" class="cta-banner hidden">
+          <div class="cta-left">
+            <svg class="cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            <span class="cta-text">Personaliseer je ervaring — sla woorden op en bouw je streak</span>
+          </div>
+          <a href="signup.html" class="cta-btn">Account aanmaken</a>
+        </div>
+      </div>
+      <div class="content-middle">
+        <h1 id="word"></h1>
+        <p id="ipa" class="ipa"></p>
+        <p id="pos" class="pos"></p>
+        <p id="definition" class="definition"></p>
+        <hr class="divider">
+        <div class="etymology">
+          <p class="etymology-label">Etymologie</p>
+          <p id="etymology" class="etymology-text"></p>
+        </div>
+        <p id="example" class="example"></p>
+        <p id="source" class="source"></p>
+      </div>
+      <p id="date" class="date"></p>
+    </div>
+  </main>
+
+  <section class="in-the-wild">
+    <hr class="section-rule">
+    <p class="label section-label">In de Praktijk</p>
+    <div class="wild-cards" id="wild-cards-container"></div>
+    <hr class="section-rule">
+  </section>
+
+  <section class="pronunciation hidden" id="pronunciation-section">
+    <p class="label section-label">Uitspraak</p>
+    <div class="pronunciation-row">
+      <div class="audio-player">
+        <button id="pronunciation-btn" class="pronunciation-btn" aria-label="Uitspraak afspelen">
+          <svg id="play-icon" class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="pause-icon" class="icon hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+        <div id="waveform" class="waveform"></div>
+      </div>
+      <div class="rating-spacer"></div>
+      <div class="rating">
+        <div class="rating-item">
+          <button id="thumb-up-btn" class="thumb-btn" aria-label="Leuk">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          </button>
+          <span id="like-count" class="rating-count">0</span>
+        </div>
+        <div class="rating-item">
+          <button id="thumb-down-btn" class="thumb-btn" aria-label="Niet leuk">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
+          </button>
+          <span id="dislike-count" class="rating-count">0</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hear-it hidden" id="hear-it-section">
+    <p class="label section-label">Beluister het</p>
+    <div id="youglish-widget"></div>
+  </section>
+
+  <div id="signin-modal" class="auth-modal hidden">
+    <div class="auth-modal-backdrop"></div>
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" aria-label="Close">&times;</button>
+      <h2 class="auth-modal-title">Inloggen</h2>
+      <form id="signin-form" class="auth-form">
+        <input type="email" class="auth-input" placeholder="E-mailadres" required autocomplete="email">
+        <div class="auth-password-wrap">
+          <input type="password" class="auth-input" placeholder="Wachtwoord" required autocomplete="current-password">
+          <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
+            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <p class="auth-error hidden"></p>
+        <button type="submit" class="auth-submit"><span class="btn-text">Inloggen</span><span class="btn-spinner"></span></button>
+      </form>
+    </div>
+  </div>
+
+  <div id="signup-modal" class="auth-modal hidden">
+    <div class="auth-modal-backdrop"></div>
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" aria-label="Close">&times;</button>
+      <h2 class="auth-modal-title">Aanmelden</h2>
+      <form id="signup-form" class="auth-form">
+        <input type="email" class="auth-input" placeholder="E-mailadres" required autocomplete="email">
+        <div class="auth-password-wrap">
+          <input type="password" class="auth-input" placeholder="Wachtwoord" required autocomplete="new-password">
+          <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
+            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <p class="auth-error hidden"></p>
+        <button type="submit" class="auth-submit"><span class="btn-text">Aanmelden</span><span class="btn-spinner"></span></button>
+      </form>
+    </div>
+  </div>
+
+  <div id="change-password-modal" class="auth-modal hidden">
+    <div class="auth-modal-backdrop"></div>
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" aria-label="Close">&times;</button>
+      <h2 class="auth-modal-title">Wachtwoord Wijzigen</h2>
+      <form id="change-password-form" class="auth-form">
+        <div class="auth-password-wrap">
+          <input type="password" class="auth-input" placeholder="Nieuw wachtwoord" required autocomplete="new-password">
+          <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
+            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <div class="auth-password-wrap">
+          <input type="password" class="auth-input" placeholder="Bevestig nieuw wachtwoord" required autocomplete="new-password">
+          <button type="button" class="auth-eye-toggle" aria-label="Toggle password visibility">
+            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="eye-icon eye-closed hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <p class="auth-error hidden"></p>
+        <button type="submit" class="auth-submit"><span class="btn-text">Wachtwoord bijwerken</span><span class="btn-spinner"></span></button>
+      </form>
+    </div>
+  </div>
+
+  </div><!-- /#main-content -->
+
+  <!-- Profile subpage -->
+  <div id="page-profile" class="subpage hidden">
+    <div class="subpage-topbar">
+      <button class="subpage-back" id="profile-back-btn" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <img src="logo.png?v=3" alt="Woord van de Dag" class="subpage-logo">
+      <span class="subpage-title">Mijn Profiel</span>
+    </div>
+    <div class="subpage-body">
+
+      <div class="pref-section">
+        <p class="pref-section-label">Niveau</p>
+        <div class="pref-grid pref-grid-2" id="profile-level-grid">
+          <div class="pref-card" data-value="Beginner">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Beginner</p>
+            <p class="pref-card-sub">A0 / A1 — Ik ken nog weinig Nederlands</p>
+          </div>
+          <div class="pref-card" data-value="Basis">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Basis</p>
+            <p class="pref-card-sub">A2 / B1 — Ik begrijp eenvoudige zinnen</p>
+          </div>
+          <div class="pref-card" data-value="Gevorderd">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Gevorderd</p>
+            <p class="pref-card-sub">B2 / C1 — Ik spreek redelijk vloeiend</p>
+          </div>
+          <div class="pref-card" data-value="Moedertaal">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Moedertaal</p>
+            <p class="pref-card-sub">C2 — Nederlands is mijn moedertaal</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-section">
+        <p class="pref-section-label">Leerdoelen</p>
+        <div class="pref-grid pref-grid-3" id="profile-goal-grid">
+          <div class="pref-card" data-value="Alledaags">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Alledaags</p>
+            <p class="pref-card-sub">Dagelijkse gesprekken en situaties</p>
+          </div>
+          <div class="pref-card" data-value="Professioneel">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Professioneel</p>
+            <p class="pref-card-sub">Zakelijke communicatie en werk</p>
+          </div>
+          <div class="pref-card" data-value="Academisch">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Academisch</p>
+            <p class="pref-card-sub">Universitair en wetenschappelijk taalgebruik</p>
+          </div>
+          <div class="pref-card" data-value="Literair">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Literair</p>
+            <p class="pref-card-sub">Poëzie, literatuur en schrijfstijl</p>
+          </div>
+          <div class="pref-card" data-value="Spreektaal">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Spreektaal</p>
+            <p class="pref-card-sub">Informeel, dialect en straattaal</p>
+          </div>
+          <div class="pref-card" data-value="Reizen">
+            <div class="pref-card-check"><svg viewBox="0 0 9 7" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3.5 3.2,6 8,1"/></svg></div>
+            <p class="pref-card-title">Reizen</p>
+            <p class="pref-card-sub">Praktisch Nederlands voor onderweg</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pref-footer">
+        <button class="pref-save-btn" id="profile-save-btn">Opslaan</button>
+        <p class="pref-save-status" id="profile-save-status"></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Settings subpage -->
+  <div id="page-settings" class="subpage hidden">
+    <div class="subpage-topbar">
+      <button class="subpage-back" id="settings-back-btn" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <img src="logo.png?v=3" alt="Woord van de Dag" class="subpage-logo">
+      <span class="subpage-title">Instellingen</span>
+    </div>
+    <div class="subpage-body">
+      <div class="settings-list">
+        <div class="settings-row">
+          <span class="settings-label">Donkere modus standaard</span>
+          <button id="setting-dark-mode" class="toggle-switch" role="switch" aria-checked="false">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Wekelijkse e-maildigest</span>
+          <button id="setting-weekly-email" class="toggle-switch" role="switch" aria-checked="false">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Compacte weergave</span>
+          <button id="setting-compact-view" class="toggle-switch" role="switch" aria-checked="false">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Words subpage -->
+  <div id="page-my-words" class="subpage hidden">
+    <div class="subpage-topbar">
+      <button class="subpage-back" id="my-words-back-btn" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <img src="logo.png?v=3" alt="Woord van de Dag" class="subpage-logo">
+      <span class="subpage-title">Mijn Woorden</span>
+    </div>
+    <div class="subpage-body">
+      <div id="my-words-list" class="my-words-list"></div>
+    </div>
+  </div>
+
+  <div id="auth-toast" class="auth-toast hidden"></div>
+  <div id="premium-toast" class="premium-toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://youglish.com/apiv2/youglish.js" async></script>
+  <script src="script.js"></script>
+</body>
+</html>

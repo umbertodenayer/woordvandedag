@@ -498,7 +498,7 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     sb.auth.getSession().then(({ data }) => {
-      if (data.session) window.location.replace('index.html');
+      if (data.session) window.location.replace('woord.html');
     });
 
     // ── State ──
@@ -621,7 +621,7 @@
           overlay.querySelector('.checkmark-circle').classList.add('animate');
           overlay.querySelector('.checkmark-tick').classList.add('animate');
         }));
-        setTimeout(() => { window.location.href = 'index.html'; }, 2200);
+        setTimeout(() => { window.location.href = 'woord.html'; }, 2200);
       }, 400);
     }
   </script>
