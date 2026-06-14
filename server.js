@@ -236,27 +236,16 @@ async function refreshWord() {
 
   const wordData = cache.get(cacheKey());
 
-  if (!cache.has(imageCacheKey())) {
-    try {
-      const image = await fetchImage(wordData.word, wordData.definition);
-      cache.set(imageCacheKey(), image);
-      await saveCache();
-      console.log('Image cached.');
-    } catch (e) {
-      console.error('fetchImage failed:', e.message);
-    }
-  }
+  await Promise.all([
+    cache.has(imageCacheKey()) ? null : fetchImage(wordData.word, wordData.definition)
+      .then(image => { cache.set(imageCacheKey(), image); console.log('Image cached.'); })
+      .catch(e => console.error('fetchImage failed:', e.message)),
+    cache.has(audioCacheKey()) ? null : fetchAudio(wordData.word)
+      .then(audio => { cache.set(audioCacheKey(), audio); console.log('Audio cached.'); })
+      .catch(e => console.error('fetchAudio failed:', e.message)),
+  ]);
 
-  if (!cache.has(audioCacheKey())) {
-    try {
-      const audio = await fetchAudio(wordData.word);
-      cache.set(audioCacheKey(), audio);
-      await saveCache();
-      console.log('Audio cached.');
-    } catch (e) {
-      console.error('fetchAudio failed:', e.message);
-    }
-  }
+  await saveCache();
 }
 
 function scheduleMidnightRefresh() {
@@ -350,22 +339,10 @@ app.post('/api/save-profile', async (req, res) => {
   const profileData = { niveau: niveau || null, leerdoelen: leerdoelen || [] };
 
   try {
-    // Try UPDATE first; if no row exists, INSERT
-    const { data: updated, error: updateErr } = await sb
+    const { error } = await sb
       .from('user_profiles')
-      .update(profileData)
-      .eq('user_id', userId)
-      .select('user_id');
-
-    if (updateErr) throw updateErr;
-
-    if (!updated || updated.length === 0) {
-      const { error: insertErr } = await sb
-        .from('user_profiles')
-        .insert({ user_id: userId, ...profileData });
-      if (insertErr) throw insertErr;
-    }
-
+      .upsert({ user_id: userId, ...profileData }, { onConflict: 'user_id' });
+    if (error) throw error;
     res.json({ ok: true });
   } catch (e) {
     console.error('[save-profile]', e.message);
