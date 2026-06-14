@@ -1716,3 +1716,122 @@ html[data-theme="dark"] #word {
   width: 15px;
   height: 15px;
 }
+
+/* ── Site-wide footer ───────────────────────────────────────────── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  padding: 64px 56px 40px;
+  transition: background-color 1.4s ease, border-color 1.4s ease;
+}
+
+.site-footer-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.site-footer-cols {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+.site-footer-logo {
+  height: 36px;
+  width: auto;
+  display: block;
+  margin-bottom: 14px;
+  mix-blend-mode: multiply;
+}
+
+html[data-theme="dark"] .site-footer-logo {
+  mix-blend-mode: screen;
+}
+
+.site-footer-tagline {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.site-footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.site-footer-nav a {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer-nav a:hover {
+  color: var(--text);
+}
+
+.site-footer-social-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+
+.site-footer-socials {
+  display: flex;
+  gap: 10px;
+}
+
+.site-footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.site-footer-social-link:hover {
+  color: var(--terracotta);
+  border-color: var(--terracotta);
+}
+
+.site-footer-social-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+.site-footer-bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+
+.site-footer-bottom p {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+@media (max-width: 680px) {
+  .site-footer {
+    padding: 48px 24px 32px;
+  }
+  .site-footer-cols {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
