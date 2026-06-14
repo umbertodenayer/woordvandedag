@@ -326,22 +326,45 @@ app.post('/api/check-email', async (req, res) => {
 app.post('/api/save-profile', async (req, res) => {
   if (!sb) return res.status(503).json({ error: 'Auth unavailable' });
 
+  // Verify the user's JWT
   const auth  = req.headers['authorization'] || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
-  const { data: { user }, error: authError } = await sb.auth.getUser(token);
-  if (authError || !user) return res.status(401).json({ error: 'Invalid token' });
+  let userId;
+  try {
+    const { data, error } = await sb.auth.getUser(token);
+    if (error || !data?.user) return res.status(401).json({ error: 'Invalid token' });
+    userId = data.user.id;
+  } catch (e) {
+    return res.status(401).json({ error: 'Token verification failed' });
+  }
 
   const { niveau, leerdoelen } = req.body || {};
+  const profileData = { niveau: niveau || null, leerdoelen: leerdoelen || [] };
 
-  const { error } = await sb.from('user_profiles').upsert(
-    { user_id: user.id, niveau: niveau || null, leerdoelen: leerdoelen || [] },
-    { onConflict: 'user_id' }
-  );
+  try {
+    // Try UPDATE first; if no row exists, INSERT
+    const { data: updated, error: updateErr } = await sb
+      .from('user_profiles')
+      .update(profileData)
+      .eq('user_id', userId)
+      .select('user_id');
 
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ ok: true });
+    if (updateErr) throw updateErr;
+
+    if (!updated || updated.length === 0) {
+      const { error: insertErr } = await sb
+        .from('user_profiles')
+        .insert({ user_id: userId, ...profileData });
+      if (insertErr) throw insertErr;
+    }
+
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[save-profile]', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.use(express.static(path.join(__dirname), {
