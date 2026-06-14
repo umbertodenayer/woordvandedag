@@ -1742,12 +1742,9 @@ html[data-theme="dark"] #word {
   width: auto;
   display: block;
   margin-bottom: 14px;
-  mix-blend-mode: multiply;
 }
 
-html[data-theme="dark"] .site-footer-logo {
-  mix-blend-mode: screen;
-}
+html[data-theme="dark"] .site-footer-logo {}
 
 .site-footer-tagline {
   font-family: 'Inter', system-ui, sans-serif;
