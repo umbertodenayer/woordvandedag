@@ -17,7 +17,7 @@
   <meta name="theme-color" content="#C4714A">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { opacity: 0; transition: opacity 0.4s ease; }
+    body { opacity: 0; transition: opacity 0.8s ease; }
     body.loaded { opacity: 1; }
 
     /* ── Nav ────────────────────────────────────────────────── */
@@ -609,57 +609,57 @@
     html[data-theme="dark"] .lnav-links a:hover { color:#fff; }
 
     /* ══ Landing entrance sequence — curtain rising, plays once per load ══ */
-    /* 0.0s  Background fades white→cream (handled by body opacity, 0.4s above) */
+    /* 0.0s  Background fades white→cream (handled by body opacity, 0.8s above) */
 
-    /* 0.1s  Eyebrow label leads in gently */
+    /* 0.2s  Eyebrow label leads in gently */
     .hero-eyebrow {
       opacity: 0;
-      animation: heroFade 0.6s ease 0.1s both;
+      animation: heroFade 1.2s ease 0.2s both;
     }
 
-    /* 0.2s / 0.6s  Headline lines rise in, staggered */
+    /* 0.4s then 2.2s  Headline lines rise — long dramatic pause between them */
     .hero-headline .hl-line {
       display: inline-block;
       opacity: 0;
       will-change: transform, opacity;
     }
     .hero-headline .hl-1 {
-      animation: heroRise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+      animation: heroRise 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
     }
     .hero-headline .hl-2 {
-      animation: heroRise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+      animation: heroRise 1.6s cubic-bezier(0.16, 1, 0.3, 1) 2.2s both;
     }
 
-    /* 1.2s  Subtitle fades in, no movement */
+    /* 3.4s  Subtitle fades in, no movement */
     .hero-sub {
       opacity: 0;
-      animation: heroFade 0.6s ease 1.2s both;
+      animation: heroFade 1.2s ease 3.4s both;
     }
 
-    /* 1.6s  CTA buttons fade + rise slightly, together */
+    /* 4.2s  CTA buttons fade + rise slightly, together */
     .hero-ctas {
       opacity: 0;
-      animation: heroRiseSmall 0.5s cubic-bezier(0.16, 1, 0.3, 1) 1.6s both;
+      animation: heroRiseSmall 1.0s cubic-bezier(0.16, 1, 0.3, 1) 4.2s both;
     }
 
-    /* 2.0s  Nav bar slides down from above; inert until it lands */
+    /* 4.8s  Nav bar slides down from above; inert until it lands */
     .lnav {
       opacity: 0;
       transform: translateY(-100%);
       pointer-events: none;
-      animation: navDrop 0.5s cubic-bezier(0.16, 1, 0.3, 1) 2.0s both;
+      animation: navDrop 1.0s cubic-bezier(0.16, 1, 0.3, 1) 4.8s both;
     }
 
-    /* 2.2s  Ghost watermark fades very slowly to its resting 0.04 */
+    /* 5.2s  Ghost watermark fades very slowly to its resting 0.04 */
     .hero-ghost {
       opacity: 0;
-      animation: ghostFade 1s ease 2.2s both;
+      animation: ghostFade 2s ease 5.2s both;
     }
 
-    /* 2.4s  Scroll indicator fades in last, then keeps bouncing */
+    /* 5.6s  Scroll indicator fades in last, then keeps bouncing */
     .scroll-indicator {
       opacity: 0;
-      animation: bounce-down 1.8s ease-in-out infinite, heroFade 0.4s ease 2.4s both;
+      animation: bounce-down 1.8s ease-in-out infinite, heroFade 0.8s ease 5.6s both;
     }
 
     @keyframes heroRise {
