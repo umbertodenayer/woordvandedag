@@ -17,8 +17,7 @@
   <meta name="theme-color" content="#C4714A">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { opacity: 0; transition: opacity 0.744s ease; }
-    body.loaded { opacity: 1; }
+    body { transition: opacity 0.28s ease; }
 
     /* ── Nav ────────────────────────────────────────────────── */
     .lnav {
@@ -32,7 +31,9 @@
       padding: 10px 64px;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
-      transition: box-shadow 0.3s ease;
+      transition: box-shadow 0.3s ease, opacity 0.7s ease;
+      opacity: 0;
+      pointer-events: none;
     }
     .lnav.scrolled {
       box-shadow: 0 2px 24px rgba(0,0,0,0.06);
@@ -136,13 +137,15 @@
       font-weight: 300;
       font-style: italic;
       color: var(--text);
-      opacity: 0.04;
+      opacity: 0;
       pointer-events: none;
       user-select: none;
       white-space: nowrap;
       letter-spacing: -0.02em;
       line-height: 1;
+      transition: opacity 1.2s ease;
     }
+    .hero-ghost.visible { opacity: 0.04; }
     .hero-content {
       position: relative;
       z-index: 1;
@@ -157,6 +160,9 @@
       text-transform: uppercase;
       color: #C4714A;
       margin-bottom: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.65s ease;
     }
     .hero-headline {
       font-family: 'Fraunces', serif;
@@ -181,6 +187,9 @@
       max-width: 520px;
       margin-left: auto;
       margin-right: auto;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.65s ease;
     }
     .hero-ctas {
       display: flex;
@@ -188,6 +197,9 @@
       justify-content: center;
       gap: 14px;
       margin-bottom: 64px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.65s ease;
     }
     .btn-primary {
       font-family: 'Inter', sans-serif;
@@ -226,6 +238,9 @@
       gap: 6px;
       color: var(--muted);
       animation: bounce-down 1.8s ease-in-out infinite;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.65s ease;
     }
     .scroll-indicator span {
       font-family: 'Inter', sans-serif;
@@ -561,6 +576,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
     }
     .lfooter-logo { height: 32px; width: auto; }
     .lfooter-links {
@@ -995,16 +1013,46 @@
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-    // Page fade-in on load
-    requestAnimationFrame(() => document.body.classList.add('loaded'));
+    // ── Entrance sequence ───────────────────────────────────
+    // On load: only .hero-headline is visible. Everything else
+    // fades in on a staggered timeline.
+    function reveal(el, opacity) {
+      if (!el) return;
+      el.style.opacity = String(opacity ?? 1);
+      el.style.pointerEvents = '';
+    }
 
-    // Page fade-out before navigating
+    // ghost fades to its natural 0.04 opacity
+    setTimeout(() => {
+      const g = document.querySelector('.hero-ghost');
+      if (g) g.classList.add('visible');
+    }, 250);
+
+    setTimeout(() => reveal(document.querySelector('.hero-eyebrow')),  550);
+    setTimeout(() => reveal(document.querySelector('.hero-sub')),       850);
+    setTimeout(() => reveal(document.querySelector('.hero-ctas')),     1100);
+    setTimeout(() => reveal(document.querySelector('.scroll-indicator')), 1350);
+    setTimeout(() => reveal(document.querySelector('.lnav')),          1600);
+
+    // Footer fades in when scrolled into view
+    const footerEl = document.querySelector('.lfooter');
+    if (footerEl) {
+      const footerObs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          reveal(footerEl);
+          footerObs.disconnect();
+        }
+      }, { threshold: 0.1 });
+      footerObs.observe(footerEl);
+    }
+
+    // ── Page exit fade ──────────────────────────────────────
     document.querySelectorAll('a[href]').forEach(a => {
       const h = a.getAttribute('href');
       if (!h || h.startsWith('#') || h.startsWith('http') || h.startsWith('mailto') || a.target === '_blank') return;
       a.addEventListener('click', e => {
         e.preventDefault();
-        document.body.classList.remove('loaded');
+        document.body.style.opacity = '0';
         setTimeout(() => window.location.href = h, 280);
       });
     });
