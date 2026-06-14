@@ -547,11 +547,11 @@ document.getElementById('profile-back-btn').addEventListener('click', () => {
 // === Profile page ===
 
 let profileNiveau = null;
-let profileGoals  = new Set();
+let profileGoal   = null;
 
 const loadProfilePage = async () => {
   profileNiveau = null;
-  profileGoals  = new Set();
+  profileGoal   = null;
 
   document.querySelectorAll('#profile-level-grid .pref-card').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('#profile-goal-grid  .pref-card').forEach(c => c.classList.remove('selected'));
@@ -567,13 +567,13 @@ const loadProfilePage = async () => {
 
   if (data) {
     profileNiveau = data.niveau || null;
-    profileGoals  = new Set(data.leerdoelen || []);
+    profileGoal   = data.leerdoelen?.[0] || null;
 
     document.querySelectorAll('#profile-level-grid .pref-card').forEach(card => {
       card.classList.toggle('selected', card.dataset.value === profileNiveau);
     });
     document.querySelectorAll('#profile-goal-grid .pref-card').forEach(card => {
-      card.classList.toggle('selected', profileGoals.has(card.dataset.value));
+      card.classList.toggle('selected', card.dataset.value === profileGoal);
     });
   }
 };
@@ -589,13 +589,13 @@ document.getElementById('profile-level-grid').addEventListener('click', e => {
 document.getElementById('profile-goal-grid').addEventListener('click', e => {
   const card = e.target.closest('.pref-card');
   if (!card) return;
-  const val = card.dataset.value;
-  if (profileGoals.has(val)) {
-    profileGoals.delete(val);
-    card.classList.remove('selected');
-  } else {
-    profileGoals.add(val);
+  const isSelected = card.classList.contains('selected');
+  document.querySelectorAll('#profile-goal-grid .pref-card').forEach(c => c.classList.remove('selected'));
+  if (!isSelected) {
     card.classList.add('selected');
+    profileGoal = card.dataset.value;
+  } else {
+    profileGoal = null;
   }
 });
 
@@ -616,7 +616,7 @@ document.getElementById('profile-save-btn').addEventListener('click', async () =
       },
       body: JSON.stringify({
         niveau:     profileNiveau,
-        leerdoelen: Array.from(profileGoals),
+        leerdoelen: profileGoal ? [profileGoal] : [],
       }),
     });
 

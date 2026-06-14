@@ -503,7 +503,7 @@
 
     // ── State ──
     let selectedLevel = null;
-    let selectedGoals = [];
+    let selectedGoal  = null;
 
     // ── Step navigation ──
     function goToStep(index) {
@@ -520,14 +520,18 @@
       document.getElementById('step0-next').classList.remove('hidden');
     }
 
-    // ── Step 2: multi-select goals ──
+    // ── Step 2: single-select goal (click again to deselect) ──
     function toggleGoal(card) {
-      card.classList.toggle('selected');
       const v = card.dataset.value;
-      selectedGoals = card.classList.contains('selected')
-        ? [...selectedGoals.filter(g => g !== v), v]
-        : selectedGoals.filter(g => g !== v);
-      document.getElementById('step1-next').classList.toggle('hidden', selectedGoals.length === 0);
+      const isSelected = card.classList.contains('selected');
+      document.querySelectorAll('#goal-grid .select-card').forEach(c => c.classList.remove('selected'));
+      if (!isSelected) {
+        card.classList.add('selected');
+        selectedGoal = v;
+      } else {
+        selectedGoal = null;
+      }
+      document.getElementById('step1-next').classList.toggle('hidden', selectedGoal === null);
     }
 
     // ── Step 3: password match ──
@@ -595,7 +599,7 @@
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${data.session.access_token}`,
             },
-            body: JSON.stringify({ niveau: selectedLevel, leerdoelen: selectedGoals }),
+            body: JSON.stringify({ niveau: selectedLevel, leerdoelen: selectedGoal ? [selectedGoal] : [] }),
           });
         } catch (_) {}
       }
