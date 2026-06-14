@@ -17,7 +17,7 @@
   <meta name="theme-color" content="#C4714A">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { opacity: 0; transition: opacity 0.3s ease; }
+    body { opacity: 0; transition: opacity 0.4s ease; }
     body.loaded { opacity: 1; }
 
     /* ── Nav ────────────────────────────────────────────────── */
@@ -71,7 +71,6 @@
       align-items: center;
       justify-content: flex-end;
       gap: 10px;
-      position: relative;
     }
     .lnav-theme {
       background: none;
@@ -599,18 +598,109 @@
     }
 
     /* ── Nav search ── */
-    .lnav-search-btn { position:relative;z-index:11;background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;padding:6px;border-radius:6px;transition:color 0.2s;flex-shrink:0; }
+    .lnav-search-wrap { display:flex;align-items:center;margin-right:4px; }
+    .lnav-search-input { width:0;overflow:hidden;border:none;border-bottom:1.5px solid transparent;outline:none;font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--text);background:transparent;padding:2px 0;transition:width 0.3s ease,border-color 0.2s,opacity 0.15s;opacity:0;pointer-events:none; }
+    .lnav-search-input::placeholder { color:var(--muted); }
+    .lnav-search-input.open { width:220px;opacity:1;pointer-events:auto;border-bottom-color:#C4714A;padding:2px 8px; }
+    .lnav-search-btn { background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;padding:6px;border-radius:6px;transition:color 0.2s;flex-shrink:0; }
     .lnav-search-btn:hover { color:var(--text); }
     .lnav-search-btn svg { width:17px;height:17px; }
-    .lnav-search-overlay { position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:10;width:0;height:38px;overflow:hidden;display:flex;align-items:center;background:var(--bg);border-bottom:1.5px solid transparent;transition:width 0.3s ease,border-color 0.25s ease; }
-    .lnav-search-overlay.open { width:280px;border-bottom-color:#C4714A; }
-    .lnav-search-input { flex:1;min-width:0;border:none;outline:none;font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--text);background:transparent;padding:0 4px 0 10px; }
-    .lnav-search-input::placeholder { color:var(--muted); }
-    .lnav-search-close { background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0 8px;flex-shrink:0;transition:color 0.2s; }
-    .lnav-search-close:hover { color:var(--text); }
-    .lnav-search-close svg { width:14px;height:14px; }
     html[data-theme="dark"] .lnav-links a { color:rgba(255,255,255,0.75); }
     html[data-theme="dark"] .lnav-links a:hover { color:#fff; }
+
+    /* ══ Landing entrance sequence — curtain rising, plays once per load ══ */
+    /* 0.0s  Background fades white→cream (handled by body opacity, 0.4s above) */
+
+    /* 0.1s  Eyebrow label leads in gently */
+    .hero-eyebrow {
+      opacity: 0;
+      animation: heroFade 0.6s ease 0.1s both;
+    }
+
+    /* 0.2s / 0.6s  Headline lines rise in, staggered */
+    .hero-headline .hl-line {
+      display: inline-block;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+    .hero-headline .hl-1 {
+      animation: heroRise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+    .hero-headline .hl-2 {
+      animation: heroRise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+    }
+
+    /* 1.2s  Subtitle fades in, no movement */
+    .hero-sub {
+      opacity: 0;
+      animation: heroFade 0.6s ease 1.2s both;
+    }
+
+    /* 1.6s  CTA buttons fade + rise slightly, together */
+    .hero-ctas {
+      opacity: 0;
+      animation: heroRiseSmall 0.5s cubic-bezier(0.16, 1, 0.3, 1) 1.6s both;
+    }
+
+    /* 2.0s  Nav bar slides down from above; inert until it lands */
+    .lnav {
+      opacity: 0;
+      transform: translateY(-100%);
+      pointer-events: none;
+      animation: navDrop 0.5s cubic-bezier(0.16, 1, 0.3, 1) 2.0s both;
+    }
+
+    /* 2.2s  Ghost watermark fades very slowly to its resting 0.04 */
+    .hero-ghost {
+      opacity: 0;
+      animation: ghostFade 1s ease 2.2s both;
+    }
+
+    /* 2.4s  Scroll indicator fades in last, then keeps bouncing */
+    .scroll-indicator {
+      opacity: 0;
+      animation: bounce-down 1.8s ease-in-out infinite, heroFade 0.4s ease 2.4s both;
+    }
+
+    @keyframes heroRise {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroRiseSmall {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroFade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes navDrop {
+      from { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+      to   { opacity: 1; transform: translateY(0);    pointer-events: auto; }
+    }
+    @keyframes ghostFade {
+      from { opacity: 0; }
+      to   { opacity: 0.04; }
+    }
+
+    /* Respect reduced-motion: show everything at rest, no curtain */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-eyebrow,
+      .hero-headline .hl-line,
+      .hero-sub,
+      .hero-ctas,
+      .lnav,
+      .scroll-indicator {
+        animation: none !important;
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+      }
+      .hero-ghost {
+        animation: none !important;
+        opacity: 0.04;
+      }
+    }
   </style>
 </head>
 <body>
@@ -628,15 +718,12 @@
       </ul>
     </div>
     <div class="lnav-right">
+    <div class="lnav-search-wrap" id="lnav-search-wrap">
+      <input type="text" class="lnav-search-input" id="lnav-search-input" placeholder="Zoek een woord…" autocomplete="off" spellcheck="false">
       <button class="lnav-search-btn" id="lnav-search-btn" aria-label="Zoeken">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
       </button>
-      <div class="lnav-search-overlay" id="lnav-search-overlay">
-        <input type="text" class="lnav-search-input" id="lnav-search-input" placeholder="Zoek een woord…" autocomplete="off" spellcheck="false">
-        <button class="lnav-search-close" id="lnav-search-close" aria-label="Sluiten">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
+    </div>
       <button class="lnav-theme" id="lnav-theme" aria-label="Thema wisselen">
         <svg id="lnav-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -655,7 +742,7 @@
     <div class="hero-ghost" id="hero-ghost">woord</div>
     <div class="hero-content">
       <p class="hero-eyebrow">Woord van de Dag</p>
-      <h1 class="hero-headline">Één woord.<br><em>Elke dag.</em></h1>
+      <h1 class="hero-headline"><span class="hl-line hl-1">Één woord.</span><br><em class="hl-line hl-2">Elke dag.</em></h1>
       <p class="hero-sub">Ontdek de rijkdom van de Nederlandse taal, één zorgvuldig gekozen woord per dag.</p>
       <div class="hero-ctas">
         <a href="woord.html" class="btn-primary">Begin vandaag</a>
@@ -924,29 +1011,24 @@
   
 // Nav search
 (function() {
-  const lsBtn     = document.getElementById('lnav-search-btn');
-  const lsOverlay = document.getElementById('lnav-search-overlay');
-  const lsInput   = document.getElementById('lnav-search-input');
-  const lsClose   = document.getElementById('lnav-search-close');
+  const lsBtn = document.getElementById('lnav-search-btn');
+  const lsInput = document.getElementById('lnav-search-input');
   let lsOpen = false;
   function lsExpand() {
     lsOpen = true;
-    lsOverlay.classList.add('open');
-    setTimeout(() => lsInput.focus(), 310);
+    lsInput.classList.add('open');
+    setTimeout(() => lsInput.focus(), 320);
   }
   function lsCollapse() {
     lsOpen = false;
-    lsOverlay.classList.remove('open');
+    lsInput.classList.remove('open');
     lsInput.value = '';
     const ps = document.getElementById('archive-search');
     if (ps) { ps.value = ''; ps.dispatchEvent(new Event('input')); }
   }
   lsBtn.addEventListener('click', e => { e.stopPropagation(); lsOpen ? lsCollapse() : lsExpand(); });
-  lsClose.addEventListener('click', e => { e.stopPropagation(); lsCollapse(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && lsOpen) lsCollapse(); });
-  document.addEventListener('click', e => {
-    if (lsOpen && !e.target.closest('#lnav-search-overlay') && !e.target.closest('#lnav-search-btn')) lsCollapse();
-  });
+  document.addEventListener('click', e => { if (lsOpen && !e.target.closest('.lnav-search-wrap')) lsCollapse(); });
   lsInput.addEventListener('input', () => {
     const ps = document.getElementById('archive-search');
     if (ps) { ps.value = lsInput.value; ps.dispatchEvent(new Event('input')); }
