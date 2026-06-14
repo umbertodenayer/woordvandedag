@@ -1022,5 +1022,11 @@ async function castVote(type) {
 thumbUpBtn.addEventListener('click', () => castVote('like'));
 thumbDownBtn.addEventListener('click', () => castVote('dislike'));
 
+// Logo load check
+const _logo = document.querySelector('.masthead-logo');
+if (_logo) {
+  _logo.addEventListener('load', () => console.log('Logo loaded:', _logo.src));
+  _logo.addEventListener('error', () => console.error('Logo failed to load — check path:', _logo.src));
+}
 load();
 loadImage();
