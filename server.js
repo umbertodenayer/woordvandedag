@@ -198,7 +198,8 @@ async function fetchAudio(word) {
     },
     body: JSON.stringify({
       text: word,
-      model_id: 'eleven_turbo_v2_5'
+      model_id: 'eleven_turbo_v2_5',
+      language_code: 'nl'
     })
   });
 
@@ -309,15 +310,20 @@ app.post('/api/check-email', async (req, res) => {
   if (!sb) {
     return res.status(503).json({ error: 'Auth check unavailable' });
   }
+  // supabase-js v2 has no admin.getUserByEmail — page through listUsers and match.
+  const target = email.trim().toLowerCase();
   try {
-    const { data, error } = await sb.auth.admin.getUserByEmail(email.trim().toLowerCase());
-    if (error && error.message === 'User not found') {
-      return res.json({ exists: false });
+    const perPage = 1000;
+    for (let page = 1; page <= 50; page++) {
+      const { data, error } = await sb.auth.admin.listUsers({ page, perPage });
+      if (error) return res.status(500).json({ error: error.message });
+      const users = data?.users || [];
+      if (users.some(u => (u.email || '').toLowerCase() === target)) {
+        return res.json({ exists: true });
+      }
+      if (users.length < perPage) break; // last page
     }
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-    return res.json({ exists: !!data.user });
+    return res.json({ exists: false });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
