@@ -718,6 +718,10 @@
         animation: none !important;
         opacity: 0.04;
       }
+      #illus-p1, #illus-p2, #illus-p3 {
+        animation: none !important;
+        opacity: 1;
+      }
       .illus-float {
         animation: none !important;
       }
@@ -743,13 +747,23 @@
       to   { transform: translateY(-12px); }
     }
 
-    /* Layer 1 — parallax wrapper: JS sets translateY via style.transform */
+    @keyframes illusReveal {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* Layer 1 — parallax wrapper: hidden from frame 0, reveals after CTA sequence */
     .illus-parallax {
       position: absolute;
       will-change: transform;
       z-index: 0;
       pointer-events: none;
+      opacity: 0; /* must stay 0 until illusReveal fires */
     }
+    /* Staggered: start after CTA buttons are fully visible (~3.906s + 0.93s = 4.836s) */
+    #illus-p1 { animation: illusReveal 0.9s ease 4.1s both; }
+    #illus-p3 { animation: illusReveal 0.9s ease 4.3s both; }
+    #illus-p2 { animation: illusReveal 0.9s ease 4.5s both; }
 
     /* Layer 2 — float wrapper: CSS animation only, independent of parallax */
     .illus-float {
