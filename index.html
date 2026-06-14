@@ -127,25 +127,6 @@
       overflow: hidden;
       padding: 100px 24px 80px;
     }
-    .hero-ghost {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -48%) rotate(-8deg);
-      font-family: 'Fraunces', serif;
-      font-size: clamp(100px, 16vw, 220px);
-      font-weight: 300;
-      font-style: italic;
-      color: var(--text);
-      opacity: 0;
-      pointer-events: none;
-      user-select: none;
-      white-space: nowrap;
-      letter-spacing: -0.02em;
-      line-height: 1;
-      transition: opacity 1.2s ease;
-    }
-    .hero-ghost.visible { opacity: 0.04; }
     .hero-content {
       position: relative;
       z-index: 1;
@@ -668,12 +649,6 @@
       animation: navDrop 0.93s cubic-bezier(0.16, 1, 0.3, 1) 4.464s both;
     }
 
-    /* 4.836s  Ghost watermark fades very slowly to its resting 0.04 */
-    .hero-ghost {
-      opacity: 0;
-      animation: ghostFade 1.86s ease 4.836s both;
-    }
-
     /* 5.208s  Scroll indicator fades in last, then keeps bouncing */
     .scroll-indicator {
       opacity: 0;
@@ -696,11 +671,6 @@
       from { opacity: 0; transform: translateY(-100%); pointer-events: none; }
       to   { opacity: 1; transform: translateY(0);    pointer-events: auto; }
     }
-    @keyframes ghostFade {
-      from { opacity: 0; }
-      to   { opacity: 0.04; }
-    }
-
     /* Respect reduced-motion: show everything at rest, no curtain */
     @media (prefers-reduced-motion: reduce) {
       .hero-eyebrow,
@@ -713,10 +683,6 @@
         opacity: 1;
         transform: none;
         pointer-events: auto;
-      }
-      .hero-ghost {
-        animation: none !important;
-        opacity: 0.04;
       }
       .illus-parallax {
         animation: none !important;
@@ -928,7 +894,6 @@
       </div>
     </div>
 
-    <div class="hero-ghost" id="hero-ghost">woord</div>
     <div class="hero-content">
       <p class="hero-eyebrow">Woord van de Dag</p>
       <h1 class="hero-headline"><span class="hl-line hl-1">Één woord.</span><br><em class="hl-line hl-2">Elke dag.</em></h1>
@@ -1279,9 +1244,6 @@
         if (!r.ok) return;
         const d = await r.json();
 
-        // Ghost word
-        document.getElementById('hero-ghost').textContent = d.word || 'woord';
-
         // Preview left
         document.getElementById('preview-pos').textContent = d.partOfSpeech || '';
         document.getElementById('preview-word').textContent = d.word || '';
@@ -1344,12 +1306,6 @@
       el.style.opacity = String(opacity ?? 1);
       el.style.pointerEvents = '';
     }
-
-    // ghost fades to its natural 0.04 opacity
-    setTimeout(() => {
-      const g = document.querySelector('.hero-ghost');
-      if (g) g.classList.add('visible');
-    }, 250);
 
     setTimeout(() => reveal(document.querySelector('.hero-eyebrow')),  550);
     setTimeout(() => reveal(document.querySelector('.hero-sub')),       850);
