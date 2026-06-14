@@ -985,37 +985,61 @@ async function loadRatings() {
 }
 
 async function castVote(type) {
-  if (!sbClient || !currentWord || localStorage.getItem(voteKey())) return;
+  if (!sbClient || !currentWord) return;
 
-  const today = todayDateStr();
-  const { data: existing } = await sbClient
+  const today    = todayDateStr();
+  const prevVote = localStorage.getItem(voteKey());    // 'like' | 'dislike' | null
+  const nextVote = prevVote === type ? null : type;    // same button = toggle off
+
+  // How much each count changes in this transition
+  const likesDelta    = (nextVote === 'like'    ? 1 : 0) - (prevVote === 'like'    ? 1 : 0);
+  const dislikesDelta = (nextVote === 'dislike' ? 1 : 0) - (prevVote === 'dislike' ? 1 : 0);
+
+  // Optimistic UI — instant feedback before the network round-trip
+  likeCountEl.textContent    = Math.max(0, (parseInt(likeCountEl.textContent,    10) || 0) + likesDelta);
+  dislikeCountEl.textContent = Math.max(0, (parseInt(dislikeCountEl.textContent, 10) || 0) + dislikesDelta);
+  if (nextVote) {
+    localStorage.setItem(voteKey(), nextVote);
+  } else {
+    localStorage.removeItem(voteKey());
+  }
+  thumbUpBtn.classList.toggle('active',   nextVote === 'like');
+  thumbDownBtn.classList.toggle('active', nextVote === 'dislike');
+
+  // Sync to Supabase — read current DB counts then apply delta
+  const { data: row } = await sbClient
     .from('word_ratings')
     .select('likes, dislikes')
     .eq('word', currentWord)
     .eq('date', today)
     .maybeSingle();
 
-  const likes = (existing?.likes ?? 0) + (type === 'like' ? 1 : 0);
-  const dislikes = (existing?.dislikes ?? 0) + (type === 'dislike' ? 1 : 0);
+  const newLikes    = Math.max(0, (row?.likes    ?? 0) + likesDelta);
+  const newDislikes = Math.max(0, (row?.dislikes ?? 0) + dislikesDelta);
 
-  if (existing) {
-    await sbClient.from('word_ratings').update({ likes, dislikes }).eq('word', currentWord).eq('date', today);
+  if (row) {
+    await sbClient
+      .from('word_ratings')
+      .update({ likes: newLikes, dislikes: newDislikes })
+      .eq('word', currentWord)
+      .eq('date', today);
   } else {
-    await sbClient.from('word_ratings').insert({ word: currentWord, date: today, likes, dislikes });
+    await sbClient
+      .from('word_ratings')
+      .insert({ word: currentWord, date: today, likes: newLikes, dislikes: newDislikes });
   }
 
-  likeCountEl.textContent = likes;
-  dislikeCountEl.textContent = dislikes;
-  localStorage.setItem(voteKey(), type);
-  thumbUpBtn.classList.toggle('active', type === 'like');
-  thumbDownBtn.classList.toggle('active', type === 'dislike');
-
-  if (type === 'like' && sbSession) {
-    await sbClient.from('user_liked_words').insert({
-      user_id: sbSession.user.id,
-      word: currentWord,
-      date: today
-    });
+  // Keep user_liked_words in sync for signed-in users
+  if (sbSession) {
+    if (nextVote === 'like') {
+      await sbClient.from('user_liked_words')
+        .insert({ user_id: sbSession.user.id, word: currentWord, date: today });
+    } else if (prevVote === 'like') {
+      await sbClient.from('user_liked_words')
+        .delete()
+        .eq('user_id', sbSession.user.id)
+        .eq('word', currentWord);
+    }
   }
 }
 
