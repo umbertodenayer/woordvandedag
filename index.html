@@ -718,6 +718,40 @@
         animation: none !important;
         opacity: 0.04;
       }
+      .illus-img {
+        animation: none !important;
+        opacity: 1;
+      }
+    }
+
+    /* ── Floating illustration cards ────────────────────────────── */
+    .illus-parallax {
+      position: absolute;
+      will-change: transform;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .illus-card {
+      border-radius: 20px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      width: 200px;
+    }
+    .illus-img {
+      display: block;
+      width: 200px;
+      height: auto;
+      border-radius: 20px;
+      opacity: 0;
+    }
+    /* Entrance: staggered 0.2s after each other, starting just after CTA buttons */
+    #illus-p3 .illus-img { animation: heroRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 4.1s both; }
+    #illus-p1 .illus-img { animation: heroRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 4.3s both; }
+    #illus-p2 .illus-img { animation: heroRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 4.5s both; }
+
+    /* Hide on viewports too narrow to have empty flanking space */
+    @media (max-width: 1199px) {
+      .illus-parallax { display: none; }
     }
   </style>
 </head>
@@ -757,6 +791,23 @@
 
   <!-- ── Hero ───────────────────────────────────────────────── -->
   <section class="hero">
+    <!-- Illustration cards: visible only at ≥1200px -->
+    <div class="illus-parallax" id="illus-p3" style="left:3%;top:8%">
+      <div class="illus-card" style="transform:rotate(-6deg)">
+        <img src="illustration-3.png" alt="" class="illus-img">
+      </div>
+    </div>
+    <div class="illus-parallax" id="illus-p1" style="left:1%;top:52%">
+      <div class="illus-card" style="transform:rotate(-4deg)">
+        <img src="illustration-1.png" alt="" class="illus-img">
+      </div>
+    </div>
+    <div class="illus-parallax illus-right" id="illus-p2" style="right:2%;top:5%">
+      <div class="illus-card" style="transform:rotate(5deg)">
+        <img src="illustration-2.png" alt="" class="illus-img">
+      </div>
+    </div>
+
     <div class="hero-ghost" id="hero-ghost">woord</div>
     <div class="hero-content">
       <p class="hero-eyebrow">Woord van de Dag</p>
@@ -927,10 +978,17 @@
       applyTheme(next);
     });
 
-    // ── Nav shadow on scroll ────────────────────────────────
+    // ── Nav shadow on scroll + illustration parallax ───────
     const lnav = document.getElementById('lnav');
+    const illusLeft  = document.querySelectorAll('.illus-parallax:not(.illus-right)');
+    const illusRight = document.querySelectorAll('.illus-parallax.illus-right');
     window.addEventListener('scroll', () => {
       lnav.classList.toggle('scrolled', window.scrollY > 8);
+      if (window.innerWidth >= 1200) {
+        const sy = window.scrollY;
+        illusLeft.forEach(el  => { el.style.transform = `translateY(${-sy * 0.15}px)`; });
+        illusRight.forEach(el => { el.style.transform = `translateY(${sy  * 0.15}px)`; });
+      }
     }, { passive: true });
 
     // ── If already logged in, swap nav CTAs ─────────────────
