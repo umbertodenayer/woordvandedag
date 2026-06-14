@@ -26,8 +26,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 56px;
-      height: 68px;
+      padding: 16px 56px;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
       transition: box-shadow 0.3s ease;
@@ -35,17 +34,22 @@
     .lnav.scrolled {
       box-shadow: 0 2px 24px rgba(0,0,0,0.06);
     }
-    .lnav-logo { height: 44px; width: auto; display: block; mix-blend-mode: multiply; }
-    html[data-theme="dark"] .lnav-logo { mix-blend-mode: screen; }
-    .lnav-right {
+    .lnav-left {
+      flex: 1;
       display: flex;
       align-items: center;
-      gap: 32px;
+    }
+    .lnav-logo { height: 44px; width: auto; display: block; mix-blend-mode: multiply; }
+    html[data-theme="dark"] .lnav-logo { mix-blend-mode: screen; }
+    .lnav-center {
+      flex: 1;
+      display: flex;
+      justify-content: center;
     }
     .lnav-links {
       display: flex;
       align-items: center;
-      gap: 28px;
+      gap: 36px;
       list-style: none;
     }
     .lnav-links a {
@@ -59,7 +63,27 @@
       transition: color 0.2s;
     }
     .lnav-links a:hover { color: var(--text); }
-    .lnav-ctas { display: flex; align-items: center; gap: 10px; }
+    .lnav-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .lnav-theme {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.2s;
+      margin-right: 6px;
+    }
+    .lnav-theme:hover { color: var(--text); }
+    .lnav-theme svg { width: 18px; height: 18px; }
     .lnav-login {
       font-family: 'Inter', sans-serif;
       font-size: 0.8rem;
@@ -88,21 +112,6 @@
       transition: border-color 0.2s, color 0.2s;
     }
     .lnav-signup:hover { border-color: #C4714A; color: #C4714A; }
-
-    /* ── Theme toggle nav ────────────────────────────────────── */
-    .lnav-theme {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      padding: 4px;
-      border-radius: 6px;
-      transition: color 0.2s;
-    }
-    .lnav-theme:hover { color: var(--text); }
-    .lnav-theme svg { width: 18px; height: 18px; }
 
     /* ── Hero ───────────────────────────────────────────────── */
     .hero {
@@ -577,8 +586,9 @@
 
     /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 860px) {
-      .lnav { padding: 0 24px; }
-      .lnav-links { display: none; }
+      .lnav { padding: 12px 24px; }
+      .lnav-center { display: none; }
+      .lnav-signup { display: none; }
       .lsection { padding: 64px 24px; }
       .hiw-grid { grid-template-columns: 1fr; gap: 36px; }
       .audience-grid { grid-template-columns: 1fr; gap: 16px; }
@@ -594,25 +604,27 @@
 
   <!-- ── Navigation ─────────────────────────────────────────── -->
   <nav class="lnav" id="lnav">
-    <a href="index.html"><img src="logoreal.png?v=1" alt="Woord van de Dag" class="lnav-logo"></a>
-    <div class="lnav-right">
+    <div class="lnav-left">
+      <a href="index.html"><img src="logoreal.png?v=1" alt="Woord van de Dag" class="lnav-logo"></a>
+    </div>
+    <div class="lnav-center">
       <ul class="lnav-links">
         <li><a href="woord.html">Woord van de Dag</a></li>
         <li><a href="#">Archief</a></li>
         <li><a href="#">Over ons</a></li>
       </ul>
-      <div class="lnav-ctas">
-        <button class="lnav-theme" id="lnav-theme" aria-label="Thema wisselen">
-          <svg id="lnav-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-          </svg>
-          <svg id="lnav-moon" class="hidden" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-        </button>
-        <a href="login.html" class="lnav-login">Inloggen</a>
-        <a href="signup.html" class="lnav-signup">Account aanmaken</a>
-      </div>
+    </div>
+    <div class="lnav-right">
+      <button class="lnav-theme" id="lnav-theme" aria-label="Thema wisselen">
+        <svg id="lnav-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+        <svg id="lnav-moon" class="hidden" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <a href="login.html" class="lnav-login">Inloggen</a>
+      <a href="signup.html" class="lnav-signup">Account aanmaken</a>
     </div>
   </nav>
 
