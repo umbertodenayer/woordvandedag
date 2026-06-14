@@ -842,31 +842,25 @@
 
   <!-- ── Hero ───────────────────────────────────────────────── -->
   <section class="hero">
-    <!-- Illustration cards: visible only at ≥1200px -->
-    <!-- p1: coffee man — left, vertically centered with hero text -->
+    <!-- Illustration cards: visible only at ≥1200px. src set dynamically by JS. -->
     <div class="illus-parallax" id="illus-p1" style="left:3%;top:50%">
       <div class="illus-float">
         <div class="illus-card loading" style="transform:translateY(-60%) rotate(-5deg);width:210px">
-          <img src="illustration-1.png" alt="" class="illus-img"
-               onload="this.classList.add('loaded');this.closest('.illus-card').classList.remove('loading')">
+          <img alt="" class="illus-img">
         </div>
       </div>
     </div>
-    <!-- p2: ice skater — right, higher up -->
     <div class="illus-parallax illus-right" id="illus-p2" style="right:2%;top:25%">
       <div class="illus-float">
         <div class="illus-card loading" style="transform:rotate(4deg);width:190px">
-          <img src="illustration-2.png" alt="" class="illus-img"
-               onload="this.classList.add('loaded');this.closest('.illus-card').classList.remove('loading')">
+          <img alt="" class="illus-img">
         </div>
       </div>
     </div>
-    <!-- p3: piano man — left, lower down -->
     <div class="illus-parallax" id="illus-p3" style="left:6%;top:72%">
       <div class="illus-float">
         <div class="illus-card loading" style="transform:rotate(-3deg);width:180px">
-          <img src="illustration-3.png" alt="" class="illus-img"
-               onload="this.classList.add('loaded');this.closest('.illus-card').classList.remove('loading')">
+          <img alt="" class="illus-img">
         </div>
       </div>
     </div>
@@ -1053,6 +1047,69 @@
         illusRight.forEach(el => { el.style.transform = `translateY(${sy  * 0.15}px)`; });
       }
     }, { passive: true });
+
+    // ── Illustration carousel ──────────────────────────────
+    // Add new illustration filenames here
+    const illustrations = [
+      'illustration-1.png',
+      'illustration-2.png',
+      'illustration-3.png',
+    ];
+
+    const illusSlots = [
+      document.getElementById('illus-p1'),
+      document.getElementById('illus-p2'),
+      document.getElementById('illus-p3'),
+    ];
+
+    function illusPickUnique(n, exclude) {
+      let pool = illustrations.filter(x => !exclude.includes(x));
+      if (pool.length < n) pool = illustrations.slice();
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return pool.slice(0, n);
+    }
+
+    function illusLoad(slot, src) {
+      const img  = slot.querySelector('.illus-img');
+      const card = slot.querySelector('.illus-card');
+      img.onload = null;
+      img.classList.remove('loaded');
+      card.classList.add('loading');
+      img.src = src;
+      img.onload = () => {
+        img.classList.add('loaded');
+        card.classList.remove('loading');
+      };
+    }
+
+    let currentIllus = illusPickUnique(3, []);
+    illusSlots.forEach((slot, i) => illusLoad(slot, currentIllus[i]));
+
+    // After entrance completes (last illusReveal: 4.5s + 0.9s = 5.4s),
+    // release CSS animation fill-mode so inline opacity can drive fades.
+    setTimeout(() => {
+      illusSlots.forEach(el => {
+        el.style.animation  = 'none';
+        el.style.transition = 'none';
+        el.style.opacity    = '1';
+        el.offsetHeight; // force reflow before re-enabling transition
+        el.style.transition = 'opacity 0.8s ease';
+      });
+
+      setInterval(() => {
+        illusSlots.forEach(el => { el.style.opacity = '0'; });
+        setTimeout(() => {
+          currentIllus = illusPickUnique(3, currentIllus);
+          illusSlots.forEach((slot, i) => illusLoad(slot, currentIllus[i]));
+          setTimeout(() => {
+            illusSlots.forEach(el => { el.style.opacity = '1'; });
+          }, 50);
+        }, 800);
+      }, 30000);
+    }, 5500);
 
     // ── If already logged in, swap nav CTAs ─────────────────
     if (window.supabase) {
