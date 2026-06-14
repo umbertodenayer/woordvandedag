@@ -758,13 +758,7 @@ html[data-theme="dark"] .masthead-rest {
   height: 52px;
   width: auto;
   flex-shrink: 0;
-  mix-blend-mode: multiply;
   display: block;
-}
-
-html[data-theme="dark"] .masthead-logo {
-  mix-blend-mode: screen;
-  filter: brightness(1.1);
 }
 
 .masthead-line {
