@@ -718,36 +718,73 @@
         animation: none !important;
         opacity: 0.04;
       }
-      .illus-img {
+      .illus-float {
         animation: none !important;
-        opacity: 1;
+      }
+      .illus-card.loading {
+        animation: none !important;
+      }
+      .illus-img {
+        transition: none !important;
       }
     }
 
     /* ── Floating illustration cards ────────────────────────────── */
+    @keyframes illusPulse {
+      0%, 100% { background-color: #f5f2ee; }
+      50%       { background-color: #ede9e3; }
+    }
+    @keyframes illusPulseDark {
+      0%, 100% { background-color: #1a1814; }
+      50%       { background-color: #2a2520; }
+    }
+    @keyframes float {
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-12px); }
+    }
+
+    /* Layer 1 — parallax wrapper: JS sets translateY via style.transform */
     .illus-parallax {
       position: absolute;
       will-change: transform;
       z-index: 0;
       pointer-events: none;
     }
+
+    /* Layer 2 — float wrapper: CSS animation only, independent of parallax */
+    .illus-float {
+      will-change: transform;
+      animation: float 4s ease-in-out infinite alternate;
+    }
+    #illus-p1 .illus-float { animation-delay: 0s; }
+    #illus-p2 .illus-float { animation-delay: 1.3s; }
+    #illus-p3 .illus-float { animation-delay: 0.7s; }
+
+    /* Layer 3 — card: rotation + skeleton bg (invisible against page until img loads) */
     .illus-card {
       border-radius: 20px;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.10);
       overflow: hidden;
-      width: 200px;
+      background-color: #f5f2ee;
     }
+    .illus-card.loading {
+      animation: illusPulse 1.5s ease-in-out infinite;
+    }
+    html[data-theme="dark"] .illus-card { background-color: #1a1814; }
+    html[data-theme="dark"] .illus-card.loading {
+      animation: illusPulseDark 1.5s ease-in-out infinite;
+    }
+
+    /* Image: fades in when loaded via .loaded class */
     .illus-img {
       display: block;
-      width: 200px;
+      width: 100%;
       height: auto;
       border-radius: 20px;
       opacity: 0;
+      transition: opacity 0.4s ease;
     }
-    /* Entrance: staggered 0.2s after each other, starting just after CTA buttons */
-    #illus-p3 .illus-img { animation: heroRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 4.1s both; }
-    #illus-p1 .illus-img { animation: heroRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 4.3s both; }
-    #illus-p2 .illus-img { animation: heroRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 4.5s both; }
+    .illus-img.loaded { opacity: 1; }
 
     /* Hide on viewports too narrow to have empty flanking space */
     @media (max-width: 1199px) {
@@ -792,19 +829,31 @@
   <!-- ── Hero ───────────────────────────────────────────────── -->
   <section class="hero">
     <!-- Illustration cards: visible only at ≥1200px -->
-    <div class="illus-parallax" id="illus-p3" style="left:3%;top:8%">
-      <div class="illus-card" style="transform:rotate(-6deg)">
-        <img src="illustration-3.png" alt="" class="illus-img">
+    <!-- p1: coffee man — left, vertically centered with hero text -->
+    <div class="illus-parallax" id="illus-p1" style="left:3%;top:50%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:translateY(-60%) rotate(-5deg);width:210px">
+          <img src="illustration-1.png" alt="" class="illus-img"
+               onload="this.classList.add('loaded');this.closest('.illus-card').classList.remove('loading')">
+        </div>
       </div>
     </div>
-    <div class="illus-parallax" id="illus-p1" style="left:1%;top:52%">
-      <div class="illus-card" style="transform:rotate(-4deg)">
-        <img src="illustration-1.png" alt="" class="illus-img">
+    <!-- p2: ice skater — right, higher up -->
+    <div class="illus-parallax illus-right" id="illus-p2" style="right:2%;top:25%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(4deg);width:190px">
+          <img src="illustration-2.png" alt="" class="illus-img"
+               onload="this.classList.add('loaded');this.closest('.illus-card').classList.remove('loading')">
+        </div>
       </div>
     </div>
-    <div class="illus-parallax illus-right" id="illus-p2" style="right:2%;top:5%">
-      <div class="illus-card" style="transform:rotate(5deg)">
-        <img src="illustration-2.png" alt="" class="illus-img">
+    <!-- p3: piano man — left, lower down -->
+    <div class="illus-parallax" id="illus-p3" style="left:6%;top:72%">
+      <div class="illus-float">
+        <div class="illus-card loading" style="transform:rotate(-3deg);width:180px">
+          <img src="illustration-3.png" alt="" class="illus-img"
+               onload="this.classList.add('loaded');this.closest('.illus-card').classList.remove('loading')">
+        </div>
       </div>
     </div>
 
