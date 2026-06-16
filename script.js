@@ -18,6 +18,7 @@ let hearItTriggered = false;
 let ygTotal = 0;
 let ygTrack = 0;
 let ygFellBack = false;
+let ygFetchedWord = null;
 let sbClient = null;
 let sbSession = null;
 
@@ -382,16 +383,6 @@ if (window.supabase) {
   signOutBtn.addEventListener('click', async () => {
     await supabase.auth.signOut();
     closeDropdown();
-  });
-
-  document.getElementById('profile-btn')?.addEventListener('click', () => {
-    closeDropdown();
-    window.location.href = 'profiel.html';
-  });
-
-  document.getElementById('my-words-btn')?.addEventListener('click', () => {
-    closeDropdown();
-    window.location.href = 'mijn-woorden.html';
   });
 
   compactViewToggle.addEventListener('click', () => {
@@ -810,11 +801,13 @@ const hearItSection = document.getElementById('hear-it-section');
 const youglishWidgetEl = document.getElementById('youglish-widget');
 
 function onYouglishAPIReady() {
+  console.log('[YG] widget ready');
   ygWidget = new YG.Widget('youglish-widget', {
-    components: 51,            // full widget (search/accents/speed/light) — renders reliably
+    components: 48,            // no search bar, no accent panel (player + speed + light)
     events: {
       onFetchDone: (e) => {
         const total = e.totalResult || 0;
+        console.log('[YG] fetchDone total=', total, 'fellBack=', ygFellBack);
         // Prefer Netherlands Dutch; if it has no clips, fall back to all Dutch.
         // (YouGlish tags few clips by accent, so strict 'nl' often returns 0.)
         if (total === 0 && !ygFellBack && currentWord) {
@@ -843,8 +836,10 @@ window.onYouglishAPIReady = onYouglishAPIReady;
 
 // Start a fresh search: prefer Netherlands Dutch (falls back to all Dutch in onFetchDone).
 function ygFetch() {
-  if (!ygWidget || !currentWord) return;
+  if (!ygWidget || !currentWord || ygFetchedWord === currentWord) return;
+  ygFetchedWord = currentWord;
   ygFellBack = false;
+  console.log('[YG] fetch nl:', currentWord);
   ygWidget.fetch(currentWord, 'dutch', 'nl');
 }
 
