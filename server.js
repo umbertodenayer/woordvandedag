@@ -17,6 +17,8 @@ const cache = new Map();
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB';
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
 const CACHE_VERSION = 'v7';
+// Bump to force image-only regeneration (keeps the day's word + audio).
+const IMAGE_STYLE = 's2';
 
 // ── CEFR levels config ─────────────────────────────────────────────────────────
 const LEVELS = [
@@ -56,7 +58,7 @@ function todayDateStr()   { return seedToDate(todaySeed()); }
 
 // Per-level cache keys (word, image, audio)
 function wordCacheKey(level)  { return `${CACHE_VERSION}:${todaySeed()}:${level}`; }
-function imageCacheKey(level) { return `${CACHE_VERSION}:image:${todaySeed()}:${level}`; }
+function imageCacheKey(level) { return `${CACHE_VERSION}:image:${IMAGE_STYLE}:${todaySeed()}:${level}`; }
 function audioCacheKey(level) { return `${CACHE_VERSION}:audio:${todaySeed()}:${level}`; }
 
 function allTodayKeys() {
@@ -430,7 +432,9 @@ async function fetchAudio(word) {
 // Generate all six levels' words (sequentially for dedup), then their images and
 // audio. Only generates levels whose caches are missing.
 async function refreshWord() {
-  const missingLevels = LEVELS.filter(l => !cache.has(wordCacheKey(l.id)));
+  const missingLevels = LEVELS.filter(l =>
+    !cache.has(wordCacheKey(l.id)) || !cache.has(imageCacheKey(l.id)) || !cache.has(audioCacheKey(l.id))
+  );
   if (missingLevels.length === 0) {
     console.log('All levels cached, skipping refresh.');
     return;
@@ -447,23 +451,25 @@ async function refreshWord() {
   }
 
   for (const { id: levelId, instruction } of missingLevels) {
-    console.log(`[${levelId}] Generating word...`);
-
-    // ── Word ──────────────────────────────────────────────────
-    let wordData;
-    try {
-      wordData = await fetchWord(levelId, instruction, usedWords);
-    } catch (e) {
-      console.error(`[${levelId}] fetchWord failed:`, e.message);
-      continue;
+    // ── Word — reuse today's word if we already have it (e.g. only the image
+    //    or audio is missing); otherwise generate a fresh one. ──
+    let wordData = cache.get(wordCacheKey(levelId));
+    if (!wordData?.word) {
+      console.log(`[${levelId}] Generating word...`);
+      try {
+        wordData = await fetchWord(levelId, instruction, usedWords);
+      } catch (e) {
+        console.error(`[${levelId}] fetchWord failed:`, e.message);
+        continue;
+      }
+      if (!wordData || !wordData.word) {
+        console.error(`[${levelId}] fetchWord returned no usable word — skipping.`);
+        continue;
+      }
+      cache.set(wordCacheKey(levelId), wordData);
+      console.log(`[${levelId}] Word: ${wordData.word}`);
     }
-    if (!wordData || !wordData.word) {
-      console.error(`[${levelId}] fetchWord returned no usable word — skipping.`);
-      continue;
-    }
-    cache.set(wordCacheKey(levelId), wordData);
     usedWords.push(wordData.word.trim().toLowerCase());
-    console.log(`[${levelId}] Word: ${wordData.word}`);
 
     // ── Image + Audio in parallel ─────────────────────────────
     await Promise.all([
