@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mijn Profiel — Woord van de Dag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="theme-color" content="#C4714A">
+  <style>
+    .pf-page { min-height: 100vh; background: var(--bg); padding-bottom: 80px; }
+
+    /* Top bar */
+    .pf-topbar {
+      display: flex; align-items: center; gap: 16px;
+      max-width: 760px; margin: 0 auto; padding: 24px;
+    }
+    .pf-back {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--card);
+      color: var(--text); cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s ease, transform 0.1s ease; flex: none;
+    }
+    .pf-back:hover { border-color: var(--terracotta); }
+    .pf-back svg { width: 20px; height: 20px; }
+    .pf-topbar-logo { height: 30px; width: auto; }
+
+    .pf-wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+    /* Identity card */
+    .pf-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+    }
+    .pf-identity { display: flex; align-items: center; gap: 24px; }
+    .pf-avatar {
+      width: 96px; height: 96px; border-radius: 50%; flex: none;
+      background: var(--terracotta); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 600;
+      overflow: hidden; user-select: none;
+      box-shadow: 0 6px 20px rgba(196,113,74,0.25);
+    }
+    .pf-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .pf-identity-text { min-width: 0; }
+    .pf-name {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: clamp(1.7rem, 4.5vw, 2.4rem); line-height: 1.1;
+      color: var(--text); margin: 0 0 6px;
+      word-break: break-word;
+    }
+    .pf-email {
+      font-family: 'Inter', sans-serif; font-size: 0.95rem;
+      color: var(--muted); margin: 0 0 12px; word-break: break-all;
+    }
+    .pf-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 5px 12px; border-radius: 999px;
+      background: rgba(196,113,74,0.1); color: var(--terracotta);
+      border: 1px solid rgba(196,113,74,0.25);
+    }
+    .pf-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--terracotta);
+    }
+
+    /* Stats */
+    .pf-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin-top: 16px;
+    }
+    .pf-stat {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px 16px; text-align: center;
+    }
+    .pf-stat-num {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: 2rem; line-height: 1; color: var(--text);
+      display: flex; align-items: baseline; justify-content: center; gap: 4px;
+    }
+    .pf-stat-num .pf-stat-unit { font-size: 0.95rem; color: var(--muted); font-family: 'Inter', sans-serif; }
+    .pf-stat-label {
+      font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* Preferences */
+    .pf-section-title {
+      font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.25rem;
+      color: var(--text); margin: 36px 0 16px;
+    }
+    .pf-field { margin-bottom: 24px; }
+    .pf-field:last-child { margin-bottom: 0; }
+    .pf-label {
+      display: block; font-family: 'Inter', sans-serif; font-size: 0.8rem;
+      font-weight: 600; letter-spacing: 0.04em; color: var(--muted);
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .pf-input {
+      width: 100%; padding: 13px 16px; border-radius: 12px;
+      border: 1.5px solid var(--border); background: var(--bg);
+      font-family: 'Inter', sans-serif; font-size: 1rem; color: var(--text);
+      transition: border-color 0.2s ease;
+    }
+    .pf-input:focus { outline: none; border-color: var(--terracotta); }
+
+    .pf-levels { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pf-level {
+      flex: 1 1 0; min-width: 88px;
+      padding: 12px 10px; border-radius: 12px; cursor: pointer;
+      border: 2px solid var(--border); background: var(--bg);
+      font-family: 'Inter', sans-serif; text-align: center;
+      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+      user-select: none;
+    }
+    .pf-level:hover { border-color: rgba(196,113,74,0.5); }
+    .pf-level.selected {
+      border-color: var(--terracotta); background: var(--terracotta); color: #fff;
+    }
+    .pf-level-code { display: block; font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.05rem; }
+    .pf-level-desc { display: block; font-size: 0.68rem; margin-top: 3px; opacity: 0.8; }
+
+    .pf-footer { display: flex; align-items: center; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+    .pf-save {
+      padding: 13px 32px; border: none; border-radius: 999px;
+      background: var(--terracotta); color: #fff; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+      transition: opacity 0.2s ease, transform 0.1s ease;
+    }
+    .pf-save:hover { opacity: 0.9; }
+    .pf-save:active { transform: scale(0.98); }
+    .pf-save:disabled { opacity: 0.6; cursor: default; }
+    .pf-status { font-family: 'Inter', sans-serif; font-size: 0.9rem; margin: 0; }
+
+    .pf-loading {
+      max-width: 760px; margin: 0 auto; padding: 80px 24px; text-align: center;
+      font-family: 'Inter', sans-serif; color: var(--muted);
+    }
+
+    @media (max-width: 560px) {
+      .pf-card { padding: 24px; }
+      .pf-identity { flex-direction: column; text-align: center; gap: 16px; }
+      .pf-email { word-break: break-all; }
+      .pf-avatar { width: 84px; height: 84px; font-size: 2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pf-page">
+    <div class="pf-topbar">
+      <a href="woord.html" class="pf-back" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <a href="index.html"><img src="logoreal.png?v=2" alt="Woord van de Dag" class="pf-topbar-logo"></a>
+    </div>
+
+    <div id="pf-loading" class="pf-loading">Profiel laden…</div>
+
+    <div id="pf-content" class="pf-wrap" style="display:none">
+      <!-- Identity -->
+      <div class="pf-card">
+        <div class="pf-identity">
+          <div class="pf-avatar" id="pf-avatar"></div>
+          <div class="pf-identity-text">
+            <h1 class="pf-name" id="pf-name"></h1>
+            <p class="pf-email" id="pf-email"></p>
+            <span class="pf-badge" id="pf-badge"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="pf-stats">
+        <div class="pf-stat">
+          <div class="pf-stat-num"><span id="pf-streak">0</span><span class="pf-stat-unit">d</span></div>
+          <div class="pf-stat-label">Reeks</div>
+        </div>
+        <div class="pf-stat">
+          <div class="pf-stat-num"><span id="pf-saved">0</span></div>
+          <div class="pf-stat-label">Opgeslagen</div>
+        </div>
+        <div class="pf-stat">
+          <div class="pf-stat-num"><span id="pf-active">0</span><span class="pf-stat-unit">d</span></div>
+          <div class="pf-stat-label">Dagen actief</div>
+        </div>
+      </div>
+
+      <!-- Preferences -->
+      <div class="pf-card" style="margin-top:16px">
+        <h2 class="pf-section-title">Voorkeuren</h2>
+
+        <div class="pf-field">
+          <label class="pf-label" for="pf-displayname">Weergavenaam</label>
+          <input type="text" id="pf-displayname" class="pf-input" placeholder="Je naam" maxlength="60" autocomplete="name">
+        </div>
+
+        <div class="pf-field">
+          <span class="pf-label">Nederlands niveau</span>
+          <div class="pf-levels" id="pf-levels"></div>
+        </div>
+
+        <div class="pf-footer">
+          <button class="pf-save" id="pf-save">Opslaan</button>
+          <p class="pf-status" id="pf-status"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (async () => {
+      const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
+
+      // Apply saved theme attribute for consistency with the rest of the site
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('wordOfTheDay:theme') || 'light');
+
+      if (!window.supabase) { location.replace('login.html'); return; }
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // ── Level vocabulary (shared with the word feature: user_profiles.niveau) ──
+      const LEVELS = [
+        { id: 'A1',     desc: 'Beginner' },
+        { id: 'A2',     desc: 'Basis' },
+        { id: 'B1',     desc: 'Halfweg' },
+        { id: 'B2',     desc: 'Gevorderd' },
+        { id: 'C1',     desc: 'Vergevorderd' },
+        { id: 'Native', desc: 'Moedertaal' },
+      ];
+      const LEVEL_IDS = LEVELS.map(l => l.id);
+      // Map legacy descriptive values (old signup vocabulary) onto CEFR ids
+      const LEGACY = { Beginner: 'A1', Basis: 'A2', Gevorderd: 'B2', Moedertaal: 'Native' };
+      const normLevel = (v) => !v ? null : (LEVEL_IDS.includes(v) ? v : (LEGACY[v] || null));
+      const levelLabel = (id) => id === 'Native' ? 'Moedertaal' : id;
+
+      // ── Require auth ──
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { location.replace('login.html'); return; }
+      const user = session.user;
+
+      // ── Gather data ──
+      let profile = null, liked = [];
+      try {
+        const res = await sb.from('user_profiles').select('niveau, leerdoelen').eq('user_id', user.id).maybeSingle();
+        profile = res.data;
+      } catch (_) {}
+      try {
+        const res = await sb.from('user_liked_words').select('word, date').eq('user_id', user.id);
+        liked = res.data || [];
+      } catch (_) {}
+
+      const meta = user.user_metadata || {};
+      let displayName = (meta.display_name || meta.full_name || meta.name || (user.email || '').split('@')[0] || 'Taalliefhebber').trim();
+      let niveau = normLevel(profile?.niveau);
+      const leerdoelen = Array.isArray(profile?.leerdoelen) ? profile.leerdoelen : [];
+
+      // ── Stats ──
+      const savedCount = liked.length;
+      const dates = [...new Set(liked.map(r => r.date).filter(Boolean))].sort(); // ascending YYYY-MM-DD
+      const daysActive = dates.length;
+
+      // current streak: consecutive days ending today or yesterday
+      const streak = (() => {
+        if (!dates.length) return 0;
+        const set = new Set(dates);
+        const d = new Date();
+        const iso = (x) => x.toISOString().slice(0, 10);
+        // allow the streak to count if the latest save was today or yesterday
+        if (!set.has(iso(d))) { d.setDate(d.getDate() - 1); if (!set.has(iso(d))) return 0; }
+        let count = 0;
+        while (set.has(iso(d))) { count++; d.setDate(d.getDate() - 1); }
+        return count;
+      })();
+
+      // ── Render identity ──
+      const initials = displayName.split(/\s+/).filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('') || (user.email || '?')[0].toUpperCase();
+      const avatarEl = document.getElementById('pf-avatar');
+      if (meta.avatar_url) {
+        const img = document.createElement('img');
+        img.src = meta.avatar_url; img.alt = displayName;
+        img.onerror = () => { avatarEl.textContent = initials; };
+        avatarEl.appendChild(img);
+      } else {
+        avatarEl.textContent = initials;
+      }
+      document.getElementById('pf-name').textContent = displayName;
+      document.getElementById('pf-email').textContent = user.email || '';
+
+      const badge = document.getElementById('pf-badge');
+      if (niveau) {
+        badge.textContent = 'Niveau ' + levelLabel(niveau);
+      } else {
+        badge.textContent = 'Niveau onbekend';
+        badge.style.opacity = '0.75';
+      }
+
+      document.getElementById('pf-streak').textContent = streak;
+      document.getElementById('pf-saved').textContent = savedCount;
+      document.getElementById('pf-active').textContent = daysActive;
+
+      // ── Preferences ──
+      document.getElementById('pf-displayname').value = displayName;
+
+      let selectedLevel = niveau;
+      const levelsWrap = document.getElementById('pf-levels');
+      LEVELS.forEach(l => {
+        const el = document.createElement('div');
+        el.className = 'pf-level' + (l.id === selectedLevel ? ' selected' : '');
+        el.dataset.value = l.id;
+        el.innerHTML = `<span class="pf-level-code">${levelLabel(l.id)}</span><span class="pf-level-desc">${l.desc}</span>`;
+        el.addEventListener('click', () => {
+          selectedLevel = l.id;
+          levelsWrap.querySelectorAll('.pf-level').forEach(c => c.classList.remove('selected'));
+          el.classList.add('selected');
+        });
+        levelsWrap.appendChild(el);
+      });
+
+      // ── Save ──
+      const saveBtn = document.getElementById('pf-save');
+      const statusEl = document.getElementById('pf-status');
+      saveBtn.addEventListener('click', async () => {
+        const newName = document.getElementById('pf-displayname').value.trim();
+        saveBtn.disabled = true; saveBtn.textContent = 'Opslaan…';
+        statusEl.textContent = ''; statusEl.style.color = 'var(--muted)';
+        try {
+          // 1. Display name -> auth user metadata
+          if (newName && newName !== displayName) {
+            const { error } = await sb.auth.updateUser({ data: { display_name: newName } });
+            if (error) throw error;
+            displayName = newName;
+            document.getElementById('pf-name').textContent = newName;
+          }
+          // 2. Niveau -> user_profiles (same field the word feature reads), via server (service role)
+          const r = await fetch('/api/save-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+            body: JSON.stringify({ niveau: selectedLevel, leerdoelen })
+          });
+          if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error || r.status); }
+
+          niveau = selectedLevel;
+          badge.style.opacity = '1';
+          badge.textContent = niveau ? 'Niveau ' + levelLabel(niveau) : 'Niveau onbekend';
+          statusEl.textContent = 'Opgeslagen ✓'; statusEl.style.color = 'var(--terracotta)';
+          setTimeout(() => { statusEl.textContent = ''; }, 3000);
+        } catch (e) {
+          console.error('[profiel save]', e);
+          statusEl.textContent = 'Er ging iets mis. Probeer het opnieuw.'; statusEl.style.color = '#c4554d';
+        } finally {
+          saveBtn.disabled = false; saveBtn.textContent = 'Opslaan';
+        }
+      });
+
+      // ── Reveal ──
+      document.getElementById('pf-loading').style.display = 'none';
+      document.getElementById('pf-content').style.display = '';
+    })();
+  </script>
+</body>
+</html>

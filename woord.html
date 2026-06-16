@@ -134,8 +134,8 @@
                 </div>
                 <div id="dropdown-signed-in" class="hidden">
                   <p id="user-email" class="user-dropdown-email"></p>
-                  <button id="my-words-btn" class="user-dropdown-item">Mijn Woorden</button>
-                  <button id="profile-btn" class="user-dropdown-item">Mijn Profiel</button>
+                  <a href="mijn-woorden.html" class="user-dropdown-item">Mijn Woorden</a>
+                  <a href="profiel.html" class="user-dropdown-item">Mijn Profiel</a>
                   <button id="settings-btn" class="user-dropdown-item">Instellingen</button>
                   <div class="user-dropdown-divider"></div>
                   <button id="open-change-password-btn" class="user-dropdown-item">Wachtwoord Wijzigen</button>
@@ -169,6 +169,10 @@
         <p id="example" class="example"></p>
         <p id="source" class="source"></p>
       </div>
+      <button id="save-word-btn" class="save-word-btn" aria-pressed="false" aria-label="Bewaar dit woord">
+        <svg class="save-word-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span class="save-word-label">Bewaar woord</span>
+      </button>
       <p id="date" class="date"></p>
     </div>
   </main>

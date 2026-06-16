@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mijn Woorden — Woord van de Dag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,600;9..144,1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="theme-color" content="#C4714A">
+  <style>
+    .mw-page { min-height: 100vh; background: var(--bg); padding-bottom: 80px; }
+
+    .mw-topbar {
+      display: flex; align-items: center; gap: 16px;
+      max-width: 760px; margin: 0 auto; padding: 24px;
+    }
+    .mw-back {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--card);
+      color: var(--text); cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s ease; flex: none;
+    }
+    .mw-back:hover { border-color: var(--terracotta); }
+    .mw-back svg { width: 20px; height: 20px; }
+    .mw-topbar-logo { height: 30px; width: auto; }
+
+    .mw-wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+    .mw-header { margin: 8px 0 28px; }
+    .mw-title {
+      font-family: 'Fraunces', serif; font-weight: 600;
+      font-size: clamp(2rem, 5vw, 2.8rem); color: var(--text);
+      margin: 0 0 6px; letter-spacing: -0.01em;
+    }
+    .mw-subtitle {
+      font-family: 'Inter', sans-serif; font-size: 0.98rem; color: var(--muted); margin: 0;
+    }
+
+    .mw-list { display: flex; flex-direction: column; gap: 12px; }
+    .mw-item {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px 20px;
+      transition: border-color 0.2s ease, transform 0.1s ease;
+    }
+    .mw-item:hover { border-color: rgba(196,113,74,0.4); }
+    .mw-item-main { flex: 1; min-width: 0; }
+    .mw-word {
+      font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.4rem;
+      color: var(--text); margin: 0; line-height: 1.2; word-break: break-word;
+    }
+    .mw-date {
+      font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--muted);
+      margin: 4px 0 0; letter-spacing: 0.02em;
+    }
+    .mw-remove {
+      flex: none; width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid var(--border); background: transparent; color: var(--muted);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .mw-remove:hover { color: #c4554d; border-color: #c4554d; background: rgba(196,85,77,0.06); }
+    .mw-remove svg { width: 16px; height: 16px; }
+
+    /* Empty state */
+    .mw-empty {
+      text-align: center; padding: 56px 24px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    }
+    .mw-empty-icon {
+      width: 64px; height: 64px; margin: 0 auto 20px; border-radius: 50%;
+      background: rgba(196,113,74,0.1); color: var(--terracotta);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mw-empty-icon svg { width: 30px; height: 30px; }
+    .mw-empty-title {
+      font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.4rem;
+      color: var(--text); margin: 0 0 8px;
+    }
+    .mw-empty-text {
+      font-family: 'Inter', sans-serif; font-size: 0.95rem; color: var(--muted);
+      margin: 0 auto 24px; max-width: 360px; line-height: 1.6;
+    }
+    .mw-empty-btn {
+      display: inline-block; padding: 13px 28px; border-radius: 999px;
+      background: var(--terracotta); color: #fff; text-decoration: none;
+      font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+      transition: opacity 0.2s ease, transform 0.1s ease;
+    }
+    .mw-empty-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .mw-loading {
+      max-width: 760px; margin: 0 auto; padding: 80px 24px; text-align: center;
+      font-family: 'Inter', sans-serif; color: var(--muted);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mw-page">
+    <div class="mw-topbar">
+      <a href="woord.html" class="mw-back" aria-label="Terug">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <a href="index.html"><img src="logoreal.png?v=2" alt="Woord van de Dag" class="mw-topbar-logo"></a>
+    </div>
+
+    <div id="mw-loading" class="mw-loading">Woorden laden…</div>
+
+    <div id="mw-content" class="mw-wrap" style="display:none">
+      <div class="mw-header">
+        <h1 class="mw-title">Mijn Woorden</h1>
+        <p class="mw-subtitle" id="mw-subtitle"></p>
+      </div>
+      <div id="mw-list" class="mw-list"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (async () => {
+      const SUPABASE_URL = 'https://lanmsexkozkrttiydtsm.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_c8SjUvXE8zTZIEgB6i9hYw_uJR_4i37';
+
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('wordOfTheDay:theme') || 'light');
+
+      if (!window.supabase) { location.replace('login.html'); return; }
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { location.replace('login.html'); return; }
+      const user = session.user;
+
+      const loadingEl = document.getElementById('mw-loading');
+      const contentEl = document.getElementById('mw-content');
+      const listEl = document.getElementById('mw-list');
+      const subtitleEl = document.getElementById('mw-subtitle');
+
+      const fmtDate = (iso) => {
+        if (!iso) return '';
+        try {
+          return new Date(iso + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+        } catch (_) { return iso; }
+      };
+      const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+      const renderEmpty = () => {
+        subtitleEl.textContent = '';
+        listEl.innerHTML = `
+          <div class="mw-empty">
+            <div class="mw-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h2 class="mw-empty-title">Nog geen opgeslagen woorden</h2>
+            <p class="mw-empty-text">Ontdek het woord van de dag en bewaar de woorden die je mooi vindt — ze verschijnen hier in je eigen verzameling.</p>
+            <a href="woord.html" class="mw-empty-btn">Ontdek het woord van de dag →</a>
+          </div>`;
+      };
+
+      const render = (rows) => {
+        if (!rows.length) { renderEmpty(); return; }
+        subtitleEl.textContent = `${rows.length} ${rows.length === 1 ? 'opgeslagen woord' : 'opgeslagen woorden'}`;
+        listEl.innerHTML = rows.map(r => `
+          <div class="mw-item" data-word="${esc(r.word)}" data-date="${esc(r.date || '')}">
+            <div class="mw-item-main">
+              <p class="mw-word">${esc(r.word)}</p>
+              <p class="mw-date">Opgeslagen op ${esc(fmtDate(r.date))}</p>
+            </div>
+            <button class="mw-remove" aria-label="Verwijderen" title="Verwijderen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>`).join('');
+
+        listEl.querySelectorAll('.mw-remove').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const item = btn.closest('.mw-item');
+            const word = item.dataset.word;
+            const date = item.dataset.date;
+            btn.disabled = true;
+            let q = sb.from('user_liked_words').delete().eq('user_id', user.id).eq('word', word);
+            if (date) q = q.eq('date', date);
+            const { error } = await q;
+            if (error) { btn.disabled = false; return; }
+            item.style.transition = 'opacity 0.2s ease';
+            item.style.opacity = '0';
+            setTimeout(() => {
+              item.remove();
+              const remaining = listEl.querySelectorAll('.mw-item').length;
+              if (!remaining) renderEmpty();
+              else subtitleEl.textContent = `${remaining} ${remaining === 1 ? 'opgeslagen woord' : 'opgeslagen woorden'}`;
+            }, 200);
+          });
+        });
+      };
+
+      let rows = [];
+      try {
+        const { data, error } = await sb
+          .from('user_liked_words')
+          .select('word, date')
+          .eq('user_id', user.id)
+          .order('date', { ascending: false });
+        if (error) throw error;
+        // de-duplicate by word (a word can be saved once conceptually)
+        const seen = new Set();
+        rows = (data || []).filter(r => { const k = r.word; if (seen.has(k)) return false; seen.add(k); return true; });
+      } catch (e) {
+        console.error('[mijn-woorden]', e);
+      }
+
+      render(rows);
+      loadingEl.style.display = 'none';
+      contentEl.style.display = '';
+    })();
+  </script>
+</body>
+</html>

@@ -1810,6 +1810,7 @@ body.compact-view .hear-it {
   }
 }
 
+<<<<<<< Updated upstream
 /* ── Community sentences ─────────────────────────────────────── */
 .community {
   max-width: 760px;
@@ -1977,4 +1978,34 @@ body.compact-view .hear-it {
   .community-submit { transition: none; }
   .community-submit:hover { transform: none; }
   .community-card--new { animation: none; }
+=======
+/* ── Save / bookmark word button ──────────────────────────────── */
+.save-word-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px auto 0;
+  padding: 9px 18px;
+  background: transparent;
+  color: var(--terracotta);
+  border: 1.5px solid var(--terracotta);
+  border-radius: 999px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+.save-word-btn:hover { background: rgba(196,113,74,0.08); }
+.save-word-btn:active { transform: scale(0.97); }
+.save-word-icon { width: 16px; height: 16px; transition: fill 0.2s ease; }
+.save-word-btn.saved {
+  background: var(--terracotta);
+  color: #fff;
+  border-color: var(--terracotta);
+}
+.save-word-btn.saved .save-word-icon { fill: #fff; }
+@media (prefers-reduced-motion: reduce) {
+  .save-word-btn, .save-word-icon { transition: none; }
+>>>>>>> Stashed changes
 }
