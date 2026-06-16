@@ -491,27 +491,27 @@ const handleRoute = async () => {
 window.addEventListener('hashchange', handleRoute);
 handleRoute();
 
-document.getElementById('my-words-btn').addEventListener('click', () => {
+document.getElementById('my-words-btn')?.addEventListener('click', () => {
   window.location.hash = '#my-words';
 });
 
-document.getElementById('settings-btn').addEventListener('click', () => {
+document.getElementById('settings-btn')?.addEventListener('click', () => {
   window.location.hash = '#settings';
 });
 
-document.getElementById('profile-btn').addEventListener('click', () => {
+document.getElementById('profile-btn')?.addEventListener('click', () => {
   window.location.hash = '#profile';
 });
 
-document.getElementById('settings-back-btn').addEventListener('click', () => {
+document.getElementById('settings-back-btn')?.addEventListener('click', () => {
   window.location.hash = '';
 });
 
-document.getElementById('my-words-back-btn').addEventListener('click', () => {
+document.getElementById('my-words-back-btn')?.addEventListener('click', () => {
   window.location.hash = '';
 });
 
-document.getElementById('profile-back-btn').addEventListener('click', () => {
+document.getElementById('profile-back-btn')?.addEventListener('click', () => {
   window.location.hash = '';
 });
 
@@ -550,7 +550,7 @@ const loadProfilePage = async () => {
   }
 };
 
-document.getElementById('profile-level-grid').addEventListener('click', e => {
+document.getElementById('profile-level-grid')?.addEventListener('click', e => {
   const card = e.target.closest('.pref-card');
   if (!card) return;
   profileNiveau = card.dataset.value;
@@ -558,7 +558,7 @@ document.getElementById('profile-level-grid').addEventListener('click', e => {
   card.classList.add('selected');
 });
 
-document.getElementById('profile-goal-grid').addEventListener('click', e => {
+document.getElementById('profile-goal-grid')?.addEventListener('click', e => {
   const card = e.target.closest('.pref-card');
   if (!card) return;
   const isSelected = card.classList.contains('selected');
@@ -571,7 +571,7 @@ document.getElementById('profile-goal-grid').addEventListener('click', e => {
   }
 });
 
-document.getElementById('profile-save-btn').addEventListener('click', async () => {
+document.getElementById('profile-save-btn')?.addEventListener('click', async () => {
   if (!sbClient || !sbSession) return;
   const btn    = document.getElementById('profile-save-btn');
   const status = document.getElementById('profile-save-status');
