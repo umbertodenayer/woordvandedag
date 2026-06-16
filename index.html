@@ -73,20 +73,6 @@
       justify-content: flex-end;
       gap: 10px;
     }
-    .lnav-theme {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      padding: 4px;
-      border-radius: 6px;
-      transition: color 0.2s;
-      margin-right: 6px;
-    }
-    .lnav-theme:hover { color: var(--text); }
-    .lnav-theme svg { width: 18px; height: 18px; }
     .lnav-login {
       font-family: 'Inter', sans-serif;
       font-size: 0.8rem;
@@ -604,9 +590,6 @@
     .lnav-search-btn { background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;padding:6px;border-radius:6px;transition:color 0.2s;flex-shrink:0; }
     .lnav-search-btn:hover { color:var(--text); }
     .lnav-search-btn svg { width:17px;height:17px; }
-    html[data-theme="dark"] .lnav-links a { color:rgba(255,255,255,0.75); }
-    html[data-theme="dark"] .lnav-links a:hover { color:#fff; }
-
     /* ══ Landing entrance sequence — curtain rising, plays once per load ══ */
     /* 0.0s  Background fades white→cream (handled by body opacity, 0.744s above) */
 
@@ -764,11 +747,6 @@
     .illus-card.loading {
       animation: illusPulse 1.5s ease-in-out infinite;
     }
-    html[data-theme="dark"] .illus-card { background-color: #1a1814; }
-    html[data-theme="dark"] .illus-card.loading {
-      animation: illusPulseDark 1.5s ease-in-out infinite;
-    }
-
     /* Image: fades in when loaded via .loaded class */
     .illus-img {
       display: block;
@@ -807,14 +785,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
       </button>
     </div>
-      <button class="lnav-theme" id="lnav-theme" aria-label="Thema wisselen">
-        <svg id="lnav-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-        </svg>
-        <svg id="lnav-moon" class="hidden" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
       <a href="login.html" class="lnav-login">Inloggen</a>
       <a href="signup.html" class="lnav-signup">Account aanmaken</a>
     </div>
@@ -1045,24 +1015,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ── Theme ───────────────────────────────────────────────
-    const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-
-    const lnavSun  = document.getElementById('lnav-sun');
-    const lnavMoon = document.getElementById('lnav-moon');
-    function applyTheme(t) {
-      document.documentElement.setAttribute('data-theme', t);
-      lnavSun.classList.toggle('hidden', t === 'dark');
-      lnavMoon.classList.toggle('hidden', t !== 'dark');
-    }
-    applyTheme(savedTheme);
-    document.getElementById('lnav-theme').addEventListener('click', () => {
-      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('wordOfTheDay:theme', next);
-      applyTheme(next);
-    });
-
     // ── Nav shadow on scroll + illustration parallax ───────
     const lnav = document.getElementById('lnav');
     const illusLeft  = document.querySelectorAll('.illus-parallax:not(.illus-right)');

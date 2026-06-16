@@ -8,45 +8,9 @@ const sourceEl = document.getElementById('source');
 const dateEl = document.getElementById('date');
 const imageEl = document.getElementById('word-image');
 
-const themeToggle = document.getElementById('theme-toggle');
-const sunIcon = document.getElementById('sun-icon');
-const moonIcon = document.getElementById('moon-icon');
-
-function applyTheme(theme, animate) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const showIcon = theme === 'dark' ? moonIcon : sunIcon;
-  const hideIcon = theme === 'dark' ? sunIcon : moonIcon;
-
-  if (animate) {
-    hideIcon.classList.add('spin-out');
-    setTimeout(() => {
-      hideIcon.classList.add('hidden');
-      hideIcon.classList.remove('spin-out');
-      showIcon.classList.remove('hidden');
-      showIcon.classList.add('spin-out');
-      requestAnimationFrame(() => {
-        showIcon.classList.remove('spin-out');
-      });
-    }, 300);
-  } else {
-    hideIcon.classList.add('hidden');
-    showIcon.classList.remove('hidden');
-  }
-}
-
-const savedTheme = localStorage.getItem('wordOfTheDay:theme') || 'light';
-applyTheme(savedTheme, false);
-
 if (localStorage.getItem('wordOfTheDay:compactView') === 'true') {
   document.body.classList.add('compact-view');
 }
-
-themeToggle.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme') || 'light';
-  const next = current === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('wordOfTheDay:theme', next);
-  applyTheme(next, true);
-});
 
 let currentWord = null;
 let ygWidget = null;
@@ -162,7 +126,6 @@ if (window.supabase) {
   const signOutBtn = document.getElementById('sign-out-btn');
   const myWordsBtn = document.getElementById('my-words-btn');
   const settingsBtn = document.getElementById('settings-btn');
-  const darkModeToggle = document.getElementById('setting-dark-mode');
   const weeklyEmailToggle = document.getElementById('setting-weekly-email');
   const compactViewToggle = document.getElementById('setting-compact-view');
   const myWordsList = document.getElementById('my-words-list');
@@ -399,14 +362,6 @@ if (window.supabase) {
     closeDropdown();
   });
 
-  darkModeToggle.addEventListener('click', () => {
-    const isDark = darkModeToggle.getAttribute('aria-checked') === 'true';
-    const next = isDark ? 'light' : 'dark';
-    darkModeToggle.setAttribute('aria-checked', !isDark);
-    localStorage.setItem('wordOfTheDay:theme', next);
-    applyTheme(next, true);
-  });
-
   compactViewToggle.addEventListener('click', () => {
     const isCompact = compactViewToggle.getAttribute('aria-checked') === 'true';
     const next = !isCompact;
@@ -481,12 +436,9 @@ const loadMyWords = async () => {
 };
 
 const loadSettingsPage = async () => {
-  const darkModeToggle = document.getElementById('setting-dark-mode');
   const weeklyEmailToggle = document.getElementById('setting-weekly-email');
   const compactViewToggle = document.getElementById('setting-compact-view');
 
-  const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-  darkModeToggle.setAttribute('aria-checked', currentTheme === 'dark');
   compactViewToggle.setAttribute('aria-checked', document.body.classList.contains('compact-view'));
 
   let weeklyEmail = false;
