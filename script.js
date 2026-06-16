@@ -19,6 +19,7 @@ let ygTotal = 0;
 let ygTrack = 0;
 let ygFellBack = false;
 let ygFetchedWord = null;
+let ygPauseNext = false;
 let sbClient = null;
 let sbSession = null;
 
@@ -804,6 +805,7 @@ function onYouglishAPIReady() {
   console.log('[YG] widget ready');
   ygWidget = new YG.Widget('youglish-widget', {
     components: 48,            // no search bar, no accent panel (player + speed + light)
+    autoStart: false,         // don't autoplay — user clicks play
     events: {
       onFetchDone: (e) => {
         const total = e.totalResult || 0;
@@ -821,6 +823,7 @@ function onYouglishAPIReady() {
       },
       onVideoChange: (e) => {
         ygTrack = e.trackNumber || 0;
+        if (ygPauseNext) { ygPauseNext = false; if (ygWidget && ygWidget.pause) ygWidget.pause(); }
         updateYgNav();
       }
     }
@@ -850,6 +853,7 @@ function ygFetch() {
   if (!ygWidget || !currentWord || ygFetchedWord === currentWord) return;
   ygFetchedWord = currentWord;
   ygFellBack = false;
+  ygPauseNext = true;
   console.log('[YG] fetch nl:', currentWord);
   ygWidget.fetch(currentWord, 'dutch', 'nl');
 }
