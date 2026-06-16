@@ -665,7 +665,8 @@ function render(data) {
   currentWord = data.word;
   loadPronunciation();
   loadRatings();
-  if (ygWidget && hearItTriggered) {
+  if (ygWidget) {
+    hearItTriggered = true;
     ygWidget.fetch(currentWord, 'dutch');
   }
   wordEl.textContent = data.word;
@@ -809,7 +810,8 @@ function onYouglishAPIReady() {
     }
   });
 
-  if (currentWord && hearItTriggered) {
+  if (currentWord) {
+    hearItTriggered = true;
     ygWidget.fetch(currentWord, 'dutch');
   }
 }
