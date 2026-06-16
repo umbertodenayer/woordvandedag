@@ -392,7 +392,7 @@ ${IMAGE_STYLE_SUFFIX}`;
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
     },
-    body: JSON.stringify({ model: 'gpt-image-1', prompt, size: '1024x1024' })
+    body: JSON.stringify({ model: 'gpt-image-1', prompt, size: '1024x1024', quality: 'medium', output_format: 'jpeg' })
   });
 
   if (!response.ok) {
@@ -403,7 +403,7 @@ ${IMAGE_STYLE_SUFFIX}`;
   const json = await response.json();
   const b64 = json.data?.[0]?.b64_json;
   if (!b64) throw new Error('No image data returned');
-  return { mimeType: 'image/png', data: b64 };
+  return { mimeType: 'image/jpeg', data: b64 };
 }
 
 async function fetchAudio(word) {
