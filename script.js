@@ -384,6 +384,16 @@ if (window.supabase) {
     closeDropdown();
   });
 
+  document.getElementById('profile-btn')?.addEventListener('click', () => {
+    closeDropdown();
+    window.location.href = 'profiel.html';
+  });
+
+  document.getElementById('my-words-btn')?.addEventListener('click', () => {
+    closeDropdown();
+    window.location.href = 'mijn-woorden.html';
+  });
+
   compactViewToggle.addEventListener('click', () => {
     const isCompact = compactViewToggle.getAttribute('aria-checked') === 'true';
     const next = !isCompact;
