@@ -414,21 +414,49 @@ if (window.supabase) {
   console.warn('Supabase failed to load; auth disabled.');
 }
 
-// === Settings subpage routing ===
-// (Mijn Profiel and Mijn Woorden are now standalone pages: profiel.html / mijn-woorden.html)
+// === Subpage routing ===
 
-const mainContent  = document.getElementById('main-content');
+const mainContent = document.getElementById('main-content');
 const pageSettings = document.getElementById('page-settings');
+const pageMyWords = document.getElementById('page-my-words');
+const pageProfile  = document.getElementById('page-profile');
 
 const showPage = (page) => {
-  if (mainContent)  mainContent.classList.toggle('hidden', !!page);
-  if (pageSettings) pageSettings.classList.toggle('hidden', page !== 'settings');
+  mainContent.classList.toggle('hidden', !!page);
+  pageSettings.classList.toggle('hidden', page !== 'settings');
+  pageMyWords.classList.toggle('hidden', page !== 'my-words');
+  pageProfile.classList.toggle('hidden',  page !== 'profile');
+};
+
+const loadMyWords = async () => {
+  const myWordsList = document.getElementById('my-words-list');
+  if (!sbClient || !sbSession) {
+    myWordsList.innerHTML = '<p class="my-words-empty">Log in om je woorden te zien.</p>';
+    return;
+  }
+  myWordsList.innerHTML = '<p class="my-words-empty">Laden…</p>';
+  const { data, error } = await sbClient
+    .from('user_liked_words')
+    .select('word, date')
+    .eq('user_id', sbSession.user.id)
+    .order('date', { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    myWordsList.innerHTML = '<p class="my-words-empty">Woorden die je leuk vindt verschijnen hier.</p>';
+    return;
+  }
+
+  myWordsList.innerHTML = data.map((row) => `
+    <div class="my-words-item">
+      <span class="my-words-word">${row.word}</span>
+      <span class="my-words-date">${row.date}</span>
+    </div>
+  `).join('');
 };
 
 const loadSettingsPage = async () => {
   const weeklyEmailToggle = document.getElementById('setting-weekly-email');
   const compactViewToggle = document.getElementById('setting-compact-view');
-  if (!weeklyEmailToggle || !compactViewToggle) return;
 
   compactViewToggle.setAttribute('aria-checked', document.body.classList.contains('compact-view'));
 
@@ -445,9 +473,16 @@ const loadSettingsPage = async () => {
 };
 
 const handleRoute = async () => {
-  if (window.location.hash === '#settings') {
+  const hash = window.location.hash;
+  if (hash === '#settings') {
     showPage('settings');
     await loadSettingsPage();
+  } else if (hash === '#my-words') {
+    showPage('my-words');
+    await loadMyWords();
+  } else if (hash === '#profile') {
+    showPage('profile');
+    await loadProfilePage();
   } else {
     showPage(null);
   }
@@ -456,15 +491,125 @@ const handleRoute = async () => {
 window.addEventListener('hashchange', handleRoute);
 handleRoute();
 
-document.getElementById('settings-btn')?.addEventListener('click', () => {
+document.getElementById('my-words-btn').addEventListener('click', () => {
+  window.location.hash = '#my-words';
+});
+
+document.getElementById('settings-btn').addEventListener('click', () => {
   window.location.hash = '#settings';
 });
 
-document.getElementById('settings-back-btn')?.addEventListener('click', () => {
+document.getElementById('profile-btn').addEventListener('click', () => {
+  window.location.hash = '#profile';
+});
+
+document.getElementById('settings-back-btn').addEventListener('click', () => {
   window.location.hash = '';
 });
 
-// (Profile editing now lives on the standalone profiel.html page.)
+document.getElementById('my-words-back-btn').addEventListener('click', () => {
+  window.location.hash = '';
+});
+
+document.getElementById('profile-back-btn').addEventListener('click', () => {
+  window.location.hash = '';
+});
+
+// === Profile page ===
+
+let profileNiveau = null;
+let profileGoal   = null;
+
+const loadProfilePage = async () => {
+  profileNiveau = null;
+  profileGoal   = null;
+
+  document.querySelectorAll('#profile-level-grid .pref-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#profile-goal-grid  .pref-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('profile-save-status').textContent = '';
+
+  if (!sbClient || !sbSession) return;
+
+  const { data } = await sbClient
+    .from('user_profiles')
+    .select('niveau, leerdoelen')
+    .eq('user_id', sbSession.user.id)
+    .maybeSingle();
+
+  if (data) {
+    const rawNiveau = data.niveau || null;
+    profileNiveau = (rawNiveau && NIVEAU_MAP[rawNiveau]) ? NIVEAU_MAP[rawNiveau] : rawNiveau;
+    profileGoal   = data.leerdoelen?.[0] || null;
+
+    document.querySelectorAll('#profile-level-grid .pref-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.value === profileNiveau);
+    });
+    document.querySelectorAll('#profile-goal-grid .pref-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.value === profileGoal);
+    });
+  }
+};
+
+document.getElementById('profile-level-grid').addEventListener('click', e => {
+  const card = e.target.closest('.pref-card');
+  if (!card) return;
+  profileNiveau = card.dataset.value;
+  document.querySelectorAll('#profile-level-grid .pref-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+});
+
+document.getElementById('profile-goal-grid').addEventListener('click', e => {
+  const card = e.target.closest('.pref-card');
+  if (!card) return;
+  const isSelected = card.classList.contains('selected');
+  document.querySelectorAll('#profile-goal-grid .pref-card').forEach(c => c.classList.remove('selected'));
+  if (!isSelected) {
+    card.classList.add('selected');
+    profileGoal = card.dataset.value;
+  } else {
+    profileGoal = null;
+  }
+});
+
+document.getElementById('profile-save-btn').addEventListener('click', async () => {
+  if (!sbClient || !sbSession) return;
+  const btn    = document.getElementById('profile-save-btn');
+  const status = document.getElementById('profile-save-status');
+  btn.disabled    = true;
+  btn.textContent = 'Opslaan…';
+  status.textContent = '';
+
+  try {
+    const r = await fetch('/api/save-profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sbSession.access_token}`,
+      },
+      body: JSON.stringify({
+        niveau:     profileNiveau,
+        leerdoelen: profileGoal ? [profileGoal] : [],
+      }),
+    });
+
+    btn.disabled    = false;
+    btn.textContent = 'Opslaan';
+
+    if (!r.ok) {
+      const body = await r.json().catch(() => ({}));
+      throw new Error(body.error || r.status);
+    }
+    status.textContent = 'Voorkeuren opgeslagen ✓';
+    status.style.color = '#C4714A';
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  } catch (e) {
+    btn.disabled    = false;
+    btn.textContent = 'Opslaan';
+    status.textContent = 'Er is iets misgegaan. Probeer het opnieuw.';
+    status.style.color = '#c4554d';
+    console.error('[profile save]', e);
+  }
+});
 
 const CACHE_VERSION = 'v4';
 
@@ -520,7 +665,6 @@ function render(data) {
   currentWord = data.word;
   loadPronunciation();
   loadRatings();
-  loadSaveState();
   if (ygWidget && hearItTriggered) {
     ygWidget.fetch(currentWord, 'english');
   }
@@ -592,10 +736,10 @@ async function load(force = false) {
 }
 
 function imageCacheKey() {
-  return `wordOfTheDay:${CACHE_VERSION}:image:${todaySeed()}:${getCurrentLevel()}`;
+  return `wordOfTheDay:${CACHE_VERSION}:image:s2:${todaySeed()}:${getCurrentLevel()}`;
 }
 
-async function loadImage(attempt = 0) {
+async function loadImage() {
   imageEl.classList.remove('loaded');
   const key = imageCacheKey();
   const cached = localStorage.getItem(key);
@@ -606,17 +750,12 @@ async function loadImage(attempt = 0) {
   }
   try {
     const response = await fetch(`/api/image?level=${getCurrentLevel()}`);
-    if (response.status === 503 && attempt < 10) {
-      setTimeout(() => loadImage(attempt + 1), 8000);
-      return;
-    }
     if (!response.ok) return;
     const data = await response.json();
     const src = `data:${data.mimeType};base64,${data.data}`;
+    localStorage.setItem(key, src);
     imageEl.src = src;
     imageEl.classList.add('loaded');
-    // best-effort cache — large base64 images can exceed the 5 MB localStorage quota
-    try { localStorage.setItem(key, src); } catch (e) {}
   } catch (e) {
     // image is optional, fail silently
   }
@@ -871,59 +1010,6 @@ async function castVote(type) {
 thumbUpBtn.addEventListener('click', () => castVote('like'));
 thumbDownBtn.addEventListener('click', () => castVote('dislike'));
 
-// === Save / bookmark the current word (writes user_liked_words) ===
-const saveWordBtn = document.getElementById('save-word-btn');
-let wordIsSaved = false;
-
-function setSavedUI(saved) {
-  wordIsSaved = saved;
-  if (!saveWordBtn) return;
-  saveWordBtn.classList.toggle('saved', saved);
-  saveWordBtn.setAttribute('aria-pressed', saved ? 'true' : 'false');
-  const label = saveWordBtn.querySelector('.save-word-label');
-  if (label) label.textContent = saved ? 'Opgeslagen' : 'Bewaar woord';
-}
-
-async function loadSaveState() {
-  setSavedUI(false);
-  if (!saveWordBtn || !sbClient || !sbSession || !currentWord) return;
-  try {
-    const { data } = await sbClient
-      .from('user_liked_words')
-      .select('word')
-      .eq('user_id', sbSession.user.id)
-      .eq('word', currentWord)
-      .limit(1);
-    setSavedUI(!!(data && data.length));
-  } catch (e) { /* ignore */ }
-}
-
-async function toggleSaveWord() {
-  if (!currentWord) return;
-  if (!sbClient || !sbSession) {
-    showPremiumToast('Log in om woorden te bewaren', 3000);
-    return;
-  }
-  const wasSaved = wordIsSaved;
-  setSavedUI(!wasSaved); // optimistic
-  try {
-    if (wasSaved) {
-      await sbClient.from('user_liked_words')
-        .delete()
-        .eq('user_id', sbSession.user.id)
-        .eq('word', currentWord);
-    } else {
-      await sbClient.from('user_liked_words')
-        .insert({ user_id: sbSession.user.id, word: currentWord, date: todayDateStr() });
-    }
-  } catch (e) {
-    setSavedUI(wasSaved); // revert on failure
-    showPremiumToast('Er ging iets mis. Probeer opnieuw.', 3000);
-  }
-}
-
-if (saveWordBtn) saveWordBtn.addEventListener('click', toggleSaveWord);
-
 function updateLevelBar() {
   const bar = document.getElementById('level-bar');
   if (!bar) return;
@@ -934,34 +1020,12 @@ function updateLevelBar() {
   }).join('');
 }
 
-// Persist a level change back to the shared Supabase field (user_profiles.niveau)
-// so the word feature and the profile page stay in sync. Fire-and-forget;
-// preserves existing leerdoelen so they aren't wiped.
-async function persistLevelToProfile(level) {
-  if (!sbClient || !sbSession) return;
-  try {
-    const { data } = await sbClient
-      .from('user_profiles')
-      .select('leerdoelen')
-      .eq('user_id', sbSession.user.id)
-      .maybeSingle();
-    await fetch('/api/save-profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sbSession.access_token}` },
-      body: JSON.stringify({ niveau: level, leerdoelen: Array.isArray(data?.leerdoelen) ? data.leerdoelen : [] })
-    });
-  } catch (e) {
-    console.error('[persist level]', e);
-  }
-}
-
 window.switchLevel = function(level) {
   if (!CEFR_LEVELS.includes(level) || level === getCurrentLevel()) return;
   setCurrentLevel(level);
   updateLevelBar();
   load(true);
   loadImage();
-  persistLevelToProfile(level);
 };
 
 // ════════ Community sentences ════════════════════════════════════════════════
