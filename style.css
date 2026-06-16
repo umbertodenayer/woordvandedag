@@ -1809,3 +1809,172 @@ body.compact-view .hear-it {
     gap: 32px;
   }
 }
+
+/* ── Community sentences ─────────────────────────────────────── */
+.community {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8px 24px 48px;
+}
+.community-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  color: var(--text);
+  text-align: center;
+  margin: 6px 0 28px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.community-title span {
+  color: var(--terracotta);
+  font-style: italic;
+}
+
+.community-composer {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 18px 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.05);
+}
+.community-input {
+  display: block;
+  width: 100%;
+  min-height: 64px;
+  resize: vertical;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.community-input::placeholder { color: var(--muted); }
+.community-composer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.community-counter {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.community-counter--warn { color: #c0392b; font-weight: 600; }
+.community-submit {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--terracotta);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 28px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.community-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+.community-submit:disabled { opacity: 0.5; cursor: default; transform: none; }
+.community-submit.is-loading { opacity: 0.6; cursor: wait; }
+
+.community-feedback {
+  margin: 12px 2px 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.community-feedback--error   { color: #c0392b; }
+.community-feedback--pending { color: var(--muted); }
+.community-feedback--success { color: #2e7d4f; }
+
+.community-login {
+  text-align: center;
+  background: rgba(196, 113, 74, 0.06);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  padding: 30px 22px;
+}
+.community-login-text {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 16px;
+}
+.community-login-btn {
+  display: inline-block;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #fff;
+  background: var(--terracotta);
+  border-radius: 999px;
+  padding: 9px 26px;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+.community-login-btn:hover { opacity: 0.9; }
+
+.community-feed {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.community-empty {
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--muted);
+  padding: 30px 0;
+  margin: 0;
+}
+.community-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.community-card-text {
+  font-family: 'Fraunces', serif;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+.community-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.community-card-author { font-weight: 600; color: var(--text); }
+.community-card-dot { opacity: 0.5; }
+.community-card--new { animation: communityIn 0.4s ease; }
+
+@keyframes communityIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .community { padding: 8px 18px 36px; }
+  .community-composer-row { flex-wrap: wrap; }
+  .community-submit { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .community-submit { transition: none; }
+  .community-submit:hover { transform: none; }
+  .community-card--new { animation: none; }
+}
