@@ -834,6 +834,17 @@ function onYouglishAPIReady() {
 
 window.onYouglishAPIReady = onYouglishAPIReady;
 
+// Load the YouGlish widget ONLY after onYouglishAPIReady exists, so the (cached,
+// instant) async script can't fire the callback before it's defined.
+(function loadYouglish() {
+  if (document.getElementById('yg-widget-script')) return;
+  const t = document.createElement('script');
+  t.id = 'yg-widget-script';
+  t.src = 'https://youglish.com/public/emb/widget.js';
+  t.async = true;
+  document.head.appendChild(t);
+})();
+
 // Start a fresh search: prefer Netherlands Dutch (falls back to all Dutch in onFetchDone).
 function ygFetch() {
   if (!ygWidget || !currentWord || ygFetchedWord === currentWord) return;
