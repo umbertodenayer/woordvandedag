@@ -193,12 +193,20 @@
       overflow: hidden;
       transition: max-height 0.4s ease;
     }
-    .archive-row.open .archive-row-body { max-height: 600px; }
+    .archive-row.open .archive-row-body { max-height: 900px; }
     .archive-row-body-inner {
       padding: 0 12px 24px;
       display: flex;
       flex-direction: column;
       gap: 16px;
+    }
+    .archive-row-img {
+      width: 220px;
+      max-width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 14px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
     }
     .archive-definition {
       font-family: 'Inter', sans-serif;
@@ -379,6 +387,9 @@ document.querySelectorAll('.fade-up').forEach(el => fadeObs.observe(el));
     div.setAttribute('data-word', (row.word || '').toLowerCase());
 
     let bodyHTML = '';
+    if (row.image_url) {
+      bodyHTML += `<img class="archive-row-img" src="${row.image_url}" alt="Illustratie bij ${row.word || ''}" loading="lazy">`;
+    }
     if (row.definition) {
       bodyHTML += `<p class="archive-definition">${row.definition}</p>`;
     }

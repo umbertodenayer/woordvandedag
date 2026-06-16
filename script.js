@@ -340,6 +340,23 @@ if (window.supabase) {
         requestAnimationFrame(() => requestAnimationFrame(() => ctaBanner.classList.add('visible')));
       }
     }
+
+    if (signedIn) {
+      supabase.from('user_profiles')
+        .select('niveau')
+        .eq('user_id', session.user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!data?.niveau) return;
+          const mapped = NIVEAU_MAP[data.niveau] || (CEFR_LEVELS.includes(data.niveau) ? data.niveau : null);
+          if (mapped && mapped !== getCurrentLevel()) {
+            setCurrentLevel(mapped);
+            updateLevelBar();
+            load(true);
+            loadImage();
+          }
+        });
+    }
   };
 
   userIconBtn.addEventListener('click', (e) => {
@@ -518,7 +535,8 @@ const loadProfilePage = async () => {
     .maybeSingle();
 
   if (data) {
-    profileNiveau = data.niveau || null;
+    const rawNiveau = data.niveau || null;
+    profileNiveau = (rawNiveau && NIVEAU_MAP[rawNiveau]) ? NIVEAU_MAP[rawNiveau] : rawNiveau;
     profileGoal   = data.leerdoelen?.[0] || null;
 
     document.querySelectorAll('#profile-level-grid .pref-card').forEach(card => {
@@ -591,7 +609,23 @@ document.getElementById('profile-save-btn').addEventListener('click', async () =
   }
 });
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
+
+const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'Native'];
+const CEFR_LABELS = { A1: 'A1', A2: 'A2', B1: 'B1', B2: 'B2', C1: 'C1', Native: 'Moedertaal' };
+const NIVEAU_MAP  = { Beginner: 'A1', Basis: 'A2', Gevorderd: 'B2', Moedertaal: 'Native' };
+const LEVEL_STORAGE_KEY = 'woordvandedag:niveau';
+const DEFAULT_LEVEL = 'B1';
+
+function getCurrentLevel() {
+  const v = localStorage.getItem(LEVEL_STORAGE_KEY);
+  return CEFR_LEVELS.includes(v) ? v : DEFAULT_LEVEL;
+}
+
+function setCurrentLevel(level) {
+  if (!CEFR_LEVELS.includes(level)) return;
+  localStorage.setItem(LEVEL_STORAGE_KEY, level);
+}
 
 function todaySeed() {
   const now = new Date();
@@ -599,7 +633,7 @@ function todaySeed() {
 }
 
 function cacheKey() {
-  return `wordOfTheDay:${CACHE_VERSION}:${todaySeed()}`;
+  return `wordOfTheDay:${CACHE_VERSION}:${todaySeed()}:${getCurrentLevel()}`;
 }
 
 function renderWildCards(examples) {
@@ -665,7 +699,7 @@ function showLoading() {
 }
 
 async function fetchWordOfTheDay() {
-  const response = await fetch('/api/word');
+  const response = await fetch(`/api/word?level=${getCurrentLevel()}`);
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new Error(body.error || `API error ${response.status}`);
@@ -699,7 +733,7 @@ async function load(force = false) {
 }
 
 function imageCacheKey() {
-  return `wordOfTheDay:${CACHE_VERSION}:image:${todaySeed()}`;
+  return `wordOfTheDay:${CACHE_VERSION}:image:${todaySeed()}:${getCurrentLevel()}`;
 }
 
 async function loadImage() {
@@ -712,7 +746,7 @@ async function loadImage() {
     return;
   }
   try {
-    const response = await fetch('/api/image');
+    const response = await fetch(`/api/image?level=${getCurrentLevel()}`);
     if (!response.ok) return;
     const data = await response.json();
     const src = `data:${data.mimeType};base64,${data.data}`;
@@ -843,7 +877,7 @@ function resetWaveform() {
 }
 
 function audioCacheKey() {
-  return `wordOfTheDay:${CACHE_VERSION}:audio:${todaySeed()}`;
+  return `wordOfTheDay:${CACHE_VERSION}:audio:${todaySeed()}:${getCurrentLevel()}`;
 }
 
 async function loadPronunciation(attempt = 0) {
@@ -855,7 +889,7 @@ async function loadPronunciation(attempt = 0) {
   }
 
   try {
-    const response = await fetch('/api/pronunciation');
+    const response = await fetch(`/api/pronunciation?level=${getCurrentLevel()}`);
     if (response.status === 503 && attempt < 10) {
       setTimeout(() => loadPronunciation(attempt + 1), 8000);
       return;
@@ -913,7 +947,7 @@ function todayDateStr() {
 }
 
 function voteKey() {
-  return `wordOfTheDay:${CACHE_VERSION}:vote:${todaySeed()}`;
+  return `wordOfTheDay:${CACHE_VERSION}:vote:${todaySeed()}:${getCurrentLevel()}`;
 }
 
 async function loadRatings() {
@@ -973,5 +1007,24 @@ async function castVote(type) {
 thumbUpBtn.addEventListener('click', () => castVote('like'));
 thumbDownBtn.addEventListener('click', () => castVote('dislike'));
 
+function updateLevelBar() {
+  const bar = document.getElementById('level-bar');
+  if (!bar) return;
+  const current = getCurrentLevel();
+  bar.innerHTML = CEFR_LEVELS.map(id => {
+    const label = CEFR_LABELS[id];
+    return `<button class="level-pill${id === current ? ' active' : ''}" data-level="${id}" onclick="window.switchLevel('${id}')">${label}</button>`;
+  }).join('');
+}
+
+window.switchLevel = function(level) {
+  if (!CEFR_LEVELS.includes(level) || level === getCurrentLevel()) return;
+  setCurrentLevel(level);
+  updateLevelBar();
+  load(true);
+  loadImage();
+};
+
+updateLevelBar();
 load();
 loadImage();

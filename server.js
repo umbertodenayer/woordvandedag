@@ -10,7 +10,24 @@ const cache = new Map();
 // Adam — ElevenLabs built-in premade voice, available on all plans including free
 const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB';
 const CACHE_FILE = fs.existsSync('/data') ? path.join('/data', '.cache.json') : path.join(__dirname, '.cache.json');
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
+
+// ── CEFR levels config ─────────────────────────────────────────────────────────
+const LEVELS = [
+  { id: 'A1',     label: 'A1',
+    instruction: 'a very high-frequency everyday word a beginner learns first — concrete nouns or basic verbs (e.g. fiets, eten, groot, gaan, hond, boek, spelen, huis, kind, mooi).' },
+  { id: 'A2',     label: 'A2',
+    instruction: 'a common everyday word just beyond survival level — still concrete but slightly less frequent (e.g. bezoeken, agenda, trein, winkel, koken, liefst, lopen, samen, vriend).' },
+  { id: 'B1',     label: 'B1',
+    instruction: 'standard vocabulary known from conversation and media, not known to beginners — moderately abstract (e.g. betrouwbaar, overtuigen, gevolg, beleven, gewoon, mening, afspraak, ondersteunen).' },
+  { id: 'B2',     label: 'B2',
+    instruction: 'a more nuanced or abstract word, lower frequency, commonly found in newspapers or professional contexts (e.g. uitdaging, beschikbaar, benadering, aanpassen, verband, consequentie, bewustzijn).' },
+  { id: 'C1',     label: 'C1',
+    instruction: 'a sophisticated, lower-frequency, often formal or literary Dutch word (e.g. ontluikend, verguizen, toewijding, welsprekend, bedachtzaam, onverbloemd, tegenstrijdig).' },
+  { id: 'Native', label: 'Moedertaal',
+    instruction: 'a rare, interesting or untranslatable word that native Dutch speakers find delightful — archaic, regionally flavoured, idiomatic, or impossible to translate neatly (e.g. gezelligheid, uitwaaien, treuzelen, betuttelen, kneuterig, doezelen, dagdromen).' },
+];
+const LEVEL_IDS = LEVELS.map(l => l.id);
 
 // Supabase client for persistent cache (survives container restarts/redeploys)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lanmsexkozkrttiydtsm.supabase.co';
@@ -28,9 +45,19 @@ function todaySeed() {
   return Date.UTC(p.year, p.month - 1, p.day) / 86400000;
 }
 
-function cacheKey()      { return `${CACHE_VERSION}:${todaySeed()}`; }
-function imageCacheKey() { return `${CACHE_VERSION}:image:${todaySeed()}`; }
-function audioCacheKey() { return `${CACHE_VERSION}:audio:${todaySeed()}`; }
+function seedToDate(seed) { return new Date(seed * 86400000).toISOString().slice(0, 10); }
+function todayDateStr()   { return seedToDate(todaySeed()); }
+
+// Per-level cache keys (word, image, audio)
+function wordCacheKey(level)  { return `${CACHE_VERSION}:${todaySeed()}:${level}`; }
+function imageCacheKey(level) { return `${CACHE_VERSION}:image:${todaySeed()}:${level}`; }
+function audioCacheKey(level) { return `${CACHE_VERSION}:audio:${todaySeed()}:${level}`; }
+
+function allTodayKeys() {
+  return LEVEL_IDS.flatMap(id => [wordCacheKey(id), imageCacheKey(id), audioCacheKey(id)]);
+}
+
+const ARCHIVE_BUCKET = 'word-images';
 
 // Milliseconds until 00:00:00 Amsterdam time
 function msUntilAmsterdamMidnight() {
@@ -47,7 +74,7 @@ function msUntilAmsterdamMidnight() {
 }
 
 async function loadCache() {
-  const todayKeys = [cacheKey(), imageCacheKey(), audioCacheKey()];
+  const todayKeys = allTodayKeys();
 
   // 1. Try local file first (fast, works in dev)
   try {
@@ -88,12 +115,10 @@ async function loadCache() {
 }
 
 async function saveCache() {
-  // Write to local file (best-effort)
   try {
     fs.writeFileSync(CACHE_FILE, JSON.stringify(Object.fromEntries(cache)));
   } catch (e) {}
 
-  // Persist to Supabase so the next deploy doesn't re-fetch
   if (sb) {
     const rows = Array.from(cache.entries()).map(([key, value]) => ({
       key,
@@ -111,9 +136,150 @@ async function saveCache() {
   }
 }
 
-async function fetchWord() {
+async function ensureBucket() {
+  if (!sb) return;
+  try {
+    const { error } = await sb.storage.createBucket(ARCHIVE_BUCKET, { public: true });
+    if (error && !/already exists/i.test(error.message)) {
+      console.error('createBucket failed:', error.message);
+    }
+  } catch (e) {
+    console.error('ensureBucket failed:', e.message);
+  }
+}
+
+// Upload a base64 PNG to Storage and return its public URL (null on failure).
+// level is included in the filename so each level's image has a unique path.
+async function uploadImage(dateStr, imageObj, level) {
+  if (!sb || !imageObj?.data) return null;
+  try {
+    const buffer = Buffer.from(imageObj.data, 'base64');
+    const filePath = level ? `${dateStr}-${level}.png` : `${dateStr}.png`;
+    const { error } = await sb.storage
+      .from(ARCHIVE_BUCKET)
+      .upload(filePath, buffer, { contentType: imageObj.mimeType || 'image/png', upsert: true });
+    if (error) { console.error('image upload failed:', error.message); return null; }
+    const { data } = sb.storage.from(ARCHIVE_BUCKET).getPublicUrl(filePath);
+    return data?.publicUrl || null;
+  } catch (e) {
+    console.error('uploadImage failed:', e.message);
+    return null;
+  }
+}
+
+// Append a word to the permanent archive — deduplicated case-insensitively across
+// ALL levels. Returns { added, reason, imageUrl }.
+async function archiveWord(wordData, imageObj, dateStr, level) {
+  if (!sb) return { added: false, reason: 'no-supabase' };
+  const word = (wordData?.word || '').trim();
+  if (!word) return { added: false, reason: 'no-word' };
+  const target = word.toLowerCase();
+
+  try {
+    const { data: existing, error: selErr } = await sb
+      .from('word_archive')
+      .select('word');
+    if (selErr) throw selErr;
+    if ((existing || []).some(r => (r.word || '').trim().toLowerCase() === target)) {
+      console.log(`Archive: "${word}" already exists — skipping.`);
+      return { added: false, reason: 'duplicate' };
+    }
+
+    const imageUrl = await uploadImage(dateStr, imageObj, level);
+    const row = {
+      word,
+      date: dateStr,
+      level: level || null,
+      pos: wordData.partOfSpeech || null,
+      definition: wordData.definition || null,
+      etymology: wordData.etymology || null,
+      example: wordData.exampleSentence || null,
+      source: wordData.exampleSource || null,
+      in_de_praktijk: wordData.inDePraktijk || null,
+      image_url: imageUrl,
+    };
+    const { error: insErr } = await sb.from('word_archive').insert(row);
+    if (insErr) {
+      if (insErr.code === '23505') {
+        console.log(`Archive: "${word}" raced a duplicate — skipping.`);
+        return { added: false, reason: 'duplicate' };
+      }
+      throw insErr;
+    }
+    console.log(`Archive: added "${word}" level=${level} (${dateStr})${imageUrl ? ' with image' : ''}.`);
+    return { added: true, imageUrl };
+  } catch (e) {
+    console.error('archiveWord failed:', e.message);
+    return { added: false, reason: e.message };
+  }
+}
+
+// Get all words currently in the archive for dedup (case-insensitive).
+async function getUsedWords() {
+  if (!sb) return [];
+  try {
+    const { data } = await sb.from('word_archive').select('word');
+    return (data || []).map(r => (r.word || '').trim().toLowerCase()).filter(Boolean);
+  } catch (e) {
+    console.error('getUsedWords failed:', e.message);
+    return [];
+  }
+}
+
+// Replay every word ever cached in daily_cache into the archive (idempotent).
+async function backfillArchive() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb.from('daily_cache').select('key, value');
+    if (error) throw error;
+    const rows = data || [];
+
+    // v6 word keys: "v6:20250"  (version:seed — no level)
+    // v7 word keys: "v7:20250:A1" (version:seed:level)
+    const isWordKey = key => /^v\d+:\d+$/.test(key) || /^v\d+:\d+:[A-Za-z0-9]+$/.test(key);
+    const wordRows = rows
+      .filter(r => isWordKey(r.key))
+      .sort((a, b) => {
+        const sa = parseInt(a.key.split(':')[1], 10);
+        const sb2 = parseInt(b.key.split(':')[1], 10);
+        return sa - sb2;
+      });
+
+    let added = 0;
+    for (const r of wordRows) {
+      const parts = r.key.split(':');
+      const seed  = parseInt(parts[1], 10);
+      const level = parts[2] || null;
+      const dateStr = seedToDate(seed);
+      let wordData;
+      try { wordData = JSON.parse(r.value); } catch { continue; }
+      if (!wordData?.word) continue;
+
+      // Find the matching image key
+      const imgKey = level
+        ? `${parts[0]}:image:${parts[1]}:${level}`
+        : r.key.replace(/^(v\d+):(\d+)$/, '$1:image:$2');
+      const imgRow = rows.find(x => x.key === imgKey);
+      let imageObj = null;
+      if (imgRow) { try { imageObj = JSON.parse(imgRow.value); } catch {} }
+
+      const res = await archiveWord(wordData, imageObj, dateStr, level);
+      if (res.added) added++;
+    }
+    console.log(`backfillArchive: scanned ${wordRows.length} cached words, added ${added} new.`);
+  } catch (e) {
+    console.error('backfillArchive failed:', e.message);
+  }
+}
+
+async function fetchWord(level, instruction, usedWords = []) {
   const seed = todaySeed();
-  const prompt = `Today's date seed is ${seed} (days since epoch, UTC). Using this seed so the result is deterministic and identical for everyone asking on this date, pick one Dutch word suitable for A0–B2 learners — everyday, concrete words like common nouns, verbs, or adjectives (for example: bezem, sprinten, prinses, woordenboek, fiets, koken, vrolijk). Respond with ONLY a JSON object (no markdown, no code fences) with these exact keys:
+  const avoidClause = usedWords.length > 0
+    ? `\n\nDo NOT pick any of these already-used words: ${usedWords.slice(-150).join(', ')}.`
+    : '';
+  const prompt = `Today's date seed is ${seed} (days since epoch, UTC). Using this seed for determinism, pick one Dutch word for CEFR level ${level}. Level requirement: ${instruction}${avoidClause}
+
+Respond with ONLY a JSON object (no markdown, no code fences) with these exact keys:
 {
   "word": "het Nederlandse woord",
   "ipa": "the IPA phonetic transcription of the Dutch word, e.g. /ˈbeː.zəm/",
@@ -149,7 +315,7 @@ async function fetchWord() {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5-20250929',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }]
     })
@@ -167,7 +333,7 @@ async function fetchWord() {
 }
 
 async function fetchImage(word, definition) {
-  const prompt = `A clean, minimal, modern editorial illustration representing the Dutch word "${word}" (${definition}). No text or letters in the image. Soft warm color palette, flat design, lots of negative space.`;
+  const prompt = `A clean, minimal, modern editorial illustration representing the Dutch word "${word}" (${definition}). No text or letters in the image. Soft warm color palette — creams, terracottas, muted greens. Flat design, generous negative space. Consistent illustration style throughout.`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
@@ -212,40 +378,55 @@ async function fetchAudio(word) {
   return { mimeType: 'audio/mpeg', data: buffer.toString('base64') };
 }
 
-// The ONLY function that calls external APIs.
-// Triggered once at Amsterdam midnight, and on cold start if cache is empty.
+// Generate all six levels' words (sequentially for dedup), then their images and
+// audio. Only generates levels whose caches are missing.
 async function refreshWord() {
-  if (cache.has(cacheKey()) && cache.has(imageCacheKey()) && cache.has(audioCacheKey())) {
-    console.log('Already fully cached, skipping refresh.');
+  const missingLevels = LEVELS.filter(l => !cache.has(wordCacheKey(l.id)));
+  if (missingLevels.length === 0) {
+    console.log('All levels cached, skipping refresh.');
     return;
   }
 
-  console.log('Generating word of the day...');
+  console.log(`Generating words for ${missingLevels.length} level(s)...`);
 
-  if (!cache.has(cacheKey())) {
-    try {
-      const data = await fetchWord();
-      cache.set(cacheKey(), data);
-      await saveCache();
-      console.log(`Word cached: ${data.word}`);
-    } catch (e) {
-      console.error('fetchWord failed:', e.message);
-      return;
-    }
+  // Build the used-words list for dedup across levels
+  const usedWords = await getUsedWords();
+  // Also add words from levels already cached today (don't duplicate within a day)
+  for (const { id } of LEVELS) {
+    const cached = cache.get(wordCacheKey(id));
+    if (cached?.word) usedWords.push(cached.word.trim().toLowerCase());
   }
 
-  const wordData = cache.get(cacheKey());
+  for (const { id: levelId, instruction } of missingLevels) {
+    console.log(`[${levelId}] Generating word...`);
 
-  await Promise.all([
-    cache.has(imageCacheKey()) ? null : fetchImage(wordData.word, wordData.definition)
-      .then(image => { cache.set(imageCacheKey(), image); console.log('Image cached.'); })
-      .catch(e => console.error('fetchImage failed:', e.message)),
-    cache.has(audioCacheKey()) ? null : fetchAudio(wordData.word)
-      .then(audio => { cache.set(audioCacheKey(), audio); console.log('Audio cached.'); })
-      .catch(e => console.error('fetchAudio failed:', e.message)),
-  ]);
+    // ── Word ──────────────────────────────────────────────────
+    let wordData;
+    try {
+      wordData = await fetchWord(levelId, instruction, usedWords);
+    } catch (e) {
+      console.error(`[${levelId}] fetchWord failed:`, e.message);
+      continue;
+    }
+    cache.set(wordCacheKey(levelId), wordData);
+    usedWords.push(wordData.word.trim().toLowerCase());
+    console.log(`[${levelId}] Word: ${wordData.word}`);
 
-  await saveCache();
+    // ── Image + Audio in parallel ─────────────────────────────
+    await Promise.all([
+      cache.has(imageCacheKey(levelId)) ? null : fetchImage(wordData.word, wordData.definition)
+        .then(img => { cache.set(imageCacheKey(levelId), img); console.log(`[${levelId}] Image cached.`); })
+        .catch(e => console.error(`[${levelId}] fetchImage failed:`, e.message)),
+      cache.has(audioCacheKey(levelId)) ? null : fetchAudio(wordData.word)
+        .then(aud => { cache.set(audioCacheKey(levelId), aud); console.log(`[${levelId}] Audio cached.`); })
+        .catch(e => console.error(`[${levelId}] fetchAudio failed:`, e.message)),
+    ]);
+
+    await saveCache();
+
+    // ── Archive ───────────────────────────────────────────────
+    await archiveWord(wordData, cache.get(imageCacheKey(levelId)), todayDateStr(), levelId);
+  }
 }
 
 function scheduleMidnightRefresh() {
@@ -253,40 +434,71 @@ function scheduleMidnightRefresh() {
   console.log(`Next word refresh in ${Math.round(delay / 60000)} min (Amsterdam midnight)`);
   setTimeout(async () => {
     await refreshWord();
-    scheduleMidnightRefresh(); // re-schedule for next day (handles DST correctly)
+    scheduleMidnightRefresh();
   }, delay);
 }
 
-// Endpoints — serve from cache only, never call APIs
+// ── Endpoints ─────────────────────────────────────────────────────────────────
+
+// Resolve and validate a ?level= query param; fall back to B1
+function resolveLevel(req) {
+  const id = req.query.level;
+  return LEVEL_IDS.includes(id) ? id : 'B1';
+}
+
 app.get('/api/word', (req, res) => {
-  const data = cache.get(cacheKey());
+  const levelId = resolveLevel(req);
+  const data = cache.get(wordCacheKey(levelId));
   if (!data) { res.status(503).json({ error: 'Woord nog niet beschikbaar. Kom later terug.' }); return; }
   res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-  res.json(data);
+  res.json({ ...data, level: levelId });
 });
 
 app.get('/api/image', (req, res) => {
-  const image = cache.get(imageCacheKey());
+  const levelId = resolveLevel(req);
+  const image = cache.get(imageCacheKey(levelId));
   if (!image) { res.status(503).json({ error: 'Afbeelding nog niet beschikbaar.' }); return; }
   res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
   res.json(image);
 });
 
 app.get('/api/pronunciation', (req, res) => {
-  const audio = cache.get(audioCacheKey());
+  const levelId = resolveLevel(req);
+  const audio = cache.get(audioCacheKey(levelId));
   if (!audio) { res.status(503).json({ error: 'Audio nog niet beschikbaar.' }); return; }
   res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
   res.json(audio);
 });
 
-// Manual trigger — requires REFRESH_SECRET header
+// Image manifest — every archived word that has an image, newest first.
+// Includes the level tag so clients can filter if needed.
+app.get('/api/manifest', async (req, res) => {
+  if (!sb) { res.json({ images: [] }); return; }
+  try {
+    const { data, error } = await sb
+      .from('word_archive')
+      .select('word, date, image_url, level')
+      .not('image_url', 'is', null)
+      .order('date', { ascending: false });
+    if (error) throw error;
+    res.set('Cache-Control', 's-maxage=300, stale-while-revalidate');
+    res.json({ images: data || [] });
+  } catch (e) {
+    console.error('manifest failed:', e.message);
+    res.json({ images: [] });
+  }
+});
+
+// Manual trigger — clears all level caches and regenerates
 app.post('/api/refresh', async (req, res) => {
   if (!process.env.REFRESH_SECRET || req.headers['x-refresh-secret'] !== process.env.REFRESH_SECRET) {
     res.status(401).json({ error: 'Unauthorized' }); return;
   }
-  cache.delete(cacheKey());
-  cache.delete(imageCacheKey());
-  cache.delete(audioCacheKey());
+  for (const id of LEVEL_IDS) {
+    cache.delete(wordCacheKey(id));
+    cache.delete(imageCacheKey(id));
+    cache.delete(audioCacheKey(id));
+  }
   res.json({ ok: true });
   refreshWord();
 });
@@ -299,7 +511,6 @@ app.post('/api/check-email', async (req, res) => {
   if (!sb) {
     return res.status(503).json({ error: 'Auth check unavailable' });
   }
-  // supabase-js v2 has no admin.getUserByEmail — page through listUsers and match.
   const target = email.trim().toLowerCase();
   try {
     const perPage = 1000;
@@ -310,7 +521,7 @@ app.post('/api/check-email', async (req, res) => {
       if (users.some(u => (u.email || '').toLowerCase() === target)) {
         return res.json({ exists: true });
       }
-      if (users.length < perPage) break; // last page
+      if (users.length < perPage) break;
     }
     return res.json({ exists: false });
   } catch (e) {
@@ -321,7 +532,6 @@ app.post('/api/check-email', async (req, res) => {
 app.post('/api/save-profile', async (req, res) => {
   if (!sb) return res.status(503).json({ error: 'Auth unavailable' });
 
-  // Verify the user's JWT
   const auth  = req.headers['authorization'] || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
@@ -357,10 +567,16 @@ app.use(express.static(path.join(__dirname), {
 const port = process.env.PORT || 3000;
 app.listen(port, async () => {
   console.log(`Listening on port ${port}`);
+  await ensureBucket();
   await loadCache();
-  // Cold start: generate now if today's content isn't cached yet
-  if (!cache.has(cacheKey()) || !cache.has(imageCacheKey()) || !cache.has(audioCacheKey())) {
+  const missingAny = LEVEL_IDS.some(id =>
+    !cache.has(wordCacheKey(id)) ||
+    !cache.has(imageCacheKey(id)) ||
+    !cache.has(audioCacheKey(id))
+  );
+  if (missingAny) {
     await refreshWord();
   }
   scheduleMidnightRefresh();
+  backfillArchive();
 });

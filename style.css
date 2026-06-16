@@ -740,6 +740,41 @@ body.compact-view .hear-it {
   margin: 8px 0 0 0;
 }
 
+.level-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 0 2px;
+  flex-wrap: wrap;
+}
+
+.level-pill {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  line-height: 1.4;
+}
+
+.level-pill:hover {
+  border-color: var(--terracotta);
+  color: var(--terracotta);
+}
+
+.level-pill.active {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: #fff;
+}
+
 .word-image {
   display: none;
   width: 100%;

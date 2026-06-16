@@ -1029,8 +1029,10 @@
     }, { passive: true });
 
     // ── Illustration carousel ──────────────────────────────
-    // Add new illustration filenames here
-    const illustrations = [
+    // Static fallback pool. Add new illustration filenames here.
+    // Generated word images from /api/manifest are merged in at runtime below,
+    // so they automatically join the rotation once they exist.
+    let illustrations = [
       'illustration-1.png',
       'illustration-2.png',
       'illustration-3.png',
@@ -1052,6 +1054,20 @@
       'illustration-19.png',
       'illustration-20.png',
     ];
+
+    // Merge the generated word-image manifest into the rotation pool. New images
+    // join future card refreshes automatically (illusPickFresh reads `illustrations`
+    // live). Best-effort: if the endpoint fails, the static pool above still works.
+    fetch('/api/manifest')
+      .then(r => r.ok ? r.json() : { images: [] })
+      .then(({ images }) => {
+        (images || []).forEach(img => {
+          if (img.image_url && !illustrations.includes(img.image_url)) {
+            illustrations.push(img.image_url);
+          }
+        });
+      })
+      .catch(() => {});
 
     const illusSlots = [
       document.getElementById('illus-l1'),
