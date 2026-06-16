@@ -372,8 +372,17 @@ Respond with ONLY a JSON object (no markdown, no code fences) with these exact k
   return JSON.parse(text);
 }
 
+// Master illustration style — keeps every generated image in one cohesive,
+// warm Scandinavian editorial series. Edit these two constants to retune the look.
+const IMAGE_STYLE_PREFIX = `Minimalist flat vector illustration in a warm Scandinavian editorial style. Square composition with softly rounded corners. Use a muted autumn palette of warm beige, cream, terracotta, burnt orange, tan, and dark brown. Soft paper-grain texture throughout, gentle shading, clean geometric shapes, rounded forms, thin dark brown linework, and simple charming facial features. Cozy calm atmosphere, elegant negative space, modern wellness/productivity-app illustration aesthetic.`;
+const IMAGE_STYLE_SUFFIX = `Show the subject in a clean, balanced scene that feels calm, warm, and slightly storybook-like. Use simplified forms rather than realistic detail. Keep the background minimal with soft rolling shapes, a large warm sun or framed sun-and-hills artwork, simple potted plants or stylized trees, and subtle floor/ground shadows. Avoid bright colors, hard contrast, photorealism, complex textures, clutter, text, logos, or overly detailed anatomy. The final image should feel like part of one cohesive illustration series: cozy, minimal, warm, soft, friendly, and polished.`;
+
 async function fetchImage(word, definition) {
-  const prompt = `A clean, minimal, modern editorial illustration representing the Dutch word "${word}" (${definition}). No text or letters in the image. Soft warm color palette — creams, terracottas, muted greens. Flat design, generous negative space. Consistent illustration style throughout.`;
+  const prompt = `${IMAGE_STYLE_PREFIX}
+
+Subject: a clear, charming scene that represents the Dutch word "${word}" (${definition}). Choose one simple focal subject that captures its meaning, rendered with simplified storybook forms.
+
+${IMAGE_STYLE_SUFFIX}`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
