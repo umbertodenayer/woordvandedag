@@ -357,6 +357,8 @@ if (window.supabase) {
           }
         });
     }
+
+    communityRenderAuth();
   };
 
   userIconBtn.addEventListener('click', (e) => {
@@ -674,6 +676,7 @@ function render(data) {
   exampleEl.textContent = data.exampleSentence;
   sourceEl.textContent = `— ${data.exampleSource}`;
   renderWildCards(data.inDePraktijk);
+  communityOnWord(data);
 }
 
 function showError(msg) {
@@ -1024,6 +1027,174 @@ window.switchLevel = function(level) {
   load(true);
   loadImage();
 };
+
+// ════════ Community sentences ════════════════════════════════════════════════
+let communityWord  = null;
+let communityDate  = null;
+let communityLevel = null;
+
+function communityEsc(str) {
+  return String(str).replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+function amsterdamDateStr() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Amsterdam', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+}
+
+function communityRelTime(iso) {
+  const then = new Date(iso).getTime();
+  if (!Number.isFinite(then)) return '';
+  const sec = Math.max(0, Math.floor((Date.now() - then) / 1000));
+  if (sec < 45) return 'zojuist';
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min} ${min === 1 ? 'minuut' : 'minuten'} geleden`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} uur geleden`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day} ${day === 1 ? 'dag' : 'dagen'} geleden`;
+  return new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function communityCardHtml(row) {
+  return `
+    <article class="community-card">
+      <p class="community-card-text">${communityEsc(row.text)}</p>
+      <div class="community-card-meta">
+        <span class="community-card-author">${communityEsc(row.display_name || 'Anoniem')}</span>
+        <span class="community-card-dot">·</span>
+        <span class="community-card-time">${communityEsc(communityRelTime(row.created_at))}</span>
+      </div>
+    </article>`;
+}
+
+function communityRenderFeed(rows) {
+  const feed = document.getElementById('community-feed');
+  if (!feed) return;
+  if (!rows || rows.length === 0) {
+    feed.innerHTML = '<p class="community-empty">Nog geen zinnen — wees de eerste!</p>';
+    return;
+  }
+  feed.innerHTML = rows.map(communityCardHtml).join('');
+}
+
+async function communityLoadFeed() {
+  const feed = document.getElementById('community-feed');
+  if (!feed || !sbClient || !communityDate || !communityLevel) return;
+  const { data, error } = await sbClient
+    .from('sentences')
+    .select('id, display_name, text, created_at')
+    .eq('word_date', communityDate)
+    .eq('level', communityLevel)
+    .order('created_at', { ascending: false })
+    .limit(200);
+  communityRenderFeed(error ? [] : data);
+}
+
+function communityRenderAuth() {
+  const composer = document.getElementById('community-composer');
+  const login    = document.getElementById('community-login');
+  if (!composer || !login) return;
+  const signedIn = !!sbSession;
+  composer.hidden = !signedIn;
+  login.hidden    = signedIn;
+}
+
+function communityOnWord(data) {
+  communityWord  = data.word;
+  communityDate  = data.date || amsterdamDateStr();
+  communityLevel = data.level || getCurrentLevel();
+  const wordSpan = document.getElementById('community-word');
+  if (wordSpan) wordSpan.textContent = `"${data.word}"`;
+  communityRenderAuth();
+  communityLoadFeed();
+}
+
+(function communityInit() {
+  const input    = document.getElementById('community-input');
+  const counter  = document.getElementById('community-counter');
+  const submit   = document.getElementById('community-submit');
+  const feedback = document.getElementById('community-feedback');
+  if (!input || !submit) return;
+
+  const MAX = 200;
+  const WARN = MAX - 20;
+
+  function setFeedback(msg, kind) {
+    if (!feedback) return;
+    if (!msg) {
+      feedback.hidden = true;
+      feedback.textContent = '';
+      feedback.className = 'community-feedback';
+      return;
+    }
+    feedback.hidden = false;
+    feedback.textContent = msg;
+    feedback.className = `community-feedback community-feedback--${kind || 'error'}`;
+  }
+
+  function updateCounter() {
+    const len = input.value.trim().length;
+    counter.textContent = `${len} / ${MAX}`;
+    counter.classList.toggle('community-counter--warn', len > WARN);
+  }
+
+  input.addEventListener('input', () => { updateCounter(); setFeedback(''); });
+  updateCounter();
+
+  async function submitSentence() {
+    if (!sbSession) { setFeedback('Log in om je zin te delen.', 'error'); return; }
+    const sentence = input.value.replace(/\s+/g, ' ').trim();
+    if (!sentence) { setFeedback('Schrijf eerst een zin.', 'error'); return; }
+    if (sentence.length > MAX) { setFeedback('Je zin is te lang — houd het kort.', 'error'); return; }
+
+    submit.disabled = true;
+    submit.classList.add('is-loading');
+    setFeedback('Controleren…', 'pending');
+    try {
+      const r = await fetch(`/api/community/submit?level=${getCurrentLevel()}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sbSession.access_token}`,
+        },
+        body: JSON.stringify({ sentence }),
+      });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok || !body.ok) {
+        setFeedback(body.message || 'Er ging iets mis. Probeer het opnieuw.', 'error');
+        return;
+      }
+      input.value = '';
+      updateCounter();
+      setFeedback('Geplaatst! Bedankt voor je bijdrage.', 'success');
+      setTimeout(() => setFeedback(''), 3000);
+      const feed = document.getElementById('community-feed');
+      if (feed) {
+        const empty = feed.querySelector('.community-empty');
+        if (empty) feed.innerHTML = '';
+        feed.insertAdjacentHTML('afterbegin', communityCardHtml(body.sentence));
+        const firstCard = feed.querySelector('.community-card');
+        if (firstCard) firstCard.classList.add('community-card--new');
+      }
+    } catch (e) {
+      setFeedback('Geen verbinding. Probeer het opnieuw.', 'error');
+    } finally {
+      submit.disabled = false;
+      submit.classList.remove('is-loading');
+    }
+  }
+
+  submit.addEventListener('click', submitSentence);
+  input.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); submitSentence(); }
+  });
+
+  communityRenderAuth();
+})();
 
 updateLevelBar();
 load();
