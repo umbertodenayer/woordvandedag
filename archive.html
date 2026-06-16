@@ -387,8 +387,10 @@ document.querySelectorAll('.fade-up').forEach(el => fadeObs.observe(el));
     div.setAttribute('data-word', (row.word || '').toLowerCase());
 
     let bodyHTML = '';
-    if (row.image_url) {
-      bodyHTML += `<img class="archive-row-img" src="${row.image_url}" alt="Illustratie bij ${row.word || ''}" loading="lazy">`;
+    // Only trust image URLs that point at our own Supabase Storage (defense-in-depth).
+    if (row.image_url && String(row.image_url).startsWith('https://lanmsexkozkrttiydtsm.supabase.co/storage/')) {
+      const safeAlt = String(row.word || '').replace(/"/g, '');
+      bodyHTML += `<img class="archive-row-img" src="${row.image_url}" alt="Illustratie bij ${safeAlt}" loading="lazy">`;
     }
     if (row.definition) {
       bodyHTML += `<p class="archive-definition">${row.definition}</p>`;

@@ -3,6 +3,12 @@ const path = require('path');
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
 
+// Last-resort safety net: log stray async failures instead of letting Node exit.
+// Background work (the midnight refresh, fire-and-forget /api/refresh, backfill)
+// should never be able to crash-loop the container.
+process.on('unhandledRejection', (e) => console.error('unhandledRejection:', e?.message || e));
+process.on('uncaughtException',  (e) => console.error('uncaughtException:', e?.message || e));
+
 const app = express();
 app.use(express.json());
 const cache = new Map();
@@ -148,13 +154,24 @@ async function ensureBucket() {
   }
 }
 
+// A filesystem-safe, word-derived slug. The image path is keyed by WORD (not date)
+// so the 1:1 word↔image mapping the dedup assumes always holds: two distinct words
+// can never overwrite each other's image (e.g. a same-day /api/refresh regeneration),
+// and the same word always maps to one object.
+function slugify(word) {
+  return word
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // strip accents
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'woord';
+}
+
 // Upload a base64 PNG to Storage and return its public URL (null on failure).
-// level is included in the filename so each level's image has a unique path.
-async function uploadImage(dateStr, imageObj, level) {
+async function uploadImage(word, imageObj) {
   if (!sb || !imageObj?.data) return null;
   try {
     const buffer = Buffer.from(imageObj.data, 'base64');
-    const filePath = level ? `${dateStr}-${level}.png` : `${dateStr}.png`;
+    const filePath = `${slugify(word)}.png`;
     const { error } = await sb.storage
       .from(ARCHIVE_BUCKET)
       .upload(filePath, buffer, { contentType: imageObj.mimeType || 'image/png', upsert: true });
@@ -168,7 +185,10 @@ async function uploadImage(dateStr, imageObj, level) {
 }
 
 // Append a word to the permanent archive — deduplicated case-insensitively across
-// ALL levels. Returns { added, reason, imageUrl }.
+// ALL levels. The row is inserted BEFORE the image is uploaded, so a failed upload
+// (or a missing column before the migration is run) never leaves an orphaned Storage
+// object, and a word with no image self-heals on a later run instead of being stuck.
+// Returns { added, reason, imageUrl }.
 async function archiveWord(wordData, imageObj, dateStr, level) {
   if (!sb) return { added: false, reason: 'no-supabase' };
   const word = (wordData?.word || '').trim();
@@ -178,15 +198,28 @@ async function archiveWord(wordData, imageObj, dateStr, level) {
   try {
     const { data: existing, error: selErr } = await sb
       .from('word_archive')
-      .select('word');
+      .select('word, image_url');
     if (selErr) throw selErr;
-    if ((existing || []).some(r => (r.word || '').trim().toLowerCase() === target)) {
+    const match = (existing || []).find(r => (r.word || '').trim().toLowerCase() === target);
+
+    if (match) {
+      // Self-heal: the word is archived but never got an image (earlier upload
+      // failure). If we now have one, attach it rather than skipping forever.
+      if (!match.image_url && imageObj?.data) {
+        const healedUrl = await uploadImage(word, imageObj);
+        if (healedUrl) {
+          const { error: updErr } = await sb
+            .from('word_archive').update({ image_url: healedUrl }).eq('word', match.word);
+          if (updErr) { console.error('image_url heal failed:', updErr.message); }
+          else { console.log(`Archive: healed missing image for "${word}".`); return { added: false, reason: 'healed', imageUrl: healedUrl }; }
+        }
+      }
       console.log(`Archive: "${word}" already exists — skipping.`);
       return { added: false, reason: 'duplicate' };
     }
 
-    const imageUrl = await uploadImage(dateStr, imageObj, level);
-    const row = {
+    // Brand-new word: insert the row first (no image yet).
+    const { error: insErr } = await sb.from('word_archive').insert({
       word,
       date: dateStr,
       level: level || null,
@@ -196,15 +229,22 @@ async function archiveWord(wordData, imageObj, dateStr, level) {
       example: wordData.exampleSentence || null,
       source: wordData.exampleSource || null,
       in_de_praktijk: wordData.inDePraktijk || null,
-      image_url: imageUrl,
-    };
-    const { error: insErr } = await sb.from('word_archive').insert(row);
+      image_url: null,
+    });
     if (insErr) {
       if (insErr.code === '23505') {
         console.log(`Archive: "${word}" raced a duplicate — skipping.`);
         return { added: false, reason: 'duplicate' };
       }
-      throw insErr;
+      throw insErr; // e.g. missing column pre-migration — no upload happened, no orphan
+    }
+
+    // Row is in. Now upload the image and attach its URL (self-heals on a later run).
+    const imageUrl = await uploadImage(word, imageObj);
+    if (imageUrl) {
+      const { error: updErr } = await sb
+        .from('word_archive').update({ image_url: imageUrl }).eq('word', word);
+      if (updErr) console.error('image_url update failed:', updErr.message);
     }
     console.log(`Archive: added "${word}" level=${level} (${dateStr})${imageUrl ? ' with image' : ''}.`);
     return { added: true, imageUrl };
@@ -408,6 +448,10 @@ async function refreshWord() {
       console.error(`[${levelId}] fetchWord failed:`, e.message);
       continue;
     }
+    if (!wordData || !wordData.word) {
+      console.error(`[${levelId}] fetchWord returned no usable word — skipping.`);
+      continue;
+    }
     cache.set(wordCacheKey(levelId), wordData);
     usedWords.push(wordData.word.trim().toLowerCase());
     console.log(`[${levelId}] Word: ${wordData.word}`);
@@ -433,8 +477,14 @@ function scheduleMidnightRefresh() {
   const delay = msUntilAmsterdamMidnight();
   console.log(`Next word refresh in ${Math.round(delay / 60000)} min (Amsterdam midnight)`);
   setTimeout(async () => {
-    await refreshWord();
-    scheduleMidnightRefresh();
+    try {
+      await refreshWord();
+    } catch (e) {
+      console.error('midnight refresh failed:', e.message);
+    } finally {
+      // ALWAYS reschedule, so one bad night never permanently stops the daily refresh.
+      scheduleMidnightRefresh();
+    }
   }, delay);
 }
 
@@ -500,7 +550,8 @@ app.post('/api/refresh', async (req, res) => {
     cache.delete(audioCacheKey(id));
   }
   res.json({ ok: true });
-  refreshWord();
+  // Fire-and-forget after responding — catch so a rejection can't crash the process.
+  refreshWord().catch(e => console.error('manual refresh failed:', e.message));
 });
 
 app.post('/api/check-email', async (req, res) => {
@@ -706,16 +757,23 @@ app.use(express.static(path.join(__dirname), {
 const port = process.env.PORT || 3000;
 app.listen(port, async () => {
   console.log(`Listening on port ${port}`);
-  await ensureBucket();
-  await loadCache();
-  const missingAny = LEVEL_IDS.some(id =>
-    !cache.has(wordCacheKey(id)) ||
-    !cache.has(imageCacheKey(id)) ||
-    !cache.has(audioCacheKey(id))
-  );
-  if (missingAny) {
-    await refreshWord();
+  // Guard the whole startup: a throw here would otherwise become an unhandled
+  // rejection and crash-loop the container. The server can keep serving from cache.
+  try {
+    await ensureBucket();
+    await loadCache();
+    const missingAny = LEVEL_IDS.some(id =>
+      !cache.has(wordCacheKey(id)) ||
+      !cache.has(imageCacheKey(id)) ||
+      !cache.has(audioCacheKey(id))
+    );
+    if (missingAny) {
+      await refreshWord();
+    }
+    scheduleMidnightRefresh();
+    backfillArchive().catch(e => console.error('backfillArchive failed:', e.message));
+  } catch (e) {
+    console.error('startup error:', e.message);
+    scheduleMidnightRefresh(); // keep the daily refresh alive even if cold start failed
   }
-  scheduleMidnightRefresh();
-  backfillArchive();
 });

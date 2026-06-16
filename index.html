@@ -1062,7 +1062,10 @@
       .then(r => r.ok ? r.json() : { images: [] })
       .then(({ images }) => {
         (images || []).forEach(img => {
-          if (img.image_url && !illustrations.includes(img.image_url)) {
+          // Only trust URLs from our own Supabase Storage (defense-in-depth).
+          if (img.image_url
+              && String(img.image_url).startsWith('https://lanmsexkozkrttiydtsm.supabase.co/storage/')
+              && !illustrations.includes(img.image_url)) {
             illustrations.push(img.image_url);
           }
         });
