@@ -801,7 +801,7 @@ const youglishWidgetEl = document.getElementById('youglish-widget');
 
 function onYouglishAPIReady() {
   ygWidget = new YG.Widget('youglish-widget', {
-    components: 48,            // player + speed + light toggle; no search bar, no accent panel
+    components: 51,            // full widget (search/accents/speed/light) — renders reliably
     events: {
       onFetchDone: (e) => {
         const total = e.totalResult || 0;
