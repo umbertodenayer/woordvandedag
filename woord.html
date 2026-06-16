@@ -180,6 +180,32 @@
     <hr class="section-rule">
   </section>
 
+  <!-- ── Community: schrijf je eigen zin ──────────────────────────── -->
+  <section class="community" id="community-section" aria-labelledby="community-title">
+    <p class="label section-label">Schrijf je eigen zin</p>
+    <h2 class="community-title" id="community-title">Gebruik <span id="community-word">het woord</span> in een zin</h2>
+
+    <!-- Composer (logged in) -->
+    <div class="community-composer" id="community-composer" hidden>
+      <textarea id="community-input" class="community-input" rows="2" maxlength="2000"
+        placeholder="Schrijf hier je eigen zin met het woord van vandaag…"></textarea>
+      <div class="community-composer-row">
+        <span class="community-counter" id="community-counter">0 / 200</span>
+        <button id="community-submit" class="community-submit" type="button">Plaats</button>
+      </div>
+      <p class="community-feedback" id="community-feedback" role="status" aria-live="polite" hidden></p>
+    </div>
+
+    <!-- Login prompt (logged out) -->
+    <div class="community-login" id="community-login" hidden>
+      <p class="community-login-text">Log in om je eigen zin met de community te delen.</p>
+      <a href="login.html" class="community-login-btn">Inloggen</a>
+    </div>
+
+    <!-- Community feed -->
+    <div class="community-feed" id="community-feed"></div>
+  </section>
+
   <section class="pronunciation hidden" id="pronunciation-section">
     <p class="label section-label">Uitspraak</p>
     <div class="pronunciation-row">
