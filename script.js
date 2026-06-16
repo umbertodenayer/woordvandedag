@@ -15,6 +15,8 @@ if (localStorage.getItem('wordOfTheDay:compactView') === 'true') {
 let currentWord = null;
 let ygWidget = null;
 let hearItTriggered = false;
+let ygTotal = 0;
+let ygTrack = 0;
 let sbClient = null;
 let sbSession = null;
 
@@ -667,7 +669,7 @@ function render(data) {
   loadRatings();
   if (ygWidget) {
     hearItTriggered = true;
-    ygWidget.fetch(currentWord, 'dutch');
+    ygWidget.fetch(currentWord, 'dutch', 'nl');
   }
   wordEl.textContent = data.word;
   ipaEl.textContent = data.ipa;
@@ -798,32 +800,48 @@ const youglishWidgetEl = document.getElementById('youglish-widget');
 
 function onYouglishAPIReady() {
   ygWidget = new YG.Widget('youglish-widget', {
-    components: 51,
+    components: 48,            // player + speed + light toggle; no search bar, no accent panel
     events: {
       onFetchDone: (e) => {
-        if (e.totalResult === 0) {
-          hearItSection.classList.add('hidden');
-        } else {
-          hearItSection.classList.remove('hidden');
-        }
+        ygTotal = e.totalResult || 0;
+        hearItSection.classList.toggle('hidden', ygTotal === 0);
+        updateYgNav();
+      },
+      onVideoChange: (e) => {
+        ygTrack = e.trackNumber || 0;
+        updateYgNav();
       }
     }
   });
 
   if (currentWord) {
     hearItTriggered = true;
-    ygWidget.fetch(currentWord, 'dutch');
+    ygWidget.fetch(currentWord, 'dutch', 'nl');
   }
 }
 
 window.onYouglishAPIReady = onYouglishAPIReady;
+
+// Custom clip navigation through the YouGlish results (Netherlands Dutch only).
+function updateYgNav() {
+  const prev = document.getElementById('yg-prev');
+  const next = document.getElementById('yg-next');
+  const count = document.getElementById('yg-count');
+  if (!prev || !next || !count) return;
+  if (!ygTotal) { count.textContent = ''; prev.disabled = true; next.disabled = true; return; }
+  count.textContent = `Clip ${Math.min(ygTrack + 1, ygTotal)} van ${ygTotal}`;
+  prev.disabled = ygTrack <= 0;
+  next.disabled = ygTrack >= ygTotal - 1;
+}
+document.getElementById('yg-prev')?.addEventListener('click', () => { if (ygWidget) ygWidget.previous(); });
+document.getElementById('yg-next')?.addEventListener('click', () => { if (ygWidget) ygWidget.next(); });
 
 const hearItObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting && !hearItTriggered) {
       hearItTriggered = true;
       if (ygWidget && currentWord) {
-        ygWidget.fetch(currentWord, 'dutch');
+        ygWidget.fetch(currentWord, 'dutch', 'nl');
       }
       hearItObserver.disconnect();
     }
