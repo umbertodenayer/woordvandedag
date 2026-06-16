@@ -2008,3 +2008,40 @@ body.compact-view .hear-it {
 @media (prefers-reduced-motion: reduce) {
   .save-word-btn, .save-word-icon { transition: none; }
 }
+
+/* ── YouGlish clip navigation ── */
+.yg-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 18px;
+}
+.yg-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--terracotta);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+.yg-nav-btn svg { width: 20px; height: 20px; }
+.yg-nav-btn:hover:not(:disabled) { border-color: var(--terracotta); transform: translateY(-1px); }
+.yg-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.yg-nav-count {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+  min-width: 96px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .yg-nav-btn { transition: border-color 0.2s ease, color 0.2s ease; }
+  .yg-nav-btn:hover:not(:disabled) { transform: none; }
+}
