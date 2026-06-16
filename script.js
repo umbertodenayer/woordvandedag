@@ -665,9 +665,7 @@ function render(data) {
   currentWord = data.word;
   loadPronunciation();
   loadRatings();
-  if (ygWidget && hearItTriggered) {
-    ygWidget.fetch(currentWord, 'english');
-  }
+  fetchYouglish();
   wordEl.textContent = data.word;
   ipaEl.textContent = data.ipa;
   posEl.textContent = data.partOfSpeech;
@@ -793,44 +791,53 @@ updateHeroOnScroll();
 
 
 const hearItSection = document.getElementById('hear-it-section');
-const youglishWidgetEl = document.getElementById('youglish-widget');
+
+// Ask YouGlish for a clip of a native speaker saying today's Dutch word.
+// No-ops until both the word is loaded and the widget is ready, so it's safe to
+// call from anywhere; the section stays hidden until a clip is actually found.
+function fetchYouglish() {
+  if (!ygWidget || !currentWord || !hearItTriggered) return;
+  ygWidget.fetch(currentWord, 'dutch');
+}
 
 function onYouglishAPIReady() {
+  // The embed lives inside a section that's display:none until results arrive, so
+  // we can't measure its own width yet — size it from the viewport (CSS also caps
+  // the iframe at 100% width so it can never overflow on phones).
+  const width = Math.min(800, (window.innerWidth || 800) - 48);
   ygWidget = new YG.Widget('youglish-widget', {
-    width: 800,
+    width: width,
     components: 51,
     events: {
       onFetchDone: (e) => {
-        if (e.totalResult === 0) {
-          hearItSection.classList.add('hidden');
-        } else {
-          hearItSection.classList.remove('hidden');
-        }
+        // Reveal the section only when there's a clip to show, so an empty result
+        // never leaves a gap or disturbs the page layout.
+        hearItSection.classList.toggle('hidden', e.totalResult === 0);
       }
     }
   });
-
-  if (currentWord && hearItTriggered) {
-    ygWidget.fetch(currentWord, 'english');
-  }
+  fetchYouglish();
 }
 
 window.onYouglishAPIReady = onYouglishAPIReady;
 
+// Lazy-load the embed when the reader reaches the lower part of the word card.
+// We observe the always-visible "In de praktijk" section — the pronunciation
+// section is display:none until TTS audio loads, so observing it would usually
+// never fire and the clip would never appear.
 const hearItObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting && !hearItTriggered) {
       hearItTriggered = true;
-      if (ygWidget && currentWord) {
-        ygWidget.fetch(currentWord, 'english');
-      }
+      fetchYouglish();
       hearItObserver.disconnect();
     }
   });
-}, { threshold: 0.3 });
+}, { threshold: 0.1 });
 
-const pronunciationSectionEl = document.getElementById('pronunciation-section');
-hearItObserver.observe(pronunciationSectionEl);
+const youglishTrigger = document.querySelector('.in-the-wild') ||
+                        document.getElementById('pronunciation-section');
+if (youglishTrigger) hearItObserver.observe(youglishTrigger);
 
 const pronunciationSection = document.getElementById('pronunciation-section');
 const pronunciationBtn = document.getElementById('pronunciation-btn');

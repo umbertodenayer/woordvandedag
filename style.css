@@ -1114,6 +1114,14 @@ body.compact-view .hear-it {
   max-width: 800px;
 }
 
+/* Keep the YouGlish embed within its column on every screen size so the clip
+   never pushes the layout wider than the viewport. */
+#youglish-widget iframe {
+  width: 100% !important;
+  max-width: 100%;
+  border: 0;
+}
+
 #main-content.hidden {
   display: none;
 }
@@ -1192,6 +1200,7 @@ body.compact-view .hear-it {
   #word { font-size: 3rem; }
   .in-the-wild { padding: 64px 24px; }
   .wild-cards { flex-direction: column; }
+  .hear-it { padding: 0 24px 48px; }
 }
 
 /* === Premium auth animations === */
