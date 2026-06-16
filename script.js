@@ -666,7 +666,7 @@ function render(data) {
   loadPronunciation();
   loadRatings();
   if (ygWidget && hearItTriggered) {
-    ygWidget.fetch(currentWord, 'english');
+    ygWidget.fetch(currentWord, 'dutch');
   }
   wordEl.textContent = data.word;
   ipaEl.textContent = data.ipa;
@@ -797,7 +797,6 @@ const youglishWidgetEl = document.getElementById('youglish-widget');
 
 function onYouglishAPIReady() {
   ygWidget = new YG.Widget('youglish-widget', {
-    width: 800,
     components: 51,
     events: {
       onFetchDone: (e) => {
@@ -811,7 +810,7 @@ function onYouglishAPIReady() {
   });
 
   if (currentWord && hearItTriggered) {
-    ygWidget.fetch(currentWord, 'english');
+    ygWidget.fetch(currentWord, 'dutch');
   }
 }
 
@@ -822,7 +821,7 @@ const hearItObserver = new IntersectionObserver((entries) => {
     if (entry.isIntersecting && !hearItTriggered) {
       hearItTriggered = true;
       if (ygWidget && currentWord) {
-        ygWidget.fetch(currentWord, 'english');
+        ygWidget.fetch(currentWord, 'dutch');
       }
       hearItObserver.disconnect();
     }
