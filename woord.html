@@ -24,16 +24,31 @@
     background: #f5f2ee;
     animation: introOverlayOut 0.8s ease 1.5s forwards;
   }
-  .intro-card-text {
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    font-size: 1.1rem;
-    letter-spacing: 0.08em;
-    color: #1a1a1a;
+  .intro-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    padding: 0 32px;
     text-align: center;
-    padding: 0 24px;
     opacity: 0;
     animation: introTextIn 0.6s ease forwards;
+  }
+  .intro-card-accent {
+    width: 48px;
+    height: 3px;
+    border-radius: 2px;
+    background: #C4714A;
+  }
+  .intro-card-text {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    color: #1a1a1a;
   }
 
   /* 2.4s — the word rises into being, alone on the page */
@@ -76,7 +91,12 @@
 </style>
 </head>
 <body>
-  <div id="intro-overlay" aria-hidden="true"><span class="intro-card-text">Het woord van de dag is…</span></div>
+  <div id="intro-overlay" aria-hidden="true">
+    <div class="intro-card">
+      <span class="intro-card-accent"></span>
+      <p class="intro-card-text">Het woord van de dag is…</p>
+    </div>
+  </div>
   <script>
     (function () {
       var ov = document.getElementById('intro-overlay');
