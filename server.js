@@ -451,7 +451,7 @@ app.get('/api/word', (req, res) => {
   const data = cache.get(wordCacheKey(levelId));
   if (!data) { res.status(503).json({ error: 'Woord nog niet beschikbaar. Kom later terug.' }); return; }
   res.set('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-  res.json({ ...data, level: levelId });
+  res.json({ ...data, level: levelId, date: todayDateStr() });
 });
 
 app.get('/api/image', (req, res) => {
@@ -557,6 +557,145 @@ app.post('/api/save-profile', async (req, res) => {
   } catch (e) {
     console.error('[save-profile]', e.message);
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Community sentences ──────────────────────────────────────────────────────
+const COMMUNITY_MAX_LEN = 200;
+const COMMUNITY_CHECK_MODEL = 'claude-sonnet-4-6';
+
+// Single place to extend the profanity filter (Dutch + English, lowercase).
+// Whole-token matching, so innocent words that merely contain these are safe.
+const PROFANITY = [
+  // Dutch
+  'kut', 'kutwijf', 'klootzak', 'klootzakken', 'lul', 'lullen', 'hoer', 'hoeren',
+  'kanker', 'kankerlijer', 'tering', 'tyfus', 'godverdomme', 'godver', 'verdomme',
+  'neuk', 'neuken', 'slet', 'sletten', 'teef', 'flikker', 'mongool', 'debiel',
+  'kech', 'klote', 'rotzak',
+  // English
+  'fuck', 'fucking', 'fucker', 'motherfucker', 'shit', 'bitch', 'bastard', 'asshole',
+  'dick', 'cunt', 'whore', 'slut', 'retard', 'nigger', 'nigga', 'faggot', 'fag',
+  'cock', 'pussy', 'wanker', 'twat', 'bollocks',
+];
+
+function hasProfanity(text) {
+  const tokens = text.toLowerCase().replace(/[^\p{L}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+  return tokens.some(tok => PROFANITY.includes(tok));
+}
+
+// Cheap, instant, free: whole-word case-insensitive match on letter boundaries.
+function usesWordExact(sentence, word) {
+  const esc = (word || '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (!esc) return false;
+  return new RegExp(`(?:^|[^\\p{L}])${esc}(?:[^\\p{L}]|$)`, 'iu').test(sentence);
+}
+
+// Fallback only when the exact check fails: ask Claude for a strict ja/nee on
+// whether the sentence uses the word or an inflected form of it.
+async function usesWordInflected(sentence, word) {
+  const prompt = `Je bent een strikte Nederlandse taalcontroleur.
+Doelwoord: "${word}"
+Zin: "${sentence}"
+
+Gebruikt de zin het doelwoord, OF een correcte verbogen of vervoegde vorm ervan (meervoud, verkleinwoord, vervoegd werkwoord, of verbogen bijvoeglijk naamwoord)? Antwoord met EXACT één woord: ja of nee.`;
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: COMMUNITY_CHECK_MODEL,
+      max_tokens: 5,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!r.ok) throw new Error(`Anthropic ${r.status}`);
+  const j = await r.json();
+  const ans = (j.content?.[0]?.text || '').trim().toLowerCase();
+  return ans.startsWith('ja');
+}
+
+// Real, server-controlled display name (never trust a client-supplied name).
+function deriveDisplayName(user) {
+  const m = user.user_metadata || {};
+  const explicit = m.display_name || m.full_name || m.name || m.user_name;
+  if (explicit && String(explicit).trim()) return String(explicit).trim().slice(0, 40);
+  const local = (user.email || '').split('@')[0] || 'Anoniem';
+  const pretty = local.replace(/[._-]+/g, ' ').replace(/\b\p{L}/gu, c => c.toUpperCase());
+  return (pretty.trim() || 'Anoniem').slice(0, 40);
+}
+
+app.post('/api/community/submit', async (req, res) => {
+  if (!sb) return res.status(503).json({ error: 'server', message: 'Server niet beschikbaar.' });
+
+  // Verify the user's JWT
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'auth', message: 'Log in om een zin te plaatsen.' });
+
+  let user;
+  try {
+    const { data, error } = await sb.auth.getUser(token);
+    if (error || !data?.user) return res.status(401).json({ error: 'auth', message: 'Log in om een zin te plaatsen.' });
+    user = data.user;
+  } catch (e) {
+    return res.status(401).json({ error: 'auth', message: 'Log in om een zin te plaatsen.' });
+  }
+
+  // Server is authoritative on which word/level/date the sentence belongs to.
+  const levelId  = resolveLevel(req);
+  const wordData = cache.get(wordCacheKey(levelId));
+  if (!wordData?.word) return res.status(503).json({ error: 'server', message: 'Het woord is nog niet beschikbaar.' });
+  const word     = wordData.word;
+  const wordDate = todayDateStr();
+
+  const sentence = String((req.body && req.body.sentence) || '').replace(/\s+/g, ' ').trim();
+
+  // ── Validation (don't save unless every check passes) ──
+  if (!sentence) {
+    return res.status(400).json({ error: 'empty', message: 'Schrijf eerst een zin.' });
+  }
+  if (sentence.length > COMMUNITY_MAX_LEN) {
+    return res.status(400).json({ error: 'length', message: 'Je zin is te lang — houd het kort.' });
+  }
+  if (hasProfanity(sentence)) {
+    return res.status(400).json({ error: 'profanity', message: 'Houd het netjes, alsjeblieft.' });
+  }
+  if (!usesWordExact(sentence, word)) {
+    let ok = false;
+    try {
+      ok = await usesWordInflected(sentence, word);   // only hits the API when the cheap check failed
+    } catch (e) {
+      console.error('[community] inflection check failed:', e.message);
+      return res.status(503).json({ error: 'server', message: 'Kon je zin niet controleren. Probeer het zo opnieuw.' });
+    }
+    if (!ok) {
+      return res.status(400).json({ error: 'word', message: 'Gebruik het woord van vandaag (of een vorm ervan) in je zin.' });
+    }
+  }
+
+  // ── Insert via service role; display name comes from the verified profile ──
+  const displayName = deriveDisplayName(user);
+  try {
+    const { data, error } = await sb
+      .from('sentences')
+      .insert({
+        word,
+        word_date: wordDate,
+        level: levelId,
+        user_id: user.id,
+        display_name: displayName,
+        text: sentence,
+      })
+      .select('id, word, word_date, level, display_name, text, created_at')
+      .single();
+    if (error) throw error;
+    return res.json({ ok: true, sentence: data });
+  } catch (e) {
+    console.error('[community] insert failed:', e.message);
+    return res.status(500).json({ error: 'server', message: 'Opslaan mislukt. Probeer het opnieuw.' });
   }
 });
 
