@@ -17,6 +17,7 @@ let ygWidget = null;
 let hearItTriggered = false;
 let ygTotal = 0;
 let ygTrack = 0;
+let ygFellBack = false;
 let sbClient = null;
 let sbSession = null;
 
@@ -669,7 +670,7 @@ function render(data) {
   loadRatings();
   if (ygWidget) {
     hearItTriggered = true;
-    ygWidget.fetch(currentWord, 'dutch', 'nl');
+    ygFetch();
   }
   wordEl.textContent = data.word;
   ipaEl.textContent = data.ipa;
@@ -803,7 +804,15 @@ function onYouglishAPIReady() {
     components: 48,            // player + speed + light toggle; no search bar, no accent panel
     events: {
       onFetchDone: (e) => {
-        ygTotal = e.totalResult || 0;
+        const total = e.totalResult || 0;
+        // Prefer Netherlands Dutch; if it has no clips, fall back to all Dutch.
+        // (YouGlish tags few clips by accent, so strict 'nl' often returns 0.)
+        if (total === 0 && !ygFellBack && currentWord) {
+          ygFellBack = true;
+          ygWidget.fetch(currentWord, 'dutch');
+          return;
+        }
+        ygTotal = total;
         hearItSection.classList.toggle('hidden', ygTotal === 0);
         updateYgNav();
       },
@@ -816,13 +825,20 @@ function onYouglishAPIReady() {
 
   if (currentWord) {
     hearItTriggered = true;
-    ygWidget.fetch(currentWord, 'dutch', 'nl');
+    ygFetch();
   }
 }
 
 window.onYouglishAPIReady = onYouglishAPIReady;
 
-// Custom clip navigation through the YouGlish results (Netherlands Dutch only).
+// Start a fresh search: prefer Netherlands Dutch (falls back to all Dutch in onFetchDone).
+function ygFetch() {
+  if (!ygWidget || !currentWord) return;
+  ygFellBack = false;
+  ygWidget.fetch(currentWord, 'dutch', 'nl');
+}
+
+// Custom clip navigation through the YouGlish results.
 function updateYgNav() {
   const prev = document.getElementById('yg-prev');
   const next = document.getElementById('yg-next');
@@ -841,7 +857,7 @@ const hearItObserver = new IntersectionObserver((entries) => {
     if (entry.isIntersecting && !hearItTriggered) {
       hearItTriggered = true;
       if (ygWidget && currentWord) {
-        ygWidget.fetch(currentWord, 'dutch', 'nl');
+        ygFetch();
       }
       hearItObserver.disconnect();
     }
