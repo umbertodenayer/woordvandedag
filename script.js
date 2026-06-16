@@ -753,9 +753,11 @@ async function loadImage() {
     if (!response.ok) return;
     const data = await response.json();
     const src = `data:${data.mimeType};base64,${data.data}`;
-    localStorage.setItem(key, src);
+    // Show the image first — caching is best-effort and must never block display
+    // (large data URLs can exceed the localStorage quota and throw).
     imageEl.src = src;
     imageEl.classList.add('loaded');
+    try { localStorage.setItem(key, src); } catch (e) { /* localStorage full — skip caching */ }
   } catch (e) {
     // image is optional, fail silently
   }
