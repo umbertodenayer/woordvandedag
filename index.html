@@ -580,6 +580,11 @@
       .hero-ctas { flex-direction: column; align-items: center; }
       .lfooter { flex-direction: column; gap: 20px; text-align: center; }
       .lfooter-links { flex-wrap: wrap; justify-content: center; }
+      /* Newsletter signup: stack the input above the button so the label
+         ("Houd me op de hoogte") isn't clipped by the pill on narrow screens. */
+      .app-form { flex-direction: column; border-radius: 16px; }
+      .app-form input { width: 100%; text-align: center; padding: 14px 18px; }
+      .app-form button { width: 100%; padding: 14px 22px; border-top: 1.5px solid var(--border); }
     }
 
     /* ── Nav search ── */
