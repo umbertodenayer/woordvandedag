@@ -688,8 +688,9 @@ function deriveDisplayName(user) {
   const m = user.user_metadata || {};
   const explicit = m.display_name || m.full_name || m.name || m.user_name;
   if (explicit && String(explicit).trim()) return String(explicit).trim().slice(0, 40);
-  const local = (user.email || '').split('@')[0];
-  return (local.trim() || 'Anoniem').slice(0, 40);
+  const local = (user.email || '').split('@')[0] || 'Anoniem';
+  const pretty = local.replace(/[._-]+/g, ' ').replace(/\b\p{L}/gu, c => c.toUpperCase());
+  return (pretty.trim() || 'Anoniem').slice(0, 40);
 }
 
 app.post('/api/community/submit', async (req, res) => {
